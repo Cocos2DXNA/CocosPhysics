@@ -81,7 +81,7 @@ namespace box2dTest
             int iter = 0;
             for (float dt = 0f; dt < 26f; )
             {
-                Update(_world, dt);
+                Update(_world, 1f / 30f);
                 dt += 1f / 30f;
                 iter++;
                 if (iter == 30)
