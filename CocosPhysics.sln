@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CocosPhysics.PCL", "CocosPhysics.PCL\CocosPhysics.PCL.csproj", "{CBE0BA8E-6E4F-44DE-8180-42E772AD7197}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "box2dConsole", "box2dConsole\box2dConsole.csproj", "{F402FE6F-6A07-44E3-841B-F503125ACA35}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBE0BA8E-6E4F-44DE-8180-42E772AD7197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBE0BA8E-6E4F-44DE-8180-42E772AD7197}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBE0BA8E-6E4F-44DE-8180-42E772AD7197}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBE0BA8E-6E4F-44DE-8180-42E772AD7197}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F402FE6F-6A07-44E3-841B-F503125ACA35}.Debug|x86.ActiveCfg = Debug|x86
+		{F402FE6F-6A07-44E3-841B-F503125ACA35}.Debug|x86.Build.0 = Debug|x86
+		{F402FE6F-6A07-44E3-841B-F503125ACA35}.Release|x86.ActiveCfg = Release|x86
+		{F402FE6F-6A07-44E3-841B-F503125ACA35}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
