@@ -105,7 +105,7 @@ namespace Box2D.Dynamics.Joints
             m_u = cB + m_rB - cA - m_rA;
 
             // Handle singularity.
-            float length = m_u.Length();
+            float length = m_u.Length;
             if (length > b2Settings.b2_linearSlop)
             {
                 m_u *= 1.0f / length;

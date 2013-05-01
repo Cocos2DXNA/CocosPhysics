@@ -80,34 +80,42 @@ namespace Box2D.Common
         /// a vector.
         public static b2Vec2 b2Cross(b2Vec2 a, float s)
         {
-            return new b2Vec2(s * a.y, -s * a.x);
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(s * a.y, -s * a.x);
+            return b;
         }
 
         /// Perform the cross product on a scalar and a vector. In 2D this produces
         /// a vector.
         public static b2Vec2 b2Cross(float s, b2Vec2 a)
         {
-            return new b2Vec2(-s * a.y, s * a.x);
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(-s * a.y, s * a.x);
+            return b;
         }
 
         /// Multiply a matrix times a vector. If a rotation matrix is provided,
         /// then this transforms the vector from one frame to another.
         public static b2Vec2 b2Mul(b2Mat22 A, b2Vec2 v)
         {
-            return new b2Vec2(A.ex.x * v.x + A.ey.x * v.y, A.ex.y * v.x + A.ey.y * v.y);
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(A.ex.x * v.x + A.ey.x * v.y, A.ex.y * v.x + A.ey.y * v.y);
+            return b;
         }
 
         /// Multiply a matrix transpose times a vector. If a rotation matrix is provided,
         /// then this transforms the vector from one frame to another (inverse transform).
         public static b2Vec2 b2MulT(b2Mat22 A, b2Vec2 v)
         {
-            return new b2Vec2(b2Dot(v, A.ex), b2Dot(v, A.ey));
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(b2Dot(v, A.ex), b2Dot(v, A.ey));
+            return b;
         }
 
         public static float b2Distance(b2Vec2 a, b2Vec2 b)
         {
             b2Vec2 c = a - b;
-            return c.Length();
+            return c.Length;
         }
 
         public static float b2DistanceSquared(b2Vec2 a, b2Vec2 b)
@@ -139,8 +147,10 @@ namespace Box2D.Common
         // A^T * B
         public static b2Mat22 b2MulT(b2Mat22 A, b2Mat22 B)
         {
-            b2Vec2 c1 = new b2Vec2(b2Dot(A.ex, B.ex), b2Dot(A.ey, B.ex));
-            b2Vec2 c2 = new b2Vec2(b2Dot(A.ex, B.ey), b2Dot(A.ey, B.ey));
+            b2Vec2 c1 = b2Vec2.Zero;
+            b2Vec2 c2 = b2Vec2.Zero;
+            c1.Set(b2Dot(A.ex, B.ex), b2Dot(A.ey, B.ex));
+            c2.Set(b2Dot(A.ex, B.ey), b2Dot(A.ey, B.ey));
             return new b2Mat22(c1, c2);
         }
 
@@ -153,7 +163,9 @@ namespace Box2D.Common
         /// Multiply a matrix times a vector.
         public static b2Vec2 b2Mul22(b2Mat33 A, b2Vec2 v)
         {
-            return new b2Vec2(A.ex.x * v.x + A.ey.x * v.y, A.ex.y * v.x + A.ey.y * v.y);
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(A.ex.x * v.x + A.ey.x * v.y, A.ex.y * v.x + A.ey.y * v.y);
+            return b;
         }
 
         /// Multiply two rotations: q * r
@@ -185,21 +197,30 @@ namespace Box2D.Common
         /// Rotate a vector
         public static b2Vec2 b2Mul(b2Rot q, b2Vec2 v)
         {
-            return new b2Vec2(q.c * v.x - q.s * v.y, q.s * v.x + q.c * v.y);
+            float x=q.c * v.x - q.s * v.y;
+            float y=q.s * v.x + q.c * v.y;
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(x, y);
+            return b;
         }
 
         /// Inverse rotate a vector
         public static b2Vec2 b2MulT(b2Rot q, b2Vec2 v)
         {
-            return new b2Vec2(q.c * v.x + q.s * v.y, -q.s * v.x + q.c * v.y);
+            float x = q.c * v.x + q.s * v.y;
+            float y =  -q.s * v.x + q.c * v.y;
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(x, y);
+            return b;
         }
 
         public static b2Vec2 b2Mul(b2Transform T, b2Vec2 v)
         {
             float x = (T.q.c * v.x - T.q.s * v.y) + T.p.x;
             float y = (T.q.s * v.x + T.q.c * v.y) + T.p.y;
-
-            return new b2Vec2(x, y);
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(x, y);
+            return b;
         }
 
         public static b2Vec2 b2MulT(b2Transform T, b2Vec2 v)
@@ -208,8 +229,9 @@ namespace Box2D.Common
             float py = v.y - T.p.y;
             float x = (T.q.c * px + T.q.s * py);
             float y = (-T.q.s * px + T.q.c * py);
-
-            return new b2Vec2(x, y);
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(x, y);
+            return b;
         }
 
         // v2 = A.q.Rot(B.q.Rot(v1) + B.p) + A.p
@@ -238,7 +260,10 @@ namespace Box2D.Common
         }
         public static b2Vec2 b2Abs(b2Vec2 a)
         {
-            return new b2Vec2(b2Abs(a.x), b2Abs(a.y));
+            b2Vec2 bx = b2Vec2.Zero;
+            bx.x = Math.Abs(a.x);
+            bx.y = Math.Abs(a.y);
+            return bx;
         }
 
         public static b2Mat22 b2Abs(b2Mat22 A)
@@ -256,12 +281,18 @@ namespace Box2D.Common
         /// <returns></returns>
         public static b2Vec2 b2Min(b2Vec2 a, b2Vec2 b)
         {
-            return new b2Vec2(Math.Min(a.x, b.x), Math.Min(a.y, b.y));
+            b2Vec2 bx = b2Vec2.Zero;
+            bx.x = Math.Min(a.x, b.x);
+            bx.y = Math.Min(a.y, b.y);
+            return bx;
         }
 
         public static b2Vec2 b2Max(b2Vec2 a, b2Vec2 b)
         {
-            return new b2Vec2(Math.Max(a.x, b.x), Math.Max(a.y, b.y));
+            b2Vec2 bx = b2Vec2.Zero;
+            bx.x = Math.Max(a.x, b.x);
+            bx.y = Math.Max(a.y, b.y);
+            return bx;
         }
 
         public static float b2Clamp(float a, float low, float high)

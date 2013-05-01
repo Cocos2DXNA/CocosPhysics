@@ -400,7 +400,7 @@ namespace Box2D.Dynamics.Joints
                 b2Vec2 rB = b2Math.b2Mul(qB, m_localAnchorB - m_localCenterB);
 
                 b2Vec2 C = cB + rB - cA - rA;
-                positionError = C.Length();
+                positionError = C.Length;
 
                 float mA = m_invMassA, mB = m_invMassB;
                 float iA = m_invIA, iB = m_invIB;

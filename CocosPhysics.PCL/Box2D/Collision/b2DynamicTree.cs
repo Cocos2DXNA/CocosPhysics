@@ -170,9 +170,8 @@ namespace Box2D.Collision
             int proxyId = AllocateNode();
 
             // Fatten the aabb.
-            b2Vec2 r = new b2Vec2(b2Settings.b2_aabbExtension, b2Settings.b2_aabbExtension);
-            m_nodes[proxyId].aabb.m_lowerBound = aabb.m_lowerBound - r;
-            m_nodes[proxyId].aabb.m_upperBound = aabb.m_upperBound + r;
+            m_nodes[proxyId].aabb = aabb;
+            m_nodes[proxyId].aabb.Fatten();
             m_nodes[proxyId].userData = userData;
             m_nodes[proxyId].height = 0;
 
@@ -205,31 +204,30 @@ namespace Box2D.Collision
 
             // Extend AABB.
             b2AABB b = aabb;
-            b2Vec2 r = new b2Vec2(b2Settings.b2_aabbExtension, b2Settings.b2_aabbExtension);
-            b.m_lowerBound = b.m_lowerBound - r;
-            b.m_upperBound = b.m_upperBound + r;
+            b.Fatten();
 
             // Predict AABB displacement.
             b2Vec2 d = b2Settings.b2_aabbMultiplier * displacement;
 
             if (d.x < 0.0f)
             {
-                b.m_lowerBound.x += d.x;
+                b.LowerBoundX += d.x;
             }
             else
             {
-                b.m_upperBound.x += d.x;
+                b.UpperBoundX += d.x;
             }
 
             if (d.y < 0.0f)
             {
-                b.m_lowerBound.y += d.y;
+                b.LowerBoundY += d.y;
             }
             else
             {
-                b.m_upperBound.y += d.y;
+                b.UpperBoundY += d.y;
             }
 
+            b.UpdateAttributes();
             m_nodes[proxyId].aabb = b;
 
             InsertLeaf(proxyId);
@@ -255,11 +253,11 @@ namespace Box2D.Collision
                 int child1 = m_nodes[index].child1;
                 int child2 = m_nodes[index].child2;
 
-                float area = m_nodes[index].aabb.GetPerimeter();
+                float area = m_nodes[index].aabb.Perimeter;
 
-                b2AABB combinedAABB = new b2AABB();
+                b2AABB combinedAABB = b2AABB.Default;
                 combinedAABB.Combine(m_nodes[index].aabb, leafAABB);
-                float combinedArea = combinedAABB.GetPerimeter();
+                float combinedArea = combinedAABB.Perimeter;
 
                 // Cost of creating a new parent for this node and the new leaf
                 float cost = 2.0f * combinedArea;
@@ -271,16 +269,16 @@ namespace Box2D.Collision
                 float cost1;
                 if (m_nodes[child1].IsLeaf())
                 {
-                    b2AABB aabb = new b2AABB();
+                    b2AABB aabb = b2AABB.Default;
                     aabb.Combine(leafAABB, m_nodes[child1].aabb);
-                    cost1 = aabb.GetPerimeter() + inheritanceCost;
+                    cost1 = aabb.Perimeter + inheritanceCost;
                 }
                 else
                 {
-                    b2AABB aabb = new b2AABB();
+                    b2AABB aabb = b2AABB.Default;
                     aabb.Combine(leafAABB, m_nodes[child1].aabb);
-                    float oldArea = m_nodes[child1].aabb.GetPerimeter();
-                    float newArea = aabb.GetPerimeter();
+                    float oldArea = m_nodes[child1].aabb.Perimeter;
+                    float newArea = aabb.Perimeter;
                     cost1 = (newArea - oldArea) + inheritanceCost;
                 }
 
@@ -288,16 +286,16 @@ namespace Box2D.Collision
                 float cost2;
                 if (m_nodes[child2].IsLeaf())
                 {
-                    b2AABB aabb = new b2AABB();
+                    b2AABB aabb = b2AABB.Default;
                     aabb.Combine(leafAABB, m_nodes[child2].aabb);
-                    cost2 = aabb.GetPerimeter() + inheritanceCost;
+                    cost2 = aabb.Perimeter + inheritanceCost;
                 }
                 else
                 {
-                    b2AABB aabb = new b2AABB();
+                    b2AABB aabb = b2AABB.Default;
                     aabb.Combine(leafAABB, m_nodes[child2].aabb);
-                    float oldArea = m_nodes[child2].aabb.GetPerimeter();
-                    float newArea = aabb.GetPerimeter();
+                    float oldArea = m_nodes[child2].aabb.Perimeter;
+                    float newArea = aabb.Perimeter;
                     cost2 = newArea - oldArea + inheritanceCost;
                 }
 
@@ -599,7 +597,7 @@ namespace Box2D.Collision
             }
 
             b2TreeNode root = m_nodes[m_root];
-            float rootArea = root.aabb.GetPerimeter();
+            float rootArea = root.aabb.Perimeter;
 
             float totalArea = 0.0f;
             for (int i = 0; i < m_nodeCapacity; ++i)
@@ -611,7 +609,7 @@ namespace Box2D.Collision
                     continue;
                 }
 
-                totalArea += node.aabb.GetPerimeter();
+                totalArea += node.aabb.Perimeter;
             }
 
             return totalArea / rootArea;
@@ -703,11 +701,11 @@ namespace Box2D.Collision
             height = 1 + Math.Max(height1, height2);
             Debug.Assert(node.height == height);
 
-            b2AABB aabb = new b2AABB();
+            b2AABB aabb = b2AABB.Default;
             aabb.Combine(m_nodes[child1].aabb, m_nodes[child2].aabb);
 
-            Debug.Assert(aabb.m_lowerBound == node.aabb.m_lowerBound);
-            Debug.Assert(aabb.m_upperBound == node.aabb.m_upperBound);
+            Debug.Assert(aabb.LowerBound == node.aabb.LowerBound);
+            Debug.Assert(aabb.UpperBound == node.aabb.UpperBound);
 
             ValidateMetrics(child1);
             ValidateMetrics(child2);
@@ -791,9 +789,9 @@ namespace Box2D.Collision
                     for (int j = i + 1; j < count; ++j)
                     {
                         b2AABB aabbj = m_nodes[nodes[j]].aabb;
-                        b2AABB b = new b2AABB();
+                        b2AABB b = b2AABB.Default;
                         b.Combine(aabbi, aabbj);
-                        float cost = b.GetPerimeter();
+                        float cost = b.Perimeter;
                         if (cost < minCost)
                         {
                             iMin = i;
@@ -883,7 +881,7 @@ namespace Box2D.Collision
             b2Vec2 p1 = input.p1;
             b2Vec2 p2 = input.p2;
             b2Vec2 r = p2 - p1;
-            Debug.Assert(r.LengthSquared() > 0.0f);
+            Debug.Assert(r.LengthSquared > 0.0f);
             r.Normalize();
 
             // v is perpendicular to the segment.
@@ -896,11 +894,10 @@ namespace Box2D.Collision
             float maxFraction = input.maxFraction;
 
             // Build a bounding box for the segment.
-            b2AABB segmentAABB = new b2AABB();
+            b2AABB segmentAABB = b2AABB.Default;
             {
                 b2Vec2 t = p1 + maxFraction * (p2 - p1);
-                segmentAABB.m_lowerBound = b2Math.b2Min(p1, t);
-                segmentAABB.m_upperBound = b2Math.b2Max(p1, t);
+                segmentAABB.Set(b2Math.b2Min(p1, t), b2Math.b2Max(p1, t));
             }
 
             Stack<int> stack = new Stack<int>();
@@ -923,8 +920,8 @@ namespace Box2D.Collision
 
                 // Separating axis for segment (Gino, p80).
                 // |dot(v, p1 - c)| > dot(|v|, h)
-                b2Vec2 c = node.aabb.GetCenter();
-                b2Vec2 h = node.aabb.GetExtents();
+                b2Vec2 c = node.aabb.Center;
+                b2Vec2 h = node.aabb.Extents;
                 float separation = b2Math.b2Abs(b2Math.b2Dot(v, p1 - c)) - b2Math.b2Dot(abs_v, h);
                 if (separation > 0.0f)
                 {
@@ -951,8 +948,7 @@ namespace Box2D.Collision
                         // Update segment bounding box.
                         maxFraction = value;
                         b2Vec2 t = p1 + maxFraction * (p2 - p1);
-                        segmentAABB.m_lowerBound = b2Math.b2Min(p1, t);
-                        segmentAABB.m_upperBound = b2Math.b2Max(p1, t);
+                        segmentAABB.Set(b2Math.b2Min(p1, t),b2Math.b2Max(p1, t));
                     }
                 }
                 else
