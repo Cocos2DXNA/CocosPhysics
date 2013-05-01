@@ -79,22 +79,33 @@ namespace box2dTest
             }
 
             int iter = 0;
+            long span = 0L;
+            float step = (float)(TimeSpan.FromTicks(333333).TotalMilliseconds)/1000f;
+            Console.WriteLine("Cycle step = {0:F3} which is {1} fps", step, (int)(1f / step));
             for (float dt = 0f; dt < 26f; )
             {
-                Update(_world, 1f / 30f);
-                dt += 1f / 30f;
+                long dtStart = DateTime.Now.Ticks;
+                Update(_world, step);
+                long duration = DateTime.Now.Ticks - dtStart;
+                span += duration;
+                dt += step;
                 iter++;
                 if (iter == 30)
                 {
-                    Dump(_world);
+                    //Dump(_world);
+                    TimeSpan ts = new TimeSpan(span);
+                    float fs = (float)ts.TotalMilliseconds / (float)iter;
+                    Console.WriteLine("iteration time is {0:F3} ms avg. and is {0:F3} cycles", fs, fs / step);
                     iter = 0;
+                    span = 0L;
                 }
             }
+
+            Dump(_world);
 
             Console.WriteLine("hit <enter> to exit");
             Console.ReadLine();
 
-            Dump(_world);
         }
 
         public static void Update(b2World _world, float dt)
