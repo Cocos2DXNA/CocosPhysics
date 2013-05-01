@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;PCL;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -28,7 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;PCL;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -36,11 +36,88 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Box2D\b2FlagExtensions.cs" />
+    <Compile Include="Box2D\Collision\b2AABB.cs" />
+    <Compile Include="Box2D\Collision\b2BroadPhase.cs" />
+    <Compile Include="Box2D\Collision\b2Collision.cs" />
+    <Compile Include="Box2D\Collision\b2ContactFeature.cs" />
+    <Compile Include="Box2D\Collision\b2Distance.cs" />
+    <Compile Include="Box2D\Collision\b2DistanceProxy.cs" />
+    <Compile Include="Box2D\Collision\b2DynamicTree.cs" />
+    <Compile Include="Box2D\Collision\b2EPCollider.cs" />
+    <Compile Include="Box2D\Collision\b2Manifold.cs" />
+    <Compile Include="Box2D\Collision\b2TimeOfImpact.cs" />
+    <Compile Include="Box2D\Collision\Shapes\b2ChainShape.cs" />
+    <Compile Include="Box2D\Collision\Shapes\b2CircleShape.cs" />
+    <Compile Include="Box2D\Collision\Shapes\b2EdgeShape.cs" />
+    <Compile Include="Box2D\Collision\Shapes\b2PolygonShape.cs" />
+    <Compile Include="Box2D\Collision\Shapes\b2Shape.cs" />
+    <Compile Include="Box2D\Common\b2Color.cs" />
+    <Compile Include="Box2D\Common\b2Draw.cs" />
+    <Compile Include="Box2D\Common\b2Mat22.cs" />
+    <Compile Include="Box2D\Common\b2Mat33.cs" />
+    <Compile Include="Box2D\Common\b2Math.cs" />
+    <Compile Include="Box2D\Common\b2Rot.cs" />
+    <Compile Include="Box2D\Common\b2Settings.cs" />
+    <Compile Include="Box2D\Common\b2Sweep.cs" />
+    <Compile Include="Box2D\Common\b2Timer.cs" />
+    <Compile Include="Box2D\Common\b2Transform.cs" />
+    <Compile Include="Box2D\Common\b2Vec2.cs" />
+    <Compile Include="Box2D\Common\b2Vec3.cs" />
+    <Compile Include="Box2D\Dynamics\b2Body.cs" />
+    <Compile Include="Box2D\Dynamics\b2BodyDef.cs" />
+    <Compile Include="Box2D\Dynamics\b2ContactFilter.cs" />
+    <Compile Include="Box2D\Dynamics\b2ContactListener.cs" />
+    <Compile Include="Box2D\Dynamics\b2ContactManager.cs" />
+    <Compile Include="Box2D\Dynamics\b2DestructionListener.cs" />
+    <Compile Include="Box2D\Dynamics\b2Fixture.cs" />
+    <Compile Include="Box2D\Dynamics\b2FixtureDef.cs" />
+    <Compile Include="Box2D\Dynamics\b2Island.cs" />
+    <Compile Include="Box2D\Dynamics\b2QueryCallback.cs" />
+    <Compile Include="Box2D\Dynamics\b2RayCastCallback.cs" />
+    <Compile Include="Box2D\Dynamics\b2TimeStep.cs" />
+    <Compile Include="Box2D\Dynamics\b2World.cs" />
+    <Compile Include="Box2D\Dynamics\b2WorldQueryWrapper.cs" />
+    <Compile Include="Box2D\Dynamics\b2WorldRayCastWrapper.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2ChainAndCircleContact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2ChainAndPolygonContact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2CircleContact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2Contact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2ContactSolver.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2EdgeAndCircleContact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2EdgeAndPolygonContact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2PolygonAndCircleContact.cs" />
+    <Compile Include="Box2D\Dynamics\Contacts\b2PolygonContact.cs" />
+    <Compile Include="Box2D\Dynamics\Ib2QueryCallback.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2DistanceJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2DistanceJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2FrictionJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2FrictionJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2GearJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2GearJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2Joint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2JointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2MouseJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2MouseJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2PrismaticJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2PrismaticJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2PulleyJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2PullyJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2RevoluteJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2RevoluteJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2RopeJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2RopeJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2WeldJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2WeldJointDef.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2WheelJoint.cs" />
+    <Compile Include="Box2D\Dynamics\Joints\b2WheelJointDef.cs" />
+    <Compile Include="Box2D\Rope\b2Rope.cs" />
+    <Compile Include="Box2D\Rope\b2RopeDef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-	<Compile Include="..\box2d\*\*.cs">
-	</Compile>
+    <Compile Include="..\box2d\*\*.cs">
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
