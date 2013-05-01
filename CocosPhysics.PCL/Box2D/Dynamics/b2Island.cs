@@ -335,7 +335,7 @@ namespace Box2D.Dynamics
                 b2Vec2 translation = h * v;
                 if (b2Math.b2Dot(translation, translation) > b2Settings.b2_maxTranslationSquared)
                 {
-                    float ratio = b2Settings.b2_maxTranslation / translation.Length();
+                    float ratio = b2Settings.b2_maxTranslation / translation.Length;
                     v *= ratio;
                 }
 
@@ -532,7 +532,7 @@ namespace Box2D.Dynamics
                 b2Vec2 translation = h * v;
                 if (b2Math.b2Dot(translation, translation) > b2Settings.b2_maxTranslationSquared)
                 {
-                    float ratio = b2Settings.b2_maxTranslation / translation.Length();
+                    float ratio = b2Settings.b2_maxTranslation / translation.Length;
                     v *= ratio;
                 }
 

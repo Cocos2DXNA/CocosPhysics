@@ -465,7 +465,7 @@ namespace Box2D.Collision
 			int saveCount = 0;
 			
 			b2Vec2 closestPoint = simplex.GetClosestPoint();
-			float distanceSqr1 = closestPoint.LengthSquared();
+			float distanceSqr1 = closestPoint.LengthSquared;
 			float distanceSqr2 = distanceSqr1;
 			
 //            Console.WriteLine("Closest Point={0},{1}, distance={2}", closestPoint.x, closestPoint.y, distanceSqr1);
@@ -510,7 +510,7 @@ namespace Box2D.Collision
 				
 				// Compute closest point.
 				b2Vec2 p = simplex.GetClosestPoint();
-				distanceSqr2 = p.LengthSquared();
+				distanceSqr2 = p.LengthSquared;
 				
 				// Ensure progress
 				if (distanceSqr2 >= distanceSqr1)
@@ -523,7 +523,7 @@ namespace Box2D.Collision
 				b2Vec2 d = simplex.GetSearchDirection();
 				
 				// Ensure the search direction is numerically fit.
-				if (d.LengthSquared() < b2Settings.b2_epsilon * b2Settings.b2_epsilon)
+				if (d.LengthSquared < b2Settings.b2_epsilon * b2Settings.b2_epsilon)
 				{
 					// The origin is probably contained by a line segment
 					// or triangle. Thus the shapes are overlapped.

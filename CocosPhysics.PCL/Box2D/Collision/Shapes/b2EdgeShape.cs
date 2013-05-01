@@ -168,16 +168,15 @@ namespace Box2D.Collision.Shapes
             b2Vec2 lower = b2Math.b2Min(v1, v2);
             b2Vec2 upper = b2Math.b2Max(v1, v2);
 
-            b2Vec2 r = new b2Vec2(m_radius, m_radius);
-            b2AABB aabb = new b2AABB(); // TODO: Convert to b2AABB.Zero
-            aabb.m_lowerBound = lower - r;
-            aabb.m_upperBound = upper + r;
+            b2AABB aabb = b2AABB.Default; // TODO: Convert to b2AABB.Zero
+            aabb.Set(lower, upper);
+            aabb.Fatten(m_radius);
             return(aabb);
         }
 
         public override b2MassData ComputeMass(float density)
         {
-            b2MassData massData = new b2MassData();
+            b2MassData massData = b2MassData.Default;
             massData.mass = 0.0f;
             massData.center = 0.5f * (m_vertex1 + m_vertex2);
             massData.I = 0.0f;

@@ -207,9 +207,9 @@ namespace Box2D.Dynamics.Joints
             b2Vec2 oldImpulse = m_impulse;
             m_impulse += impulse;
             float maxImpulse = data.step.dt * m_maxForce;
-            if (m_impulse.LengthSquared() > maxImpulse * maxImpulse)
+            if (m_impulse.LengthSquared > maxImpulse * maxImpulse)
             {
-                m_impulse *= maxImpulse / m_impulse.Length();
+                m_impulse *= maxImpulse / m_impulse.Length;
             }
             impulse = m_impulse - oldImpulse;
 

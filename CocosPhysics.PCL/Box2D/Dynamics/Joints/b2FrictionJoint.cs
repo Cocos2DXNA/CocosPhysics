@@ -182,7 +182,7 @@ namespace Box2D.Dynamics.Joints
 
                 float maxImpulse = h * m_maxForce;
 
-                if (m_linearImpulse.LengthSquared() > maxImpulse * maxImpulse)
+                if (m_linearImpulse.LengthSquared > maxImpulse * maxImpulse)
                 {
                     m_linearImpulse.Normalize();
                     m_linearImpulse *= maxImpulse;

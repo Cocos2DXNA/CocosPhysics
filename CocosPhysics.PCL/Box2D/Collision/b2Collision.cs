@@ -574,8 +574,8 @@ namespace Box2D.Collision
         public static bool b2TestOverlap(ref b2AABB a, ref b2AABB b)
         {
             b2Vec2 d1, d2;
-            d1 = b.m_lowerBound - a.m_upperBound;
-            d2 = a.m_lowerBound - b.m_upperBound;
+            d1 = b.LowerBound - a.UpperBound;
+            d2 = a.LowerBound - b.UpperBound;
 
             if (d1.x > 0.0f || d1.y > 0.0f)
                 return false;

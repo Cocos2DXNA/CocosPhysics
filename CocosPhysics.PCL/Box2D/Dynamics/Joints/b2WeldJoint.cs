@@ -280,7 +280,7 @@ namespace Box2D.Dynamics.Joints
             {
                 b2Vec2 C1 = cB + rB - cA - rA;
 
-                positionError = C1.Length();
+                positionError = C1.Length;
                 angularError = 0.0f;
 
                 b2Vec2 P = -K.Solve22(C1);
@@ -296,7 +296,7 @@ namespace Box2D.Dynamics.Joints
                 b2Vec2 C1 = cB + rB - cA - rA;
                 float C2 = aB - aA - m_referenceAngle;
 
-                positionError = C1.Length();
+                positionError = C1.Length;
                 angularError = b2Math.b2Abs(C2);
 
                 b2Vec3 C = new b2Vec3(C1.x, C1.y, C2);

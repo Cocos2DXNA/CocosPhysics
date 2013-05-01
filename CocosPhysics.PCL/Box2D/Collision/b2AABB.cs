@@ -17,51 +17,151 @@ namespace Box2D.Collision
             return valid;
         }
 
+        public bool Equals(b2AABB o)
+        {
+            return (m_lowerBound == o.LowerBound && m_upperBound == o.UpperBound);
+        }
+
+        public override bool Equals(object obj)
+        {
+            b2AABB o = (b2AABB)obj;
+            return (m_lowerBound == o.LowerBound && m_upperBound == o.UpperBound);
+        }
+
+        public static bool operator ==(b2AABB a, b2AABB b)
+        {
+            return (a.Equals(b));
+        }
+        public static bool operator !=(b2AABB a, b2AABB b)
+        {
+            return (a.LowerBound != b.LowerBound || a.UpperBound != b.UpperBound);
+        }
+
+        public b2Vec2 Center
+        {
+            get
+            {
+                return 0.5f * (m_lowerBound + m_upperBound);
+            }
+        }
+
+        public b2Vec2 Extents
+        {
+            get
+            {
+                return 0.5f * (m_upperBound - m_lowerBound);
+            }
+        }
+
+        public float Perimeter
+        {
+            get
+            {
+                return (_Perimeter);
+            }
+        }
+
         /// Get the center of the AABB.
+        [Obsolete("Use the property accessor")]
         public b2Vec2 GetCenter()
         {
-            return 0.5f * (m_lowerBound + m_upperBound);
+            return (Center);
         }
 
         /// Get the extents of the AABB (half-widths).
+        [Obsolete("Use the property accessor")]
         public b2Vec2 GetExtents()
         {
-            return 0.5f * (m_upperBound - m_lowerBound);
+            return (Extents);
         }
 
         /// Get the perimeter length
+        [Obsolete("Use the property accessor")]
         public float GetPerimeter()
+        {
+            return (Perimeter);
+        }
+
+        public void UpdateAttributes()
         {
             float wx = m_upperBound.x - m_lowerBound.x;
             float wy = m_upperBound.y - m_lowerBound.y;
-            return 2.0f * (wx + wy);
+            _Perimeter = 2.0f * (wx + wy);
+            _Extents = 0.5f * (m_upperBound - m_lowerBound);
+            _Center = 0.5f * (m_lowerBound + m_upperBound);
         }
 
         /// Combine an AABB into this one.
         public void Combine(b2AABB aabb)
         {
-            m_lowerBound = b2Math.b2Min(m_lowerBound, aabb.m_lowerBound);
-            m_upperBound = b2Math.b2Max(m_upperBound, aabb.m_upperBound);
+            m_lowerBound = b2Math.b2Min(m_lowerBound, aabb.LowerBound);
+            m_upperBound = b2Math.b2Max(m_upperBound, aabb.UpperBound);
+            UpdateAttributes();
         }
 
         /// Combine two AABBs into this one.
         public void Combine(b2AABB aabb1, b2AABB aabb2)
         {
-            m_lowerBound = b2Math.b2Min(aabb1.m_lowerBound, aabb2.m_lowerBound);
-            m_upperBound = b2Math.b2Max(aabb1.m_upperBound, aabb2.m_upperBound);
+            m_lowerBound = b2Math.b2Min(aabb1.LowerBound, aabb2.LowerBound);
+            m_upperBound = b2Math.b2Max(aabb1.UpperBound, aabb2.UpperBound);
+            UpdateAttributes();
+        }
+
+        public void Set(b2Vec2 lower, b2Vec2 upper)
+        {
+            m_lowerBound = lower;
+            m_upperBound = upper;
+            UpdateAttributes();
+        }
+
+        public void Set(float lx, float ly, float ux, float uy)
+        {
+            m_lowerBound.Set(lx,ly);
+            m_upperBound.Set(ux,uy);
+            UpdateAttributes();
+        }
+
+        public void SetLowerBound(float x, float y)
+        {
+            m_lowerBound.Set(x,y);
+        }
+        public void SetUpperBound(float x, float y)
+        {
+            m_upperBound.Set(x, y);
+        }
+
+        public float LowerBoundX
+        {
+            get { return (m_lowerBound.x); }
+            set { m_lowerBound.x = value; }
+        }
+        public float LowerBoundY
+        {
+            get { return (m_lowerBound.x); }
+            set { m_lowerBound.x = value; }
+        }
+        public float UpperBoundX
+        {
+            get { return (m_upperBound.x); }
+            set { m_upperBound.x = value; }
+        }
+        public float UpperBoundY
+        {
+            get { return (m_upperBound.y); }
+            set { m_upperBound.y = value; }
         }
 
         /// Does this aabb contain the provided AABB.
         public bool Contains(b2AABB aabb)
         {
             bool result = true;
-            result = result && m_lowerBound.x <= aabb.m_lowerBound.x;
+            result = result && m_lowerBound.x <= aabb.LowerBound.x;
             if(result)
-            result = result && m_lowerBound.y <= aabb.m_lowerBound.y;
+            result = result && m_lowerBound.y <= aabb.LowerBound.y;
             if(result)
-            result = result && aabb.m_upperBound.x <= m_upperBound.x;
+            result = result && aabb.UpperBound.x <= m_upperBound.x;
             if(result)
-            result = result && aabb.m_upperBound.y <= m_upperBound.y;
+            result = result && aabb.UpperBound.y <= m_upperBound.y;
             return result;
         }
 
@@ -151,8 +251,36 @@ namespace Box2D.Collision
             output.normal = normal;
             return true;
         }
-        public b2Vec2 m_lowerBound;    //< the lower vertex
-        public b2Vec2 m_upperBound;    //< the upper vertex
+
+        public void Fatten(float amt)
+        {
+            m_upperBound.x += amt;
+            m_upperBound.y += amt;
+
+            m_lowerBound.x -= amt;
+            m_lowerBound.y -= amt;
+        }
+
+        public void Fatten()
+        {
+            m_upperBound.x += b2Settings.b2_aabbExtensionVec.x;
+            m_upperBound.y += b2Settings.b2_aabbExtensionVec.y;
+
+            m_lowerBound.x -= b2Settings.b2_aabbExtensionVec.x;
+            m_lowerBound.y -= b2Settings.b2_aabbExtensionVec.y;
+        }
+
+        // Private attributes
+        private float _Perimeter;
+        private b2Vec2 _Extents, _Center;
+
+        public b2Vec2 LowerBound { get { return (m_lowerBound); } }
+        public b2Vec2 UpperBound { get { return (m_upperBound); } }
+
+        private b2Vec2 m_lowerBound;    //< the lower vertex
+        private b2Vec2 m_upperBound;    //< the upper vertex
+
+        public static b2AABB Default = new b2AABB();
 
     }
 }

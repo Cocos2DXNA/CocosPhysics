@@ -121,8 +121,8 @@ namespace Box2D.Dynamics.Joints
             m_uA = cA + m_rA - m_groundAnchorA;
             m_uB = cB + m_rB - m_groundAnchorB;
 
-            float lengthA = m_uA.Length();
-            float lengthB = m_uB.Length();
+            float lengthA = m_uA.Length;
+            float lengthB = m_uB.Length;
 
             if (lengthA > 10.0f * b2Settings.b2_linearSlop)
             {
@@ -225,8 +225,8 @@ namespace Box2D.Dynamics.Joints
             b2Vec2 uA = cA + rA - m_groundAnchorA;
             b2Vec2 uB = cB + rB - m_groundAnchorB;
 
-            float lengthA = uA.Length();
-            float lengthB = uB.Length();
+            float lengthA = uA.Length;
+            float lengthB = uB.Length;
 
             if (lengthA > 10.0f * b2Settings.b2_linearSlop)
             {
@@ -317,7 +317,7 @@ namespace Box2D.Dynamics.Joints
             b2Vec2 p = m_bodyA.GetWorldPoint(m_localAnchorA);
             b2Vec2 s = m_groundAnchorA;
             b2Vec2 d = p - s;
-            return d.Length();
+            return d.Length;
         }
 
         public virtual float GetLengthB()
@@ -325,7 +325,7 @@ namespace Box2D.Dynamics.Joints
             b2Vec2 p = m_bodyB.GetWorldPoint(m_localAnchorB);
             b2Vec2 s = m_groundAnchorB;
             b2Vec2 d = p - s;
-            return d.Length();
+            return d.Length;
         }
 
         public virtual float GetRatio()

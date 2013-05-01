@@ -191,8 +191,8 @@ namespace Box2D.Rope
                 b2Vec2 d1 = p2 - p1;
                 b2Vec2 d2 = p3 - p2;
 
-                float L1sqr = d1.LengthSquared();
-                float L2sqr = d2.LengthSquared();
+                float L1sqr = d1.LengthSquared;
+                float L2sqr = d2.LengthSquared;
 
                 if (L1sqr * L2sqr == 0.0f)
                 {

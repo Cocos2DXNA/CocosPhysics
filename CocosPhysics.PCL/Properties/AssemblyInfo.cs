@@ -1,4 +1,5 @@
 ﻿using System.Resources;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -6,6 +7,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
+// CA1014	Mark assemblies with CLSCompliantAttribute	Mark 'CocosPhysics.PCL.dll' with CLSCompliant(true) because it exposes externally visible types.	CocosPhysics.PCL	(Global)	
+[assembly: CLSCompliant(true)]
 [assembly: AssemblyTitle("CocosPhysics.PCL")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
