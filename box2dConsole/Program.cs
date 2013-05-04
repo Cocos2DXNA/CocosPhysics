@@ -82,6 +82,10 @@ namespace box2dTest
             long span = 0L;
             float step = (float)(TimeSpan.FromTicks(333333).TotalMilliseconds)/1000f;
             Console.WriteLine("Cycle step = {0:F3} which is {1} fps", step, (int)(1f / step));
+            int interval = 0;
+            b2Profile m_maxProfile = new b2Profile();
+            b2Profile m_totalProfile = new b2Profile();
+            b2Profile aveProfile = new b2Profile();
             for (float dt = 0f; dt < 26f; )
             {
                 long dtStart = DateTime.Now.Ticks;
@@ -90,14 +94,72 @@ namespace box2dTest
                 span += duration;
                 dt += step;
                 iter++;
+                bool bdump = false;
                 if (iter == 30)
                 {
+                    interval++;
+                    bdump = true;
                     //Dump(_world);
                     TimeSpan ts = new TimeSpan(span);
                     float fs = (float)ts.TotalMilliseconds / (float)iter;
-                    Console.WriteLine("iteration time is {0:F3} ms avg. and is {0:F3} cycles", fs, fs / step);
+                    Console.WriteLine("{2}: iteration time is {0:F3} ms avg. and is {1:F3} cycles", fs, fs / step, interval);
                     iter = 0;
                     span = 0L;
+                    int bodyCount = _world.BodyCount;
+                    int contactCount = _world.ContactManager.ContactCount;
+                    int jointCount = _world.JointCount;
+                    Console.WriteLine("{3}:bodies/contacts/joints = {0}/{1}/{2}", bodyCount, contactCount, jointCount, interval);
+
+                    int proxyCount = _world.GetProxyCount();
+                    int treeheight = _world.GetTreeHeight();
+                    int balance = _world.GetTreeBalance();
+                    float quality = _world.GetTreeQuality();
+                    Console.WriteLine("{4}:proxies/height/balance/quality = {0}/{1}/{2}/{3:F3}", proxyCount, height, balance, quality, interval);
+                }
+
+                b2Profile p = _world.Profile;
+                // Track maximum profile times
+                {
+                    m_maxProfile.step = Math.Max(m_maxProfile.step, p.step);
+                    m_maxProfile.collide = Math.Max(m_maxProfile.collide, p.collide);
+                    m_maxProfile.solve = Math.Max(m_maxProfile.solve, p.solve);
+                    m_maxProfile.solveInit = Math.Max(m_maxProfile.solveInit, p.solveInit);
+                    m_maxProfile.solveVelocity = Math.Max(m_maxProfile.solveVelocity, p.solveVelocity);
+                    m_maxProfile.solvePosition = Math.Max(m_maxProfile.solvePosition, p.solvePosition);
+                    m_maxProfile.solveTOI = Math.Max(m_maxProfile.solveTOI, p.solveTOI);
+                    m_maxProfile.broadphase = Math.Max(m_maxProfile.broadphase, p.broadphase);
+
+                    m_totalProfile.step += p.step;
+                    m_totalProfile.collide += p.collide;
+                    m_totalProfile.solve += p.solve;
+                    m_totalProfile.solveInit += p.solveInit;
+                    m_totalProfile.solveVelocity += p.solveVelocity;
+                    m_totalProfile.solvePosition += p.solvePosition;
+                    m_totalProfile.solveTOI += p.solveTOI;
+                    m_totalProfile.broadphase += p.broadphase;
+                }
+                if (interval > 0)
+                {
+                    float scale = 1.0f / (float)interval;
+                    aveProfile.step = scale * m_totalProfile.step;
+                    aveProfile.collide = scale * m_totalProfile.collide;
+                    aveProfile.solve = scale * m_totalProfile.solve;
+                    aveProfile.solveInit = scale * m_totalProfile.solveInit;
+                    aveProfile.solveVelocity = scale * m_totalProfile.solveVelocity;
+                    aveProfile.solvePosition = scale * m_totalProfile.solvePosition;
+                    aveProfile.solveTOI = scale * m_totalProfile.solveTOI;
+                    aveProfile.broadphase = scale * m_totalProfile.broadphase;
+                }
+                if (bdump)
+                {
+                    Console.WriteLine("{3}:step [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.step, aveProfile.step, m_maxProfile.step,interval);
+                    Console.WriteLine("{3}:collide [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.collide, aveProfile.collide, m_maxProfile.collide, interval);
+                    Console.WriteLine("{3}:solve [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.solve, aveProfile.solve, m_maxProfile.solve, interval);
+                    Console.WriteLine("{3}:solve init [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.solveInit, aveProfile.solveInit, m_maxProfile.solveInit, interval);
+                    Console.WriteLine("{3}:solve velocity [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.solveVelocity, aveProfile.solveVelocity, m_maxProfile.solveVelocity, interval);
+                    Console.WriteLine("{3}:solve position [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.solvePosition, aveProfile.solvePosition, m_maxProfile.solvePosition, interval);
+                    Console.WriteLine("{3}:solveTOI [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.solveTOI, aveProfile.solveTOI, m_maxProfile.solveTOI, interval);
+                    Console.WriteLine("{3}:broad-phase [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.broadphase, aveProfile.broadphase, m_maxProfile.broadphase, interval);
                 }
             }
 
