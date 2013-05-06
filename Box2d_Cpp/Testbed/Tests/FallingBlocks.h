@@ -71,23 +71,32 @@ public:
 
 		// Always make 150 bodies to fall
 
-        for (int i = 0; i < 150; i++)
+        float y = height;
+        int count = 0, max = 150;
+        while (count < max)
         {
-            b2BodyDef def;
-            def.position = b2Vec2(-width/2 + width * RandomFloat(0,1), height * RandomFloat(0,1));
-            def.type = b2_dynamicBody;
-            b2Body *body = m_world->CreateBody(&def);
-            // Define another box shape for our dynamic body.
-            b2PolygonShape dynamicBox;
-            dynamicBox.SetAsBox(.5f, .5f); //These are mid points for our 1m box
+            float xStart = (count / 30 % 2 == 1) ? 8.0f : 0.0f;
+            for (int i = 0; i < 30 && count < max; i++, count++)
+            {
+				b2BodyDef def;
+				float x = xStart + (float)i / 30.0f * ((float)width - 30.0*2.0 - xStart*2.0f) + (float)i * 2.0f;
+				x += -width / 2.0f;
+				def.position = b2Vec2(x, y + (float)(count / 30) + (float)(i+1));
+				def.type = b2_dynamicBody;
+				b2Body *body = m_world->CreateBody(&def);
+				// Define another box shape for our dynamic body.
+				b2PolygonShape dynamicBox;
+				dynamicBox.SetAsBox(.5f, .5f); //These are mid points for our 1m box
 
-            // Define the dynamic body fixture.
-            b2FixtureDef fd;
-            fd.shape = &dynamicBox;
-            fd.density = 1.0f;
-            fd.friction = 0.3f;
-            body->CreateFixture(&fd);
-        }
+				// Define the dynamic body fixture.
+				b2FixtureDef fd;
+				fd.shape = &dynamicBox;
+				fd.density = 1.0f;
+				fd.friction = 0.3f;
+				body->CreateFixture(&fd);
+			}
+			y -= 10.0f;
+		}
 	}
 
 	void Keyboard(unsigned char key)
