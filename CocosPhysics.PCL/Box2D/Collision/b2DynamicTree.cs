@@ -885,7 +885,7 @@ namespace Box2D.Collision
             r.Normalize();
 
             // v is perpendicular to the segment.
-            b2Vec2 v = b2Math.b2Cross(1.0f, r);
+            b2Vec2 v = r.NegUnitCross(); // b2Math.b2Cross(1.0f, r);
             b2Vec2 abs_v = b2Math.b2Abs(v);
 
             // Separating axis for segment (Gino, p80).
