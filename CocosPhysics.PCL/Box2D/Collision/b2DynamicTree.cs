@@ -61,7 +61,6 @@ namespace Box2D.Collision
     /// Nodes are pooled and relocatable, so we use node indices rather than pointers.
     public class b2DynamicTree
     {
-
         private int m_root;
 
         private b2TreeNode[] m_nodes;
@@ -256,7 +255,7 @@ namespace Box2D.Collision
                 float area = m_nodes[index].aabb.Perimeter;
 
                 b2AABB combinedAABB = b2AABB.Default;
-                combinedAABB.Combine(m_nodes[index].aabb, leafAABB);
+                combinedAABB.Combine(ref m_nodes[index].aabb, ref leafAABB);
                 float combinedArea = combinedAABB.Perimeter;
 
                 // Cost of creating a new parent for this node and the new leaf
@@ -270,13 +269,13 @@ namespace Box2D.Collision
                 if (m_nodes[child1].IsLeaf())
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child1].aabb);
+                    aabb.Combine(ref leafAABB, ref m_nodes[child1].aabb);
                     cost1 = aabb.Perimeter + inheritanceCost;
                 }
                 else
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child1].aabb);
+                    aabb.Combine(ref leafAABB, ref m_nodes[child1].aabb);
                     float oldArea = m_nodes[child1].aabb.Perimeter;
                     float newArea = aabb.Perimeter;
                     cost1 = (newArea - oldArea) + inheritanceCost;
@@ -287,7 +286,7 @@ namespace Box2D.Collision
                 if (m_nodes[child2].IsLeaf())
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child2].aabb);
+                    aabb.Combine(ref leafAABB, ref s_nodes[child2].aabb);
                     cost2 = aabb.Perimeter + inheritanceCost;
                 }
                 else
@@ -317,6 +316,7 @@ namespace Box2D.Collision
             }
 
             int sibling = index;
+
 
             // Create a new parent.
             int oldParent = m_nodes[sibling].parentOrNext;

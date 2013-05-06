@@ -96,6 +96,16 @@ namespace Box2D.Common
             return (b);
         }
 
+
+        /// Divide this vector by a scalar.
+        public static b2Vec2 operator /(b2Vec2 v1, float a)
+        {
+            b2Vec2 b = b2Vec2.Zero;
+            b.m_x = v1.m_x / a;
+            b.m_y = v1.m_y / a;
+            return (b);
+        }
+
         /// Multiply this vector by a scalar.
         public static b2Vec2 operator *(float a, b2Vec2 v1)
         {

@@ -113,6 +113,7 @@ namespace Box2D.Collision.Shapes
             b2AABB aabb = b2AABB.Default;
             aabb.SetLowerBound(p.x - m_radius, p.y - m_radius);
             aabb.SetUpperBound(p.x + m_radius, p.y + m_radius);
+            aabb.UpdateAttributes();
             return (aabb);
         }
 

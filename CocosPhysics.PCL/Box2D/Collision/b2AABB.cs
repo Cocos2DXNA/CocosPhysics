@@ -87,12 +87,12 @@ namespace Box2D.Collision
             float wx = m_upperBound.x - m_lowerBound.x;
             float wy = m_upperBound.y - m_lowerBound.y;
             _Perimeter = 2.0f * (wx + wy);
-            _Extents = 0.5f * (m_upperBound - m_lowerBound);
-            _Center = 0.5f * (m_lowerBound + m_upperBound);
+            _Extents = (m_upperBound - m_lowerBound)/2f;
+            _Center = (m_lowerBound + m_upperBound)/2f;
         }
 
         /// Combine an AABB into this one.
-        public void Combine(b2AABB aabb)
+        public void Combine(ref b2AABB aabb)
         {
             m_lowerBound = b2Math.b2Min(m_lowerBound, aabb.LowerBound);
             m_upperBound = b2Math.b2Max(m_upperBound, aabb.UpperBound);
@@ -100,7 +100,7 @@ namespace Box2D.Collision
         }
 
         /// Combine two AABBs into this one.
-        public void Combine(b2AABB aabb1, b2AABB aabb2)
+        public void Combine(ref b2AABB aabb1, ref b2AABB aabb2)
         {
             m_lowerBound = b2Math.b2Min(aabb1.LowerBound, aabb2.LowerBound);
             m_upperBound = b2Math.b2Max(aabb1.UpperBound, aabb2.UpperBound);
@@ -259,6 +259,7 @@ namespace Box2D.Collision
 
             m_lowerBound.x -= amt;
             m_lowerBound.y -= amt;
+            UpdateAttributes();
         }
 
         public void Fatten()
@@ -268,6 +269,7 @@ namespace Box2D.Collision
 
             m_lowerBound.x -= b2Settings.b2_aabbExtensionVec.x;
             m_lowerBound.y -= b2Settings.b2_aabbExtensionVec.y;
+            UpdateAttributes();
         }
 
         // Private attributes
