@@ -67,11 +67,11 @@ namespace Box2D.Common
         /// Perform the dot product on two vectors.
         public static float b2Dot(ref b2Vec2 a, ref b2Vec2 b)
         {
-            return a.x * b.x + a.y * b.y;
+            return a.m_x * b.m_x + a.m_y * b.m_y;
         }
         public static float b2Dot(b2Vec2 a, b2Vec2 b)
         {
-            return a.x * b.x + a.y * b.y;
+            return a.m_x * b.m_x + a.m_y * b.m_y;
         }
 
         public static float b2Dot(float ax, float ay, float bx, float by)
@@ -82,12 +82,12 @@ namespace Box2D.Common
         /// Perform the cross product on two vectors. In 2D this produces a scalar.
         public static float b2Cross(ref b2Vec2 a, ref b2Vec2 b)
         {
-            return a.x * b.y - a.y * b.x;
+            return a.m_x * b.m_y - a.m_y * b.m_x;
         }
 
         public static float b2Cross(b2Vec2 a, b2Vec2 b)
         {
-            return a.x * b.y - a.y * b.x;
+            return a.m_x * b.m_y - a.m_y * b.m_x;
         }
 
         public static float b2Cross(float ax, float ay, float bx, float by)
@@ -100,7 +100,7 @@ namespace Box2D.Common
         public static b2Vec2 b2Cross(ref b2Vec2 a, float s)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.Set(s * a.y, -s * a.x);
+            b.Set(s * a.m_y, -s * a.m_x);
             return b;
         }
 
@@ -116,8 +116,8 @@ namespace Box2D.Common
         public static b2Vec2 b2Cross(float s, ref b2Vec2 a)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.m_x = -s * a.y;
-            b.m_y = s * a.x;
+            b.m_x = -s * a.m_y;
+            b.m_y = s * a.m_x;
             return b;
         }
 
@@ -126,8 +126,8 @@ namespace Box2D.Common
         public static b2Vec2 b2Mul(ref b2Mat22 A, ref b2Vec2 v)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.m_x = A.ex.x * v.x + A.ey.x * v.y;
-            b.m_y = A.ex.y * v.x + A.ey.y * v.y;
+            b.m_x = A.ex.x * v.m_x + A.ey.x * v.m_y;
+            b.m_y = A.ex.y * v.m_x + A.ey.y * v.m_y;
             return b;
         }
 

@@ -41,7 +41,11 @@ namespace Box2D.Collision
         {
             get
             {
-                return 0.5f * (m_lowerBound + m_upperBound);
+                if (_Dirty)
+                {
+                    UpdateAttributes();
+                }
+                return _Center;
             }
         }
 
@@ -49,7 +53,11 @@ namespace Box2D.Collision
         {
             get
             {
-                return 0.5f * (m_upperBound - m_lowerBound);
+                if (_Dirty)
+                {
+                    UpdateAttributes();
+                }
+                return _Extents;
             }
         }
 
@@ -57,6 +65,10 @@ namespace Box2D.Collision
         {
             get
             {
+                if (_Dirty)
+                {
+                    UpdateAttributes();
+                }
                 return (_Perimeter);
             }
         }
@@ -65,6 +77,10 @@ namespace Box2D.Collision
         [Obsolete("Use the property accessor")]
         public b2Vec2 GetCenter()
         {
+            if (_Dirty)
+            {
+                UpdateAttributes();
+            }
             return (Center);
         }
 
@@ -72,6 +88,10 @@ namespace Box2D.Collision
         [Obsolete("Use the property accessor")]
         public b2Vec2 GetExtents()
         {
+            if (_Dirty)
+            {
+                UpdateAttributes();
+            }
             return (Extents);
         }
 
@@ -79,6 +99,10 @@ namespace Box2D.Collision
         [Obsolete("Use the property accessor")]
         public float GetPerimeter()
         {
+            if (_Dirty)
+            {
+                UpdateAttributes();
+            }
             return (Perimeter);
         }
 
@@ -89,6 +113,7 @@ namespace Box2D.Collision
             _Perimeter = 2.0f * (wx + wy);
             _Extents = (m_upperBound - m_lowerBound)/2f;
             _Center = (m_lowerBound + m_upperBound)/2f;
+            _Dirty = false;
         }
 
         /// Combine an AABB into this one.
@@ -96,7 +121,7 @@ namespace Box2D.Collision
         {
             m_lowerBound = b2Math.b2Min(m_lowerBound, aabb.LowerBound);
             m_upperBound = b2Math.b2Max(m_upperBound, aabb.UpperBound);
-            UpdateAttributes();
+            _Dirty = true;
         }
 
         /// Combine two AABBs into this one.
@@ -104,21 +129,21 @@ namespace Box2D.Collision
         {
             m_lowerBound = b2Math.b2Min(aabb1.LowerBound, aabb2.LowerBound);
             m_upperBound = b2Math.b2Max(aabb1.UpperBound, aabb2.UpperBound);
-            UpdateAttributes();
+            _Dirty = true;
         }
 
         public void Set(b2Vec2 lower, b2Vec2 upper)
         {
             m_lowerBound = lower;
             m_upperBound = upper;
-            UpdateAttributes();
+            _Dirty = true;
         }
 
         public void Set(float lx, float ly, float ux, float uy)
         {
             m_lowerBound.Set(lx,ly);
             m_upperBound.Set(ux,uy);
-            UpdateAttributes();
+            _Dirty = true;
         }
 
         public void SetLowerBound(float x, float y)
@@ -191,7 +216,7 @@ namespace Box2D.Collision
                     if (p_i < lb || ub < p_i)
                     {
                         output.fraction = 0f;
-                        output.normal = new b2Vec2(0, 0);
+                        output.normal = b2Vec2.Zero;
                         return false;
                     }
                 }
@@ -231,7 +256,7 @@ namespace Box2D.Collision
                     if (tmin > tmax)
                     {
                         output.fraction = 0f;
-                        output.normal = new b2Vec2(0, 0);
+                        output.normal = b2Vec2.Zero;
                         return false;
                     }
                 }
@@ -242,7 +267,7 @@ namespace Box2D.Collision
             if (tmin < 0.0f || input.maxFraction < tmin)
             {
                 output.fraction = 0f;
-                output.normal = new b2Vec2(0, 0);
+                output.normal = b2Vec2.Zero;
                 return false;
             }
 
@@ -259,7 +284,7 @@ namespace Box2D.Collision
 
             m_lowerBound.x -= amt;
             m_lowerBound.y -= amt;
-            UpdateAttributes();
+            _Dirty = true;
         }
 
         public void Fatten()
@@ -269,8 +294,10 @@ namespace Box2D.Collision
 
             m_lowerBound.x -= b2Settings.b2_aabbExtensionVec.x;
             m_lowerBound.y -= b2Settings.b2_aabbExtensionVec.y;
-            UpdateAttributes();
+            _Dirty = true;
         }
+
+        private bool _Dirty;
 
         // Private attributes
         private float _Perimeter;
