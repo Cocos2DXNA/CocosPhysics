@@ -287,7 +287,7 @@ namespace Box2D.Dynamics.Contacts
 
                     vcp.normalMass = kNormal > 0.0f ? 1.0f / kNormal : 0.0f;
 
-                    b2Vec2 tangent = b2Math.b2Cross(vc.normal, 1.0f);
+                    b2Vec2 tangent = vc.normal.UnitCross(); //  b2Math.b2Cross(vc.normal, 1.0f);
 
                     float rtA = b2Math.b2Cross(vcp.rA, tangent);
                     float rtB = b2Math.b2Cross(vcp.rB, tangent);
@@ -298,7 +298,7 @@ namespace Box2D.Dynamics.Contacts
 
                     // Setup a velocity bias for restitution.
                     vcp.velocityBias = 0.0f;
-                    float vRel = b2Math.b2Dot(vc.normal, vB + b2Math.b2Cross(wB, vcp.rB) - vA - b2Math.b2Cross(wA, vcp.rA));
+                    float vRel = b2Math.b2Dot(vc.normal, vB + b2Math.b2Cross(wB, ref vcp.rB) - vA - b2Math.b2Cross(wA, ref vcp.rA));
                     if (vRel < -b2Settings.b2_velocityThreshold)
                     {
                         vcp.velocityBias = -vc.restitution * vRel;
@@ -363,7 +363,7 @@ namespace Box2D.Dynamics.Contacts
                 float wB = m_velocities[indexB].w;
 
                 b2Vec2 normal = vc.normal;
-                b2Vec2 tangent = b2Math.b2Cross(normal, 1.0f);
+                b2Vec2 tangent = normal.UnitCross(); //  b2Math.b2Cross(normal, 1.0f);
 
                 for (int j = 0; j < pointCount; ++j)
                 {
@@ -402,7 +402,7 @@ namespace Box2D.Dynamics.Contacts
                 float wB = m_velocities[indexB].w;
 
                 b2Vec2 normal = vc.normal;
-                b2Vec2 tangent = b2Math.b2Cross(normal, 1.0f);
+                b2Vec2 tangent = normal.UnitCross(); // b2Math.b2Cross(normal, 1.0f);
                 float friction = vc.friction;
 
                 Debug.Assert(pointCount == 1 || pointCount == 2);
@@ -414,7 +414,7 @@ namespace Box2D.Dynamics.Contacts
                     b2VelocityConstraintPoint vcp = vc.points[j];
 
                     // Relative velocity at contact
-                    b2Vec2 dv = vB + b2Math.b2Cross(wB, vcp.rB) - vA - b2Math.b2Cross(wA, vcp.rA);
+                    b2Vec2 dv = vB + b2Math.b2Cross(wB, ref vcp.rB) - vA - b2Math.b2Cross(wA, ref vcp.rA);
 
                     // Compute tangent force
                     float vt = b2Math.b2Dot(dv, tangent);
@@ -443,7 +443,7 @@ namespace Box2D.Dynamics.Contacts
                     b2VelocityConstraintPoint vcp = vc.points[0];
 
                     // Relative velocity at contact
-                    b2Vec2 dv = vB + b2Math.b2Cross(wB, vcp.rB) - vA - b2Math.b2Cross(wA, vcp.rA);
+                    b2Vec2 dv = vB + b2Math.b2Cross(wB, ref vcp.rB) - vA - b2Math.b2Cross(wA, ref vcp.rA);
 
                     // Compute normal impulse
                     float vn = b2Math.b2Dot(dv, normal);
@@ -505,12 +505,12 @@ namespace Box2D.Dynamics.Contacts
                     Debug.Assert(a.x >= 0.0f && a.y >= 0.0f);
 
                     // Relative velocity at contact
-                    b2Vec2 dv1 = vB + b2Math.b2Cross(wB, cp1.rB) - vA - b2Math.b2Cross(wA, cp1.rA);
-                    b2Vec2 dv2 = vB + b2Math.b2Cross(wB, cp2.rB) - vA - b2Math.b2Cross(wA, cp2.rA);
+                    b2Vec2 dv1 = vB + b2Math.b2Cross(wB, ref cp1.rB) - vA - b2Math.b2Cross(wA, ref cp1.rA);
+                    b2Vec2 dv2 = vB + b2Math.b2Cross(wB, ref cp2.rB) - vA - b2Math.b2Cross(wA, ref cp2.rA);
 
                     // Compute normal velocity
-                    float vn1 = b2Math.b2Dot(dv1, normal);
-                    float vn2 = b2Math.b2Dot(dv2, normal);
+                    float vn1 = b2Math.b2Dot(ref dv1, ref normal);
+                    float vn2 = b2Math.b2Dot(ref dv2, ref normal);
 
                     b2Vec2 b = b2Vec2.Zero;
                     b.x = vn1 - cp1.velocityBias;

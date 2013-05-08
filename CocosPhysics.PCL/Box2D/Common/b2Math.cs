@@ -65,32 +65,69 @@ namespace Box2D.Common
         public static float b2Atan2(float y, float x) { return ((float)Math.Atan2(y, x)); }
 
         /// Perform the dot product on two vectors.
+        public static float b2Dot(ref b2Vec2 a, ref b2Vec2 b)
+        {
+            return a.m_x * b.m_x + a.m_y * b.m_y;
+        }
         public static float b2Dot(b2Vec2 a, b2Vec2 b)
         {
-            return a.x * b.x + a.y * b.y;
+            return a.m_x * b.m_x + a.m_y * b.m_y;
         }
 
+        public static float b2Dot(float ax, float ay, float bx, float by)
+        {
+            return ax * bx + ay * by;
+        }
+        
         /// Perform the cross product on two vectors. In 2D this produces a scalar.
+        public static float b2Cross(ref b2Vec2 a, ref b2Vec2 b)
+        {
+            return a.m_x * b.m_y - a.m_y * b.m_x;
+        }
+
         public static float b2Cross(b2Vec2 a, b2Vec2 b)
         {
-            return a.x * b.y - a.y * b.x;
+            return a.m_x * b.m_y - a.m_y * b.m_x;
+        }
+
+        public static float b2Cross(float ax, float ay, float bx, float by)
+        {
+            return ax * by - ay * bx;
         }
 
         /// Perform the cross product on a vector and a scalar. In 2D this produces
         /// a vector.
-        public static b2Vec2 b2Cross(b2Vec2 a, float s)
+        public static b2Vec2 b2Cross(ref b2Vec2 a, float s)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.Set(s * a.y, -s * a.x);
+            b.Set(s * a.m_y, -s * a.m_x);
+            return b;
+        }
+
+        public static b2Vec2 b2Cross(float ax, float ay, float s)
+        {
+            b2Vec2 b = b2Vec2.Zero;
+            b.Set(s * ay, -s * ax);
             return b;
         }
 
         /// Perform the cross product on a scalar and a vector. In 2D this produces
         /// a vector.
-        public static b2Vec2 b2Cross(float s, b2Vec2 a)
+        public static b2Vec2 b2Cross(float s, ref b2Vec2 a)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.Set(-s * a.y, s * a.x);
+            b.m_x = -s * a.m_y;
+            b.m_y = s * a.m_x;
+            return b;
+        }
+
+        /// Multiply a matrix times a vector. If a rotation matrix is provided,
+        /// then this transforms the vector from one frame to another.
+        public static b2Vec2 b2Mul(ref b2Mat22 A, ref b2Vec2 v)
+        {
+            b2Vec2 b = b2Vec2.Zero;
+            b.m_x = A.ex.x * v.m_x + A.ey.x * v.m_y;
+            b.m_y = A.ex.y * v.m_x + A.ey.y * v.m_y;
             return b;
         }
 
@@ -105,7 +142,7 @@ namespace Box2D.Common
 
         /// Multiply a matrix transpose times a vector. If a rotation matrix is provided,
         /// then this transforms the vector from one frame to another (inverse transform).
-        public static b2Vec2 b2MulT(b2Mat22 A, b2Vec2 v)
+        public static b2Vec2 b2MulT(ref b2Mat22 A, ref b2Vec2 v)
         {
             b2Vec2 b = b2Vec2.Zero;
             b.Set(b2Dot(v, A.ex), b2Dot(v, A.ey));
@@ -121,9 +158,8 @@ namespace Box2D.Common
         public static float b2DistanceSquared(b2Vec2 a, b2Vec2 b)
         {
             b2Vec2 c = a - b;
-            return b2Dot(c, c);
+            return c.LengthSquared; //  b2Dot(c, c);
         }
-
 
         /// Perform the dot product on two vectors.
         public static float b2Dot(b2Vec3 a, b2Vec3 b)
@@ -131,12 +167,23 @@ namespace Box2D.Common
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
+        /// Perform the dot product on two vectors.
+        public static float b2Dot(ref b2Vec3 a, ref b2Vec3 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        /// Perform the cross product on two vectors.
+        public static b2Vec3 b2Cross(ref b2Vec3 a, ref b2Vec3 b)
+        {
+            return new b2Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+        }
+
         /// Perform the cross product on two vectors.
         public static b2Vec3 b2Cross(b2Vec3 a, b2Vec3 b)
         {
             return new b2Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
-
 
         // A * B
         public static b2Mat22 b2Mul(b2Mat22 A, b2Mat22 B)

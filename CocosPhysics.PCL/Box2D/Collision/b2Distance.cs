@@ -175,12 +175,12 @@ namespace Box2D.Collision
 				if (sgn > 0.0f)
 				{
 					// Origin is left of e12.
-					return b2Math.b2Cross(1.0f, e12);
+                    return e12.NegUnitCross(); //  b2Math.b2Cross(1.0f, e12);
 				}
 				else
 				{
 					// Origin is right of e12.
-					return b2Math.b2Cross(e12, 1.0f);
+                    return e12.UnitCross(); // b2Math.b2Cross(e12, 1.0f);
 				}
 			}
 				

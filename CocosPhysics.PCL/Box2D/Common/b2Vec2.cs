@@ -82,8 +82,8 @@ namespace Box2D.Common
         public static b2Vec2 operator -(b2Vec2 v1, b2Vec2 v2)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.x = v1.m_x - v2.m_x;
-            b.y = v1.m_y - v2.m_y;
+            b.m_x = v1.m_x - v2.m_x;
+            b.m_y = v1.m_y - v2.m_y;
             return (b);
         }
 
@@ -93,6 +93,16 @@ namespace Box2D.Common
             b2Vec2 b = b2Vec2.Zero;
             b.m_x = v1.m_x * a;
             b.m_y = v1.m_y * a;
+            return (b);
+        }
+
+
+        /// Divide this vector by a scalar.
+        public static b2Vec2 operator /(b2Vec2 v1, float a)
+        {
+            b2Vec2 b = b2Vec2.Zero;
+            b.m_x = v1.m_x / a;
+            b.m_y = v1.m_y / a;
             return (b);
         }
 
@@ -184,19 +194,42 @@ namespace Box2D.Common
             return b2Math.b2IsValid(x) && b2Math.b2IsValid(y);
         }
 
+        /// <summary>
+        /// The mathematical equivalent of this cross with 1.0f
+        /// </summary>
+        /// <returns></returns>
+        public b2Vec2 UnitCross()
+        {
+            b2Vec2 b = b2Vec2.Zero;
+            b.m_x = m_y;
+            b.m_y = -m_x;
+            return (b);
+        }
+        /// <summary>
+        /// The mathematical equivalent of 1 cross with this
+        /// </summary>
+        /// <returns></returns>
+        public b2Vec2 NegUnitCross()
+        {
+            b2Vec2 b = b2Vec2.Zero;
+            b.m_x = -m_y;
+            b.m_y = m_x;
+            return (b);
+        }
+
         /// Get the skew vector such that dot(skewvec, other) == cross(vec, other)
         public b2Vec2 Skew()
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.x = -y;
-            b.y = x;
+            b.m_x = -m_y;
+            b.m_y = m_x;
             return (b);
         }
 
         public float x { get { return (m_x); } set { m_x = value; _Length = 0f; } }
         public float y { get { return (m_y); } set { m_y = value; _Length = 0f; } }
 
-        private float m_x, m_y;
+        internal float m_x, m_y;
         private bool _bNormalized;
         private float _Length, _LengthSquared;
     }

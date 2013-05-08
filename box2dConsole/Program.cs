@@ -60,24 +60,32 @@ namespace box2dTest
             Console.WriteLine("Enter the number of bodies you want to run?");
             string s = Console.ReadLine();
             Random ran = new Random();
-            for (int i = 0; i < int.Parse(s); i++)
+            float y = height;
+            int count = 0, max = int.Parse(s);
+            while (count < max)
             {
-                def = b2BodyDef.Create();
-                def.position = new b2Vec2(width * (float)ran.NextDouble(), height * (float)ran.NextDouble());
-                def.type = b2BodyType.b2_dynamicBody;
-                b2Body body = _world.CreateBody(def);
-                // Define another box shape for our dynamic body.
-                var dynamicBox = new b2PolygonShape();
-                dynamicBox.SetAsBox(.5f, .5f); //These are mid points for our 1m box
+                float xStart = (count / 30 % 2 == 1) ? 8f : 0f;
+                for (int i = 0; i < 30 && count < max; i++, count++)
+                {
+                    def = b2BodyDef.Create();
+                    def.position = new b2Vec2(
+                          xStart + (float)i / 30f * (width - 30*2 - xStart*2f) + (float)i * 2f
+                        , y + (float)(count / 30) + (float)(i+1));
+                    def.type = b2BodyType.b2_dynamicBody;
+                    b2Body body = _world.CreateBody(def);
+                    // Define another box shape for our dynamic body.
+                    var dynamicBox = new b2PolygonShape();
+                    dynamicBox.SetAsBox(.5f, .5f); //These are mid points for our 1m box
 
-                // Define the dynamic body fixture.
-                fd = b2FixtureDef.Create();
-                fd.shape = dynamicBox;
-                fd.density = 1f;
-                fd.friction = 0.3f;
-                b2Fixture fixture = body.CreateFixture(fd);
+                    // Define the dynamic body fixture.
+                    fd = b2FixtureDef.Create();
+                    fd.shape = dynamicBox;
+                    fd.density = 1f;
+                    fd.friction = 0.3f;
+                    b2Fixture fixture = body.CreateFixture(fd);
+                }
+                y -= 10f;
             }
-
             int iter = 0;
             long span = 0L;
             float step = (float)(TimeSpan.FromTicks(333333).TotalMilliseconds)/1000f;
