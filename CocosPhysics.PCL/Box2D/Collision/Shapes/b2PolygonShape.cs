@@ -169,7 +169,7 @@ namespace Box2D.Collision.Shapes
                 int i2 = i + 1 < m_vertexCount ? i + 1 : 0;
                 b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
                  Debug.Assert(edge.LengthSquared > b2Settings.b2_epsilon * b2Settings.b2_epsilon);
-                m_normals[i] = b2Math.b2Cross(edge, 1.0f);
+                 m_normals[i] = edge.UnitCross(); // b2Math.b2Cross(edge, 1.0f);
                 m_normals[i].Normalize();
             }
 

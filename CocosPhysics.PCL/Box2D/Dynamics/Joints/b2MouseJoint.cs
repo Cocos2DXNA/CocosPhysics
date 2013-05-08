@@ -201,7 +201,7 @@ namespace Box2D.Dynamics.Joints
             float wB = data.velocities[m_indexB].w;
 
             // Cdot = v + cross(w, r)
-            b2Vec2 Cdot = vB + b2Math.b2Cross(wB, m_rB);
+            b2Vec2 Cdot = vB + b2Math.b2Cross(wB, ref m_rB);
             b2Vec2 impulse = b2Math.b2Mul(m_mass, -(Cdot + m_C + m_gamma * m_impulse));
 
             b2Vec2 oldImpulse = m_impulse;

@@ -363,7 +363,8 @@ namespace Box2D.Dynamics
 
         public virtual b2Vec2 GetLinearVelocityFromWorldPoint(b2Vec2 worldPoint)
         {
-            return m_linearVelocity + b2Math.b2Cross(m_angularVelocity, worldPoint - Sweep.c);
+            b2Vec2 diff = worldPoint - Sweep.c;
+            return m_linearVelocity + b2Math.b2Cross(m_angularVelocity, ref diff);
         }
 
         public virtual b2Vec2 GetLinearVelocityFromLocalPoint(b2Vec2 localPoint)
@@ -768,7 +769,8 @@ namespace Box2D.Dynamics
             Sweep.c0 = Sweep.c = b2Math.b2Mul(m_xf, Sweep.localCenter);
 
             // Update center of mass velocity.
-            m_linearVelocity += b2Math.b2Cross(m_angularVelocity, Sweep.c - oldCenter);
+            b2Vec2 diff = Sweep.c - oldCenter;
+            m_linearVelocity += b2Math.b2Cross(m_angularVelocity, ref diff);
         }
 
         public virtual void SetMassData(b2MassData massData)
@@ -809,7 +811,8 @@ namespace Box2D.Dynamics
             Sweep.c0 = Sweep.c = b2Math.b2Mul(m_xf, Sweep.localCenter);
 
             // Update center of mass velocity.
-            m_linearVelocity += b2Math.b2Cross(m_angularVelocity, Sweep.c - oldCenter);
+            b2Vec2 diff = Sweep.c - oldCenter;
+            m_linearVelocity += b2Math.b2Cross(m_angularVelocity, ref diff);
         }
 
         public virtual bool ShouldCollide(b2Body other)

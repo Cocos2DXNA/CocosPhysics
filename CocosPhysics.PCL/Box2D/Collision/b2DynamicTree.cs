@@ -61,7 +61,6 @@ namespace Box2D.Collision
     /// Nodes are pooled and relocatable, so we use node indices rather than pointers.
     public class b2DynamicTree
     {
-
         private int m_root;
 
         private b2TreeNode[] m_nodes;
@@ -256,7 +255,7 @@ namespace Box2D.Collision
                 float area = m_nodes[index].aabb.Perimeter;
 
                 b2AABB combinedAABB = b2AABB.Default;
-                combinedAABB.Combine(m_nodes[index].aabb, leafAABB);
+                combinedAABB.Combine(ref m_nodes[index].aabb, ref leafAABB);
                 float combinedArea = combinedAABB.Perimeter;
 
                 // Cost of creating a new parent for this node and the new leaf
@@ -270,13 +269,13 @@ namespace Box2D.Collision
                 if (m_nodes[child1].IsLeaf())
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child1].aabb);
+                    aabb.Combine(ref leafAABB, ref m_nodes[child1].aabb);
                     cost1 = aabb.Perimeter + inheritanceCost;
                 }
                 else
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child1].aabb);
+                    aabb.Combine(ref leafAABB, ref m_nodes[child1].aabb);
                     float oldArea = m_nodes[child1].aabb.Perimeter;
                     float newArea = aabb.Perimeter;
                     cost1 = (newArea - oldArea) + inheritanceCost;
@@ -287,13 +286,13 @@ namespace Box2D.Collision
                 if (m_nodes[child2].IsLeaf())
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child2].aabb);
+                    aabb.Combine(ref leafAABB, ref m_nodes[child2].aabb);
                     cost2 = aabb.Perimeter + inheritanceCost;
                 }
                 else
                 {
                     b2AABB aabb = b2AABB.Default;
-                    aabb.Combine(leafAABB, m_nodes[child2].aabb);
+                    aabb.Combine(ref leafAABB, ref m_nodes[child2].aabb);
                     float oldArea = m_nodes[child2].aabb.Perimeter;
                     float newArea = aabb.Perimeter;
                     cost2 = newArea - oldArea + inheritanceCost;
@@ -318,12 +317,13 @@ namespace Box2D.Collision
 
             int sibling = index;
 
+
             // Create a new parent.
             int oldParent = m_nodes[sibling].parentOrNext;
             int newParent = AllocateNode();
             m_nodes[newParent].parentOrNext = oldParent;
             m_nodes[newParent].userData = null;
-            m_nodes[newParent].aabb.Combine(leafAABB, m_nodes[sibling].aabb);
+            m_nodes[newParent].aabb.Combine(ref leafAABB, ref m_nodes[sibling].aabb);
             m_nodes[newParent].height = m_nodes[sibling].height + 1;
 
             if (oldParent != b2TreeNode.b2_nullNode)
@@ -366,7 +366,7 @@ namespace Box2D.Collision
                 Debug.Assert(child2 != b2TreeNode.b2_nullNode);
 
                 m_nodes[index].height = 1 + Math.Max(m_nodes[child1].height, m_nodes[child2].height);
-                m_nodes[index].aabb.Combine(m_nodes[child1].aabb, m_nodes[child2].aabb);
+                m_nodes[index].aabb.Combine(ref m_nodes[child1].aabb, ref m_nodes[child2].aabb);
 
                 index = m_nodes[index].parentOrNext;
             }
@@ -417,7 +417,7 @@ namespace Box2D.Collision
                     int child1 = m_nodes[index].child1;
                     int child2 = m_nodes[index].child2;
 
-                    m_nodes[index].aabb.Combine(m_nodes[child1].aabb, m_nodes[child2].aabb);
+                    m_nodes[index].aabb.Combine(ref m_nodes[child1].aabb, ref m_nodes[child2].aabb);
                     m_nodes[index].height = 1 + Math.Max(m_nodes[child1].height, m_nodes[child2].height);
 
                     index = m_nodes[index].parentOrNext;
@@ -494,8 +494,8 @@ namespace Box2D.Collision
                     C.child2 = iF;
                     A.child2 = iG;
                     G.parentOrNext = iA;
-                    A.aabb.Combine(B.aabb, G.aabb);
-                    C.aabb.Combine(A.aabb, F.aabb);
+                    A.aabb.Combine(ref B.aabb, ref G.aabb);
+                    C.aabb.Combine(ref A.aabb, ref F.aabb);
 
                     A.height = 1 + Math.Max(B.height, G.height);
                     C.height = 1 + Math.Max(A.height, F.height);
@@ -505,8 +505,8 @@ namespace Box2D.Collision
                     C.child2 = iG;
                     A.child2 = iF;
                     F.parentOrNext = iA;
-                    A.aabb.Combine(B.aabb, F.aabb);
-                    C.aabb.Combine(A.aabb, G.aabb);
+                    A.aabb.Combine(ref B.aabb, ref F.aabb);
+                    C.aabb.Combine(ref A.aabb, ref G.aabb);
 
                     A.height = 1 + Math.Max(B.height, F.height);
                     C.height = 1 + Math.Max(A.height, G.height);
@@ -554,8 +554,8 @@ namespace Box2D.Collision
                     B.child2 = iD;
                     A.child1 = iE;
                     E.parentOrNext = iA;
-                    A.aabb.Combine(C.aabb, E.aabb);
-                    B.aabb.Combine(A.aabb, D.aabb);
+                    A.aabb.Combine(ref C.aabb, ref E.aabb);
+                    B.aabb.Combine(ref A.aabb, ref D.aabb);
 
                     A.height = 1 + Math.Max(C.height, E.height);
                     B.height = 1 + Math.Max(A.height, D.height);
@@ -565,8 +565,8 @@ namespace Box2D.Collision
                     B.child2 = iE;
                     A.child1 = iD;
                     D.parentOrNext = iA;
-                    A.aabb.Combine(C.aabb, D.aabb);
-                    B.aabb.Combine(A.aabb, E.aabb);
+                    A.aabb.Combine(ref C.aabb, ref D.aabb);
+                    B.aabb.Combine(ref A.aabb, ref E.aabb);
 
                     A.height = 1 + Math.Max(C.height, D.height);
                     B.height = 1 + Math.Max(A.height, E.height);
@@ -702,7 +702,7 @@ namespace Box2D.Collision
             Debug.Assert(node.height == height);
 
             b2AABB aabb = b2AABB.Default;
-            aabb.Combine(m_nodes[child1].aabb, m_nodes[child2].aabb);
+            aabb.Combine(ref m_nodes[child1].aabb, ref m_nodes[child2].aabb);
 
             Debug.Assert(aabb.LowerBound == node.aabb.LowerBound);
             Debug.Assert(aabb.UpperBound == node.aabb.UpperBound);
@@ -790,7 +790,7 @@ namespace Box2D.Collision
                     {
                         b2AABB aabbj = m_nodes[nodes[j]].aabb;
                         b2AABB b = b2AABB.Default;
-                        b.Combine(aabbi, aabbj);
+                        b.Combine(ref aabbi, ref aabbj);
                         float cost = b.Perimeter;
                         if (cost < minCost)
                         {
@@ -811,7 +811,7 @@ namespace Box2D.Collision
                 parent.child1 = index1;
                 parent.child2 = index2;
                 parent.height = 1 + Math.Max(child1.height, child2.height);
-                parent.aabb.Combine(child1.aabb, child2.aabb);
+                parent.aabb.Combine(ref child1.aabb, ref child2.aabb);
                 parent.parentOrNext = b2TreeNode.b2_nullNode;
 
                 child1.parentOrNext = parentIndex;
@@ -885,7 +885,7 @@ namespace Box2D.Collision
             r.Normalize();
 
             // v is perpendicular to the segment.
-            b2Vec2 v = b2Math.b2Cross(1.0f, r);
+            b2Vec2 v = r.NegUnitCross(); // b2Math.b2Cross(1.0f, r);
             b2Vec2 abs_v = b2Math.b2Abs(v);
 
             // Separating axis for segment (Gino, p80).
