@@ -511,10 +511,12 @@ namespace Box2D.Collision
                 return;
             }
 
-            b2Vec2 n = new b2Vec2(-e.y, e.x);
+            b2Vec2 n = b2Vec2.Zero;
+            n.m_x = -e.y;
+            n.m_y = e.x;
             if (b2Math.b2Dot(n, Q - A) < 0.0f)
             {
-                n.Set(-n.x, -n.y);
+                n.Set(-n.m_x, -n.m_y);
             }
             n.Normalize();
 
@@ -574,13 +576,19 @@ namespace Box2D.Collision
         public static bool b2TestOverlap(ref b2AABB a, ref b2AABB b)
         {
             b2Vec2 d1, d2;
-            d1 = b.LowerBound - a.UpperBound;
-            d2 = a.LowerBound - b.UpperBound;
+            // No operator overloading here - do direct computation to reduce time complexity
+            d1.m_x = a.UpperBoundX - b.LowerBoundX;
+            d1.m_y = a.UpperBoundY - b.LowerBoundY;
+            d2.m_x = b.UpperBoundX - a.LowerBoundX;
+            d2.m_y = b.UpperBoundY - a.LowerBoundY;
 
-            if (d1.x > 0.0f || d1.y > 0.0f)
+            // d1 = b.LowerBound - a.UpperBound;
+            // d2 = a.LowerBound - b.UpperBound;
+
+            if (d1.m_x > 0.0f || d1.m_y > 0.0f)
                 return false;
 
-            if (d2.x > 0.0f || d2.y > 0.0f)
+            if (d2.m_x > 0.0f || d2.m_y > 0.0f)
                 return false;
 
             return true;

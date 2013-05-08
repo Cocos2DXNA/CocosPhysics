@@ -91,9 +91,11 @@ namespace box2dTest
             float step = (float)(TimeSpan.FromTicks(333333).TotalMilliseconds)/1000f;
             Console.WriteLine("Cycle step = {0:F3} which is {1} fps", step, (int)(1f / step));
             int interval = 0;
+#if PROFILING
             b2Profile m_maxProfile = new b2Profile();
             b2Profile m_totalProfile = new b2Profile();
             b2Profile aveProfile = new b2Profile();
+#endif
             for (float dt = 0f; dt < 26f; )
             {
                 long dtStart = DateTime.Now.Ticks;
@@ -124,7 +126,7 @@ namespace box2dTest
                     float quality = _world.GetTreeQuality();
                     Console.WriteLine("{4}:proxies/height/balance/quality = {0}/{1}/{2}/{3:F3}", proxyCount, height, balance, quality, interval);
                 }
-
+#if PROFILING
                 b2Profile p = _world.Profile;
                 // Track maximum profile times
                 {
@@ -169,10 +171,11 @@ namespace box2dTest
                     Console.WriteLine("{3}:solveTOI [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.solveTOI, aveProfile.solveTOI, m_maxProfile.solveTOI, interval);
                     Console.WriteLine("{3}:broad-phase [ave] (max) = {0:F2} [{1:F2}] ({2:F2})", p.broadphase, aveProfile.broadphase, m_maxProfile.broadphase, interval);
                 }
+#endif
             }
-
+#if PROFILING
             Dump(_world);
-
+#endif
             Console.WriteLine("hit <enter> to exit");
             Console.ReadLine();
 
@@ -186,6 +189,7 @@ namespace box2dTest
 
         public static void Dump(b2World _world)
         {
+#if PROFILING
             _world.Dump();
             b2Profile profile = _world.Profile;
             Console.WriteLine("]-----------[{0:F4}]-----------------------[", profile.step);
@@ -205,6 +209,7 @@ namespace box2dTest
             Console.WriteLine("Solve Velocity Time = {0:F4}", profile.solveVelocity);
             Console.WriteLine("Solve Position Time = {0:F4}", profile.solvePosition);
             Console.WriteLine("Step Time = {0:F4}", profile.step);
+#endif
         }
     }
 }

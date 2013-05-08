@@ -94,7 +94,7 @@ namespace Box2D.Dynamics
             get { return (Sweep.localCenter); }
         }
 
-        protected b2Vec2 m_linearVelocity = new b2Vec2();
+        protected b2Vec2 m_linearVelocity = b2Vec2.Zero;
         public b2Vec2 LinearVelocity
         {
             get { return (m_linearVelocity); }
@@ -104,7 +104,8 @@ namespace Box2D.Dynamics
                 {
                     return;
                 }
-                if (b2Math.b2Dot(value, value) > 0.0f)
+                float l = value.LengthSquared; // same as dot with itself!
+                if (l > 0.0f)
                 {
                     SetAwake(true);
                 }

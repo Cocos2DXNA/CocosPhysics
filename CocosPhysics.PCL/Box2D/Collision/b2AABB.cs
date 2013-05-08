@@ -127,8 +127,15 @@ namespace Box2D.Collision
         /// Combine two AABBs into this one.
         public void Combine(ref b2AABB aabb1, ref b2AABB aabb2)
         {
-            m_lowerBound = b2Math.b2Min(aabb1.LowerBound, aabb2.LowerBound);
-            m_upperBound = b2Math.b2Max(aabb1.UpperBound, aabb2.UpperBound);
+            m_lowerBound.m_x = aabb1.LowerBoundX < aabb2.LowerBoundX ? aabb1.LowerBoundX : aabb2.LowerBoundX;
+            m_lowerBound.m_y = aabb1.LowerBoundY < aabb2.LowerBoundY ? aabb1.LowerBoundY : aabb2.LowerBoundY;
+
+            m_upperBound.m_x = aabb1.UpperBoundX > aabb2.UpperBoundX ? aabb1.UpperBoundX : aabb2.UpperBoundX;
+            m_upperBound.m_y = aabb1.UpperBoundY > aabb2.UpperBoundY ? aabb1.UpperBoundY : aabb2.UpperBoundY;
+
+//            m_lowerBound = b2Math.b2Min(aabb1.LowerBound, aabb2.LowerBound);
+//            m_upperBound = b2Math.b2Max(aabb1.UpperBound, aabb2.UpperBound);
+
             _Dirty = true;
         }
 
@@ -180,13 +187,13 @@ namespace Box2D.Collision
         public bool Contains(b2AABB aabb)
         {
             bool result = true;
-            result = result && m_lowerBound.x <= aabb.LowerBound.x;
+            result = result && m_lowerBound.m_x <= aabb.LowerBoundX;
             if(result)
-            result = result && m_lowerBound.y <= aabb.LowerBound.y;
+            result = result && m_lowerBound.m_y <= aabb.LowerBoundY;
             if(result)
-            result = result && aabb.UpperBound.x <= m_upperBound.x;
+            result = result && aabb.UpperBoundX <= m_upperBound.m_x;
             if(result)
-            result = result && aabb.UpperBound.y <= m_upperBound.y;
+            result = result && aabb.UpperBoundY <= m_upperBound.m_y;
             return result;
         }
 
@@ -205,8 +212,8 @@ namespace Box2D.Collision
             {
                 float p_i, lb, ub, d_i, absd_i;
                 p_i = (i == 0 ? p.x : p.y);
-                lb = (i == 0 ? m_lowerBound.x : m_lowerBound.y);
-                ub = (i == 0 ? m_upperBound.x : m_upperBound.y);
+                lb = (i == 0 ? m_lowerBound.m_x : m_lowerBound.m_y);
+                ub = (i == 0 ? m_upperBound.m_x : m_upperBound.m_y);
                 absd_i = (i == 0 ? absD.x : absD.y);
                 d_i = (i == 0 ? d.x : d.y);
 
@@ -251,7 +258,7 @@ namespace Box2D.Collision
                     }
 
                     // Pull the max down
-                    tmax = Math.Min(tmax, t2);
+                    tmax = tmax < t2 ? tmax : t2;
 
                     if (tmin > tmax)
                     {

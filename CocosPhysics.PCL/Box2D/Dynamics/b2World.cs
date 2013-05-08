@@ -115,14 +115,14 @@ namespace Box2D.Dynamics
         private bool m_subStepping;
 
         private bool m_stepComplete;
-
+#if PROFILING
         private b2Profile m_profile;
         public b2Profile Profile
         {
             get { return (m_profile); }
             set { m_profile = value; }
         }
-
+#endif
         public b2World(b2Vec2 gravity)
         {
             m_destructionListener = null;
@@ -457,6 +457,7 @@ namespace Box2D.Dynamics
         // Find islands, integrate and solve raints, solve position raints
         public void Solve(b2TimeStep step)
         {
+#if PROFILING
             m_profile.solveInit = 0.0f;
             m_profile.solveVelocity = 0.0f;
             m_profile.solvePosition = 0.0f;
@@ -466,7 +467,7 @@ namespace Box2D.Dynamics
             m_profile.bodyCount = 0;
             m_profile.toiSolverIterations = 0;
             m_profile.timeInInit = 0f;
-
+#endif
             // Size the island for the worst case.
             if (m_Island == null)
             {
@@ -488,17 +489,23 @@ namespace Box2D.Dynamics
             // Clear all the island flags.
             for (b2Body b = m_bodyList; b != null; b = b.Next)
             {
+#if PROFILING
                 m_profile.bodyCount++;
+#endif
                 b.BodyFlags &= ~b2BodyFlags.e_islandFlag;
             }
             for (b2Contact c = m_contactManager.ContactList; c != null; c = c.Next)
             {
+#if PROFILING
                 m_profile.contactCount++;
+#endif
                 c.Flags &= ~b2ContactFlags.e_islandFlag;
             }
             for (b2Joint j = m_jointList; j != null; j = j.Next)
             {
+#if PROFILING
                 m_profile.jointCount++;
+#endif
                 j.m_islandFlag = false;
             }
 
@@ -592,7 +599,9 @@ namespace Box2D.Dynamics
                     // Search all joints connect to this body.
                     for (b2JointEdge je = b.JointList; je != null; je = je.Next)
                     {
+#if PROFILING
                         m_profile.jointCount++;
+#endif
                         if (je.Joint.m_islandFlag == true)
                         {
                             continue;
@@ -618,12 +627,17 @@ namespace Box2D.Dynamics
                         other.BodyFlags |= b2BodyFlags.e_islandFlag;
                     }
                 }
+#if PROFILING
                 b2Profile profile = new b2Profile();
                 island.Solve(ref profile, step, m_gravity, m_allowSleep);
+#else
+                island.Solve(step, m_gravity, m_allowSleep);
+#endif
+#if PROFILING
                 m_profile.solveInit += profile.solveInit;
                 m_profile.solveVelocity += profile.solveVelocity;
                 m_profile.solvePosition += profile.solvePosition;
-
+#endif
                 // Post solve cleanup.
                 for (int i = 0; i < island.m_bodyCount; ++i)
                 {
@@ -657,7 +671,9 @@ namespace Box2D.Dynamics
 
             // Look for new contacts.
             m_contactManager.FindNewContacts();
+#if PROFILING
             m_profile.broadphase = timer.GetMilliseconds();
+#endif
         }
 
         // Find TOI contacts and solve them.
@@ -700,7 +716,9 @@ namespace Box2D.Dynamics
             b2Timer computeTimer = new b2Timer();
             for (; ; )
             {
+#if PROFILING
                 m_profile.toiSolverIterations++;
+#endif
                 // Find the first TOI.
                 b2Contact minContact = null;
                 float minAlpha = 1.0f;
@@ -791,7 +809,9 @@ namespace Box2D.Dynamics
 
                         // Console.WriteLine("TOI Output={0}, t={1}", output.state, output.t);
 
+#if PROFILING
                         m_profile.computeTOI += computeTimer.GetMilliseconds();
+#endif
                         // Console.WriteLine("b2TimeOfImpact.compute tool {0:F4} ms", m_profile.computeTOI);
 
                         // Beta is the fraction of the remaining portion of the .
@@ -998,7 +1018,9 @@ namespace Box2D.Dynamics
                         m_stepComplete = false;
                         break;
                     }
+#if PROFILING
                     m_profile.solveTOIAdvance += bt.GetMilliseconds();
+#endif
                 }
             }
         }
@@ -1037,7 +1059,9 @@ namespace Box2D.Dynamics
             // Update contacts. This is where some contacts are destroyed.
             {
                 m_contactManager.Collide();
+#if PROFILING
                 m_profile.collide = timer.GetMilliseconds();
+#endif
             }
 
             // Integrate velocities, solve velocityraints, and integrate positions.
@@ -1045,7 +1069,9 @@ namespace Box2D.Dynamics
             {
                 timer.Reset();
                 Solve(step);
+#if PROFILING
                 m_profile.solve = timer.GetMilliseconds();
+#endif
             }
 
             // Handle TOI events.
@@ -1053,7 +1079,9 @@ namespace Box2D.Dynamics
             {
                 timer.Reset();
                 SolveTOI(step);
+#if PROFILING
                 m_profile.solveTOI = timer.GetMilliseconds();
+#endif
             }
 
             if (step.dt > 0.0f)
@@ -1067,8 +1095,9 @@ namespace Box2D.Dynamics
             }
 
             m_flags &= ~b2WorldFlags.e_locked;
-
+#if PROFILING
             m_profile.step = stepTimer.GetMilliseconds();
+#endif
         }
 
         public void ClearForces()
