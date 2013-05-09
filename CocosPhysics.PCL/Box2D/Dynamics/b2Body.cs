@@ -74,7 +74,7 @@ namespace Box2D.Dynamics
             get { return (m_xf.p); }
         }
 
-        public b2Sweep Sweep = b2Sweep.Create();        // the swept motion for CCD
+        public b2Sweep Sweep = b2Sweep.Zero;        // the swept motion for CCD
 /*        public b2Sweep Sweep
         {
             get { return (m_sweep); }
@@ -338,7 +338,7 @@ namespace Box2D.Dynamics
         {
             b2MassData data;
             data.mass = m_mass;
-            data.I = m_I + m_mass * b2Math.b2Dot(Sweep.localCenter, Sweep.localCenter);
+            data.I = m_I + m_mass * Sweep.localCenter.LengthSquared; //  b2Math.b2Dot(Sweep.localCenter, Sweep.localCenter);
             data.center = Sweep.localCenter;
             return (data);
         }

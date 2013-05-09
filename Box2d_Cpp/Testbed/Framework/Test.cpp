@@ -318,6 +318,26 @@ void Test::Step(Settings* settings)
 		m_debugDraw.DrawString(5, m_textLine, "!proxies/height/balance/quality = %d/%d/%d/%g", proxyCount, height, balance, quality);
 		m_textLine += 15;
 	}
+	else {
+		if(m_stepCount % 30 == 0) {
+			int32 bodyCount = m_world->GetBodyCount();
+			int32 contactCount = m_world->GetContactCount();
+			int32 jointCount = m_world->GetJointCount();
+			printf("%d:bodies/contacts/joints = %d/%d/%d\n", m_stepCount / 30, bodyCount, contactCount, jointCount);
+			int32 proxyCount = m_world->GetProxyCount();
+			int32 height = m_world->GetTreeHeight();
+			int32 balance = m_world->GetTreeBalance();
+			float32 quality = m_world->GetTreeQuality();
+			printf("%d:proxies/height/balance/quality = %d/%d/%d/%0.3f\n",  m_stepCount / 30, proxyCount, height, balance, quality);
+		}
+	}
+
+	if(m_stepCount % 30 == 0) {
+		for (b2Body *b = m_world->GetBodyList(); b != NULL; b = b->GetNext())
+        {
+			printf("Body: p=%0.3f,%0.3f v=%0.3f,%0.3f, w=%0.3f\n", b->GetPosition().x, b->GetPosition().y, b->GetLinearVelocity().x, b->GetLinearVelocity().y, b->GetAngularVelocity());
+        }
+	}
 
 	// Track maximum profile times
 	{
