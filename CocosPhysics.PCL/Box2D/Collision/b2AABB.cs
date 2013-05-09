@@ -323,7 +323,15 @@ namespace Box2D.Collision
         private b2Vec2 m_lowerBound;    //< the lower vertex
         private b2Vec2 m_upperBound;    //< the upper vertex
 
-        public static b2AABB Default = new b2AABB();
+        public static b2AABB Default = new b2AABB()
+        {
+            m_lowerBound = b2Vec2.Zero,
+            m_upperBound = b2Vec2.Zero,
+            _Dirty = true,
+            _Perimeter = 0f,
+            _Extents = b2Vec2.Zero,
+            _Center = b2Vec2.Zero
+        };
 
     }
 }
