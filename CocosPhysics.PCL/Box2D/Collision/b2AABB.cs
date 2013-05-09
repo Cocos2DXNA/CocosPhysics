@@ -119,8 +119,15 @@ namespace Box2D.Collision
         /// Combine an AABB into this one.
         public void Combine(ref b2AABB aabb)
         {
-            m_lowerBound = b2Math.b2Min(m_lowerBound, aabb.LowerBound);
-            m_upperBound = b2Math.b2Max(m_upperBound, aabb.UpperBound);
+            m_lowerBound.m_x = aabb.LowerBoundX < LowerBoundX ? aabb.LowerBoundX : LowerBoundX;
+            m_lowerBound.m_y = aabb.LowerBoundY < LowerBoundY ? aabb.LowerBoundY : LowerBoundY;
+
+            m_upperBound.m_x = aabb.UpperBoundX > UpperBoundX ? aabb.UpperBoundX : UpperBoundX;
+            m_upperBound.m_y = aabb.UpperBoundY > UpperBoundY ? aabb.UpperBoundY : UpperBoundY;
+
+            //m_lowerBound = b2Math.b2Min(m_lowerBound, aabb.LowerBound);
+            //m_upperBound = b2Math.b2Max(m_upperBound, aabb.UpperBound);
+
             _Dirty = true;
         }
 
@@ -169,8 +176,8 @@ namespace Box2D.Collision
         }
         public float LowerBoundY
         {
-            get { return (m_lowerBound.x); }
-            set { m_lowerBound.x = value; }
+            get { return (m_lowerBound.y); }
+            set { m_lowerBound.y = value; }
         }
         public float UpperBoundX
         {
@@ -184,16 +191,16 @@ namespace Box2D.Collision
         }
 
         /// Does this aabb contain the provided AABB.
-        public bool Contains(b2AABB aabb)
+        public bool Contains(ref b2AABB aabb)
         {
             bool result = true;
             result = result && m_lowerBound.m_x <= aabb.LowerBoundX;
             if(result)
-            result = result && m_lowerBound.m_y <= aabb.LowerBoundY;
+                result = result && m_lowerBound.m_y <= aabb.LowerBoundY;
             if(result)
-            result = result && aabb.UpperBoundX <= m_upperBound.m_x;
+                result = result && aabb.UpperBoundX <= m_upperBound.m_x;
             if(result)
-            result = result && aabb.UpperBoundY <= m_upperBound.m_y;
+                result = result && aabb.UpperBoundY <= m_upperBound.m_y;
             return result;
         }
 

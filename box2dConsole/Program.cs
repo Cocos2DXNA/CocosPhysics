@@ -125,6 +125,10 @@ namespace box2dTest
                     int balance = _world.GetTreeBalance();
                     float quality = _world.GetTreeQuality();
                     Console.WriteLine("{4}:proxies/height/balance/quality = {0}/{1}/{2}/{3:F3}", proxyCount, height, balance, quality, interval);
+                    for (b2Body b = _world.BodyList; b != null; b = b.Next)
+                    {
+                        Console.WriteLine("Body: p={0:F3},{1:F3} v={2:F3},{3:F3}, w={4:F3}", b.Position.x, b.Position.y, b.LinearVelocity.x, b.LinearVelocity.y, b.AngularVelocity);
+                    }
                 }
 #if PROFILING
                 b2Profile p = _world.Profile;

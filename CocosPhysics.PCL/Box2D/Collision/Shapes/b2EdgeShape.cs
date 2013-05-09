@@ -111,7 +111,7 @@ namespace Box2D.Collision.Shapes
             b2Vec2 v1 = m_vertex1;
             b2Vec2 v2 = m_vertex2;
             b2Vec2 e = v2 - v1;
-            b2Vec2 normal = b2Vec2.Zero;
+            b2Vec2 normal = b2Vec2.Zero; // new b2Vec2(e.y, -e.x);
             normal.m_x = e.m_y;
             normal.m_y = -e.m_x;
             normal.Normalize();

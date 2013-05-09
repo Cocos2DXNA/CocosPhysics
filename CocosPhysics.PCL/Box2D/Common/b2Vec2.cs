@@ -53,6 +53,8 @@ namespace Box2D.Common
             m_x = x_; 
             m_y = y_;
             _Length = 0f;
+            _LengthSquared = 0f;
+            _bNormalized = false;
 //            _LengthSquared = m_x * m_x + m_y * m_y;
 //            _Length = b2Math.b2Sqrt(_LengthSquared);
 #if DEBUG
@@ -153,7 +155,7 @@ namespace Box2D.Common
         [Obsolete("Use the property accessor instead")]
         public float GetLengthSquared()
         {
-            if (_LengthSquared == 0f)
+            if (_LengthSquared == 0f || _Length == 0f)
             {
                 _LengthSquared = m_x * m_x + m_y * m_y;
                 _Length = (float)Math.Sqrt(_LengthSquared);
@@ -165,7 +167,7 @@ namespace Box2D.Common
         {
             get
             {
-                if (_Length == 0f)
+                if (_Length == 0f || _LengthSquared == 0f)
                 {
                     _LengthSquared = m_x * m_x + m_y * m_y;
                     _Length = (float)Math.Sqrt(_LengthSquared);
@@ -176,7 +178,7 @@ namespace Box2D.Common
         /// Convert this vector into a unit vector. Returns the length.
         public float Normalize()
         {
-            if (_Length == 0f)
+            if (_Length == 0f || _LengthSquared == 0f)
             {
                 _LengthSquared = m_x * m_x + m_y * m_y;
                 _Length = (float)Math.Sqrt(_LengthSquared);
