@@ -1104,7 +1104,7 @@ namespace Box2D.Dynamics
         {
             for (b2Body body = m_bodyList; body != null; body = body.Next)
             {
-                body.Force = new b2Vec2();
+                body.Force.SetZero(); // = b2Vec2.Zero;
                 body.Torque = 0.0f;
             }
         }
