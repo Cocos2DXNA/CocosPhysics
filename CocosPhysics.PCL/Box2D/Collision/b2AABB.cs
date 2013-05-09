@@ -163,31 +163,33 @@ namespace Box2D.Collision
         public void SetLowerBound(float x, float y)
         {
             m_lowerBound.Set(x,y);
+            _Dirty = true;
         }
         public void SetUpperBound(float x, float y)
         {
             m_upperBound.Set(x, y);
+            _Dirty = true;
         }
 
         public float LowerBoundX
         {
-            get { return (m_lowerBound.x); }
-            set { m_lowerBound.x = value; }
+            get { return (m_lowerBound.m_x); }
+            set { m_lowerBound.x = value; _Dirty = true; }
         }
         public float LowerBoundY
         {
-            get { return (m_lowerBound.y); }
-            set { m_lowerBound.y = value; }
+            get { return (m_lowerBound.m_y); }
+            set { m_lowerBound.y = value; _Dirty = true; }
         }
         public float UpperBoundX
         {
-            get { return (m_upperBound.x); }
-            set { m_upperBound.x = value; }
+            get { return (m_upperBound.m_x); }
+            set { m_upperBound.x = value; _Dirty = true; }
         }
         public float UpperBoundY
         {
-            get { return (m_upperBound.y); }
-            set { m_upperBound.y = value; }
+            get { return (m_upperBound.m_y); }
+            set { m_upperBound.y = value; _Dirty = true; }
         }
 
         /// Does this aabb contain the provided AABB.
@@ -213,7 +215,7 @@ namespace Box2D.Collision
             b2Vec2 d = input.p2 - input.p1;
             b2Vec2 absD = b2Math.b2Abs(d);
 
-            b2Vec2 normal = new b2Vec2(0,0);
+            b2Vec2 normal = b2Vec2.Zero;
 
             for (int i = 0; i < 2; ++i)
             {
@@ -293,21 +295,21 @@ namespace Box2D.Collision
 
         public void Fatten(float amt)
         {
-            m_upperBound.x += amt;
-            m_upperBound.y += amt;
+            m_upperBound.m_x += amt;
+            m_upperBound.m_y += amt;
 
-            m_lowerBound.x -= amt;
-            m_lowerBound.y -= amt;
+            m_lowerBound.m_x -= amt;
+            m_lowerBound.m_y -= amt;
             _Dirty = true;
         }
 
         public void Fatten()
         {
-            m_upperBound.x += b2Settings.b2_aabbExtensionVec.x;
-            m_upperBound.y += b2Settings.b2_aabbExtensionVec.y;
+            m_upperBound.m_x += b2Settings.b2_aabbExtensionVec.x;
+            m_upperBound.m_y += b2Settings.b2_aabbExtensionVec.y;
 
-            m_lowerBound.x -= b2Settings.b2_aabbExtensionVec.x;
-            m_lowerBound.y -= b2Settings.b2_aabbExtensionVec.y;
+            m_lowerBound.m_x -= b2Settings.b2_aabbExtensionVec.x;
+            m_lowerBound.m_y -= b2Settings.b2_aabbExtensionVec.y;
             _Dirty = true;
         }
 

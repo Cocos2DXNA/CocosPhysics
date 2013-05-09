@@ -57,9 +57,16 @@ namespace box2dTest
 
             _world.Dump();
 
-            Console.WriteLine("Enter the number of bodies you want to run?");
-            string s = Console.ReadLine();
-            Random ran = new Random();
+            string s = null;
+            if (args.Length == 1)
+            {
+                s = args[0];
+            }
+            else
+            {
+                Console.WriteLine("Enter the number of bodies you want to run?");
+                s = Console.ReadLine();
+            }
             float y = height;
             int count = 0, max = int.Parse(s);
             while (count < max)
@@ -184,8 +191,11 @@ namespace box2dTest
 #if PROFILING
             Dump(_world);
 #endif
-            Console.WriteLine("hit <enter> to exit");
-            Console.ReadLine();
+            if (args.Length == 0)
+            {
+                Console.WriteLine("hit <enter> to exit");
+                Console.ReadLine();
+            }
 
         }
 
