@@ -194,7 +194,7 @@ namespace Box2D.Collision
 
             Debug.Assert(m_nodes[proxyId].IsLeaf());
 
-            if (m_nodes[proxyId].aabb.Contains(aabb))
+            if (m_nodes[proxyId].aabb.Contains(ref aabb))
             {
                 return false;
             }

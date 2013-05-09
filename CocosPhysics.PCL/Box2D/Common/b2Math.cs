@@ -45,7 +45,7 @@ namespace Box2D.Common
             return (true);
         }
 
-        /// This is a approximate yet fast inverse square-root.
+        /// This is an approximate yet fast inverse square-root.
         public static float b2InvSqrt(float x)
         {
 
@@ -53,7 +53,7 @@ namespace Box2D.Common
             int ci;
 
             cx = x;
-            float xhalf = 0.5f * x;
+            float xhalf = x / 2f;
             ci = (int)cx;
             ci = 0x5f3759df - (ci >> 1);
             x = (int)ci;
@@ -69,6 +69,8 @@ namespace Box2D.Common
         {
             return a.m_x * b.m_x + a.m_y * b.m_y;
         }
+
+        [Obsolete("Use the ref b2Dot instead")]
         public static float b2Dot(b2Vec2 a, b2Vec2 b)
         {
             return a.m_x * b.m_x + a.m_y * b.m_y;
@@ -85,6 +87,7 @@ namespace Box2D.Common
             return a.m_x * b.m_y - a.m_y * b.m_x;
         }
 
+        [Obsolete("Use the ref b2Cross")]
         public static float b2Cross(b2Vec2 a, b2Vec2 b)
         {
             return a.m_x * b.m_y - a.m_y * b.m_x;
