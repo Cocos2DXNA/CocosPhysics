@@ -29,29 +29,29 @@ namespace box2dTest
             groundBody.SetActive(true);
 
             // Define the ground box shape.
-            float width = 100f, height = 100f;
+            float width = 50f, height = 50f;
             // bottom
             b2EdgeShape groundBox = new b2EdgeShape();
-            groundBox.Set(b2Vec2.Zero, new b2Vec2(width, 0));
+            groundBox.Set(new b2Vec2(-width / 2f, 0), new b2Vec2(width / 2f, 0));
             b2FixtureDef fd = b2FixtureDef.Create();
             fd.shape = groundBox;
             groundBody.CreateFixture(fd);
 
             // top
             groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(0, height), new b2Vec2(width, height));
+            groundBox.Set(new b2Vec2(-width/2f, height), new b2Vec2(width/2f, height));
             fd.shape = groundBox;
             groundBody.CreateFixture(fd);
 
             // left
             groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(0, height), b2Vec2.Zero);
+            groundBox.Set(new b2Vec2(-width / 2f, height), new b2Vec2(-width / 2f, 0));
             fd.shape = groundBox;
             groundBody.CreateFixture(fd);
 
             // right
             groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(width, height), new b2Vec2(width, 0));
+            groundBox.Set(new b2Vec2(width/2f, height), new b2Vec2(width/2f, 0));
             fd.shape = groundBox;
             groundBody.CreateFixture(fd);
 
@@ -68,9 +68,13 @@ namespace box2dTest
                 for (int i = 0; i < 30 && count < max; i++, count++)
                 {
                     def = b2BodyDef.Create();
-                    def.position = new b2Vec2(
+                    float x = xStart + (float)i / 30.0f * ((float)width - 30.0f * 2.0f - xStart * 2.0f) + (float)i * 2.0f;
+                    x += -width / 2.0f;
+                    def.position = new b2Vec2(x, y + (float)(count / 30) + (float)(i + 1));
+/*                    def.position = new b2Vec2(
                           xStart + (float)i / 30f * (width - 30*2 - xStart*2f) + (float)i * 2f
                         , y + (float)(count / 30) + (float)(i+1));
+ */
                     def.type = b2BodyType.b2_dynamicBody;
                     b2Body body = _world.CreateBody(def);
                     // Define another box shape for our dynamic body.

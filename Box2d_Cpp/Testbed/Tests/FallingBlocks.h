@@ -79,9 +79,9 @@ public:
             for (int i = 0; i < 30 && count < max; i++, count++)
             {
 				b2BodyDef def;
-				float x = xStart + (float)i / 30.0f * ((float)width - 30.0*2.0 - xStart*2.0f) + (float)i * 2.0f;
+				float x = xStart + (float)i / 30.0f * ((float)width - 30.0f*2.0f - xStart*2.0f) + (float)i * 2.0f;
 				x += -width / 2.0f;
-				def.position = b2Vec2(x, y + (float)(count / 30) + (float)(i+1));
+				def.position = b2Vec2(x, y + (float)count / 30.0f + (float)(i+1));
 				def.type = b2_dynamicBody;
 				b2Body *body = m_world->CreateBody(&def);
 				// Define another box shape for our dynamic body.
