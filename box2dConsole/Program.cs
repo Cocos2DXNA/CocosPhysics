@@ -107,7 +107,7 @@ namespace box2dTest
             b2Profile m_totalProfile = new b2Profile();
             b2Profile aveProfile = new b2Profile();
 #endif
-            for (float dt = 0f; dt < 26f; )
+            for (float dt = 0f; dt < 3f; )
             {
                 long dtStart = DateTime.Now.Ticks;
                 Update(_world, step);
@@ -208,9 +208,9 @@ namespace box2dTest
 
         }
 
-        public static void Update(b2World _world, float dt)
+        public static void Update(b2World _world, float step)
         {
-            _world.Step(dt, 8, 1);
+            _world.Step(step, 8, 3);
 
         }
 
