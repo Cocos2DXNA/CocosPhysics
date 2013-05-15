@@ -739,7 +739,8 @@ namespace Box2D.Dynamics.Contacts
                             b2Vec2 planePoint = b2Math.b2Mul(xfA, pc.localPoint);
 
                             b2Vec2 clipPoint = b2Math.b2Mul(xfB, pc.localPoints[index]);
-                            separation = b2Math.b2Dot(clipPoint - planePoint, normal) - pc.radiusA - pc.radiusB;
+                            b2Vec2 rCP = clipPoint - planePoint;
+                            separation = b2Math.b2Dot(ref rCP, ref normal) - pc.radiusA - pc.radiusB;
                             point = clipPoint;
                         }
                         break;
@@ -750,7 +751,8 @@ namespace Box2D.Dynamics.Contacts
                             b2Vec2 planePoint = b2Math.b2Mul(xfB, pc.localPoint);
 
                             b2Vec2 clipPoint = b2Math.b2Mul(xfA, pc.localPoints[index]);
-                            separation = b2Math.b2Dot(clipPoint - planePoint, normal) - pc.radiusA - pc.radiusB;
+                            b2Vec2 rCP = clipPoint - planePoint;
+                            separation = b2Math.b2Dot(ref rCP, ref normal) - pc.radiusA - pc.radiusB;
                             point = clipPoint;
 
                             // Ensure normal points from A to B
@@ -828,7 +830,7 @@ namespace Box2D.Dynamics.Contacts
                     aA -= iA * b2Math.b2Cross(ref rA, ref P);
 
                     cB += mB * P;
-                    aB += iB * b2Math.b2Cross(rB, P);
+                    aB += iB * b2Math.b2Cross(ref rB, ref P);
                 }
 
                 m_positions[indexA].c = cA;
@@ -907,8 +909,8 @@ namespace Box2D.Dynamics.Contacts
                     float C = b2Math.b2Clamp(b2Settings.b2_toiBaugarte * (separation + b2Settings.b2_linearSlop), -b2Settings.b2_maxLinearCorrection, 0.0f);
 
                     // Compute the effective mass.
-                    float rnA = b2Math.b2Cross(rA, normal);
-                    float rnB = b2Math.b2Cross(rB, normal);
+                    float rnA = b2Math.b2Cross(ref rA, ref normal);
+                    float rnB = b2Math.b2Cross(ref rB, ref normal);
                     float K = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
 
                     // Compute normal impulse

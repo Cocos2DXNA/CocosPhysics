@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Box2D.Common;
+using System.Runtime.CompilerServices;
 
 namespace Box2D.Collision
 {
@@ -75,6 +76,9 @@ namespace Box2D.Collision
 
         /// Get the center of the AABB.
         [Obsolete("Use the property accessor")]
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public b2Vec2 GetCenter()
         {
             if (_Dirty)
@@ -86,6 +90,9 @@ namespace Box2D.Collision
 
         /// Get the extents of the AABB (half-widths).
         [Obsolete("Use the property accessor")]
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public b2Vec2 GetExtents()
         {
             if (_Dirty)
@@ -97,6 +104,9 @@ namespace Box2D.Collision
 
         /// Get the perimeter length
         [Obsolete("Use the property accessor")]
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public float GetPerimeter()
         {
             if (_Dirty)
@@ -117,6 +127,9 @@ namespace Box2D.Collision
         }
 
         /// Combine an AABB into this one.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void Combine(ref b2AABB aabb)
         {
             m_lowerBound.m_x = aabb.LowerBoundX < LowerBoundX ? aabb.LowerBoundX : LowerBoundX;
@@ -132,6 +145,9 @@ namespace Box2D.Collision
         }
 
         /// Combine two AABBs into this one.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void Combine(ref b2AABB aabb1, ref b2AABB aabb2)
         {
             m_lowerBound.m_x = aabb1.LowerBoundX < aabb2.LowerBoundX ? aabb1.LowerBoundX : aabb2.LowerBoundX;
@@ -146,6 +162,9 @@ namespace Box2D.Collision
             _Dirty = true;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void Set(b2Vec2 lower, b2Vec2 upper)
         {
             m_lowerBound = lower;
@@ -153,6 +172,9 @@ namespace Box2D.Collision
             _Dirty = true;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void Set(float lx, float ly, float ux, float uy)
         {
             m_lowerBound.Set(lx,ly);
@@ -160,11 +182,17 @@ namespace Box2D.Collision
             _Dirty = true;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void SetLowerBound(float x, float y)
         {
             m_lowerBound.Set(x,y);
             _Dirty = true;
         }
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void SetUpperBound(float x, float y)
         {
             m_upperBound.Set(x, y);
@@ -193,6 +221,9 @@ namespace Box2D.Collision
         }
 
         /// Does this aabb contain the provided AABB.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public bool Contains(ref b2AABB aabb)
         {
             bool result = true;
@@ -293,6 +324,9 @@ namespace Box2D.Collision
             return true;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void Fatten(float amt)
         {
             m_upperBound.m_x += amt;
@@ -303,6 +337,9 @@ namespace Box2D.Collision
             _Dirty = true;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public void Fatten()
         {
             m_upperBound.m_x += b2Settings.b2_aabbExtensionVec.x;

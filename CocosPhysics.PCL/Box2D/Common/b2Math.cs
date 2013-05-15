@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace Box2D.Common
 {
@@ -13,6 +14,9 @@ namespace Box2D.Common
 
         /// Friction mixing law. The idea is to allow either fixture to drive the restitution to zero.
         /// For example, anything slides on ice.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2MixFriction(float friction1, float friction2)
         {
             return (friction1 * friction2);
@@ -20,6 +24,9 @@ namespace Box2D.Common
 
         /// Restitution mixing law. The idea is allow for anything to bounce off an inelastic surface.
         /// For example, a superball bounces on anything.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2MixRestitution(float restitution1, float restitution2)
         {
             return restitution1 > restitution2 ? restitution1 : restitution2;
@@ -27,6 +34,9 @@ namespace Box2D.Common
 
         /// This function is used to ensure that a floating point number is
         /// not a NaN or infinity.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static bool b2IsValid(float x)
         {
             if (float.IsNaN(x))
@@ -46,6 +56,9 @@ namespace Box2D.Common
         }
 
         /// This is an approximate yet fast inverse square-root.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2InvSqrt(float x)
         {
 
@@ -61,38 +74,62 @@ namespace Box2D.Common
             return x;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Sqrt(float x) { return ((float)Math.Sqrt(x)); }
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Atan2(float y, float x) { return ((float)Math.Atan2(y, x)); }
 
         /// Perform the dot product on two vectors.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Dot(ref b2Vec2 a, ref b2Vec2 b)
         {
             return a.m_x * b.m_x + a.m_y * b.m_y;
         }
 
         [Obsolete("Use the ref b2Dot instead")]
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Dot(b2Vec2 a, b2Vec2 b)
         {
             return a.m_x * b.m_x + a.m_y * b.m_y;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Dot(float ax, float ay, float bx, float by)
         {
             return ax * bx + ay * by;
         }
         
         /// Perform the cross product on two vectors. In 2D this produces a scalar.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Cross(ref b2Vec2 a, ref b2Vec2 b)
         {
             return a.m_x * b.m_y - a.m_y * b.m_x;
         }
 
         [Obsolete("Use the ref b2Cross")]
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Cross(b2Vec2 a, b2Vec2 b)
         {
             return a.m_x * b.m_y - a.m_y * b.m_x;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Cross(float ax, float ay, float bx, float by)
         {
             return ax * by - ay * bx;
@@ -100,6 +137,9 @@ namespace Box2D.Common
 
         /// Perform the cross product on a vector and a scalar. In 2D this produces
         /// a vector.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Cross(ref b2Vec2 a, float s)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -107,6 +147,9 @@ namespace Box2D.Common
             return b;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Cross(float ax, float ay, float s)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -116,6 +159,9 @@ namespace Box2D.Common
 
         /// Perform the cross product on a scalar and a vector. In 2D this produces
         /// a vector.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Cross(float s, ref b2Vec2 a)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -126,6 +172,9 @@ namespace Box2D.Common
 
         /// Multiply a matrix times a vector. If a rotation matrix is provided,
         /// then this transforms the vector from one frame to another.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Mul(ref b2Mat22 A, ref b2Vec2 v)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -136,6 +185,9 @@ namespace Box2D.Common
 
         /// Multiply a matrix times a vector. If a rotation matrix is provided,
         /// then this transforms the vector from one frame to another.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Mul(b2Mat22 A, b2Vec2 v)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -145,6 +197,9 @@ namespace Box2D.Common
 
         /// Multiply a matrix transpose times a vector. If a rotation matrix is provided,
         /// then this transforms the vector from one frame to another (inverse transform).
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2MulT(ref b2Mat22 A, ref b2Vec2 v)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -152,12 +207,18 @@ namespace Box2D.Common
             return b;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Distance(b2Vec2 a, b2Vec2 b)
         {
             b2Vec2 c = a - b;
             return c.Length;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2DistanceSquared(b2Vec2 a, b2Vec2 b)
         {
             b2Vec2 c = a - b;
@@ -165,36 +226,54 @@ namespace Box2D.Common
         }
 
         /// Perform the dot product on two vectors.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Dot(b2Vec3 a, b2Vec3 b)
         {
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
         /// Perform the dot product on two vectors.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Dot(ref b2Vec3 a, ref b2Vec3 b)
         {
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
         /// Perform the cross product on two vectors.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec3 b2Cross(ref b2Vec3 a, ref b2Vec3 b)
         {
             return new b2Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
 
         /// Perform the cross product on two vectors.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec3 b2Cross(b2Vec3 a, b2Vec3 b)
         {
             return new b2Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
 
         // A * B
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Mat22 b2Mul(b2Mat22 A, b2Mat22 B)
         {
             return new b2Mat22(b2Mul(A, B.ex), b2Mul(A, B.ey));
         }
 
         // A^T * B
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Mat22 b2MulT(b2Mat22 A, b2Mat22 B)
         {
             b2Vec2 c1 = b2Vec2.Zero;
@@ -205,12 +284,18 @@ namespace Box2D.Common
         }
 
         /// Multiply a matrix times a vector.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec3 b2Mul(b2Mat33 A, b2Vec3 v)
         {
             return v.x * A.ex + v.y * A.ey + v.z * A.ez;
         }
 
         /// Multiply a matrix times a vector.
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Mul22(b2Mat33 A, b2Vec2 v)
         {
             b2Vec2 b = b2Vec2.Zero;
@@ -219,6 +304,9 @@ namespace Box2D.Common
         }
 
         /// Multiply two rotations: q * r
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Rot b2Mul(b2Rot q, b2Rot r)
         {
             // [qc -qs] * [rc -rs] = [qc*rc-qs*rs -qc*rs-qs*rc]
@@ -232,6 +320,9 @@ namespace Box2D.Common
         }
 
         /// Transpose multiply two rotations: qT * r
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Rot b2MulT(b2Rot q, b2Rot r)
         {
             // [ qc qs] * [rc -rs] = [qc*rc+qs*rs -qc*rs+qs*rc]
@@ -245,6 +336,9 @@ namespace Box2D.Common
         }
 
         /// Rotate a vector
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Mul(b2Rot q, b2Vec2 v)
         {
             float x=q.c * v.x - q.s * v.y;
@@ -255,6 +349,9 @@ namespace Box2D.Common
         }
 
         /// Inverse rotate a vector
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2MulT(b2Rot q, b2Vec2 v)
         {
             float x = q.c * v.x + q.s * v.y;
@@ -264,6 +361,9 @@ namespace Box2D.Common
             return b;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Mul(b2Transform T, b2Vec2 v)
         {
             float x = (T.q.c * v.x - T.q.s * v.y) + T.p.x;
@@ -273,6 +373,9 @@ namespace Box2D.Common
             return b;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2MulT(b2Transform T, b2Vec2 v)
         {
             float px = v.x - T.p.x;
@@ -286,6 +389,9 @@ namespace Box2D.Common
 
         // v2 = A.q.Rot(B.q.Rot(v1) + B.p) + A.p
         //    = (A.q * B.q).Rot(v1) + A.q.Rot(B.p) + A.p
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Transform b2Mul(b2Transform A, b2Transform B)
         {
             b2Transform C = b2Transform.Create();
@@ -296,6 +402,9 @@ namespace Box2D.Common
 
         // v2 = A.q' * (B.q * v1 + B.p - A.p)
         //    = A.q' * B.q * v1 + A.q' * (B.p - A.p)
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Transform b2MulT(b2Transform A, b2Transform B)
         {
             b2Transform C = b2Transform.Create();
@@ -304,10 +413,16 @@ namespace Box2D.Common
             return C;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Abs(float a)
         {
             return (Math.Abs(a));
         }
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Abs(b2Vec2 a)
         {
             b2Vec2 bx = b2Vec2.Zero;
@@ -316,6 +431,9 @@ namespace Box2D.Common
             return bx;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Mat22 b2Abs(b2Mat22 A)
         {
             return new b2Mat22(b2Abs(A.ex), b2Abs(A.ey));
@@ -329,6 +447,9 @@ namespace Box2D.Common
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Min(b2Vec2 a, b2Vec2 b)
         {
             b2Vec2 bx = b2Vec2.Zero;
@@ -337,6 +458,9 @@ namespace Box2D.Common
             return bx;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Max(b2Vec2 a, b2Vec2 b)
         {
             b2Vec2 bx = b2Vec2.Zero;
@@ -345,16 +469,25 @@ namespace Box2D.Common
             return bx;
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static float b2Clamp(float a, float low, float high)
         {
             return (a < low ? low : (a > high ? high : a));
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static b2Vec2 b2Clamp(b2Vec2 a, b2Vec2 low, b2Vec2 high)
         {
             return b2Max(low, b2Min(a, high));
         }
 
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
         public static void b2Swap<T>(T a, T b)
         {
             T tmp = a;
@@ -367,7 +500,10 @@ namespace Box2D.Common
         /// that recursively "folds" the upper bits into the lower bits. This process yields a bit vector with
         /// the same most significant 1 as x, but all 1's below it. Adding 1 to that value yields the next
         /// largest power of 2. For a 32-bit value:"
-        public static uint b2NextPowerOfTwo(uint x)
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
+        public static int b2NextPowerOfTwo(int x)
         {
             x |= (x >> 1);
             x |= (x >> 2);
@@ -377,7 +513,10 @@ namespace Box2D.Common
             return x + 1;
         }
 
-        public static bool b2IsPowerOfTwo(uint x)
+#if AGGRESSIVE_INLINING
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+#endif
+        public static bool b2IsPowerOfTwo(int x)
         {
             bool result = x > 0 && (x & (x - 1)) == 0;
             return result;
