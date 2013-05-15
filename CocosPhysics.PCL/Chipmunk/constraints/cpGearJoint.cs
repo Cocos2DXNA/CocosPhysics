@@ -25,54 +25,54 @@
 static void
 preStep(cpGearJoint *joint, float dt)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
 	// calculate moment of inertia coefficient.
-	joint->iSum = 1.0f/(a->i_inv*joint->ratio_inv + joint->ratio*b->i_inv);
+	joint.iSum = 1.0f/(a.i_inv*joint.ratio_inv + joint.ratio*b.i_inv);
 	
 	// calculate bias velocity
-	float maxBias = joint->constraint.maxBias;
-	joint->bias = cpfclamp(-bias_coef(joint->constraint.errorBias, dt)*(b->a*joint->ratio - a->a - joint->phase)/dt, -maxBias, maxBias);
+	float maxBias = joint.constraint.maxBias;
+	joint.bias = cpfclamp(-bias_coef(joint.constraint.errorBias, dt)*(b.a*joint.ratio - a.a - joint.phase)/dt, -maxBias, maxBias);
 }
 
 static void
 applyCachedImpulse(cpGearJoint *joint, float dt_coef)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
-	float j = joint->jAcc*dt_coef;
-	a->w -= j*a->i_inv*joint->ratio_inv;
-	b->w += j*b->i_inv;
+	float j = joint.jAcc*dt_coef;
+	a.w -= j*a.i_inv*joint.ratio_inv;
+	b.w += j*b.i_inv;
 }
 
 static void
 applyImpulse(cpGearJoint *joint, float dt)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
 	// compute relative rotational velocity
-	float wr = b->w*joint->ratio - a->w;
+	float wr = b.w*joint.ratio - a.w;
 	
-	float jMax = joint->constraint.maxForce*dt;
+	float jMax = joint.constraint.maxForce*dt;
 	
 	// compute normal impulse	
-	float j = (joint->bias - wr)*joint->iSum;
-	float jOld = joint->jAcc;
-	joint->jAcc = cpfclamp(jOld + j, -jMax, jMax);
-	j = joint->jAcc - jOld;
+	float j = (joint.bias - wr)*joint.iSum;
+	float jOld = joint.jAcc;
+	joint.jAcc = cpfclamp(jOld + j, -jMax, jMax);
+	j = joint.jAcc - jOld;
 	
 	// apply impulse
-	a->w -= j*a->i_inv*joint->ratio_inv;
-	b->w += j*b->i_inv;
+	a.w -= j*a.i_inv*joint.ratio_inv;
+	b.w += j*b.i_inv;
 }
 
 static float
 getImpulse(cpGearJoint *joint)
 {
-	return cpfabs(joint->jAcc);
+	return cpfabs(joint.jAcc);
 }
 
 static cpConstraintClass klass = {
@@ -84,36 +84,36 @@ static cpConstraintClass klass = {
 CP_DefineClassGetter(cpGearJoint)
 
 cpGearJoint *
-cpGearJointAlloc(void)
+cpGearJointAlloc()
 {
 	return (cpGearJoint *)cpcalloc(1, sizeof(cpGearJoint));
 }
 
 cpGearJoint *
-cpGearJointInit(cpGearJoint *joint, cpBody *a, cpBody *b, float phase, float ratio)
+cpGearJointInit(cpGearJoint *joint, cpBody a, cpBody b, float phase, float ratio)
 {
-	cpConstraintInit((cpConstraint *)joint, &klass, a, b);
+	cpConstraintInit((cpConstraint )joint, &klass, a, b);
 	
-	joint->phase = phase;
-	joint->ratio = ratio;
-	joint->ratio_inv = 1.0f/ratio;
+	joint.phase = phase;
+	joint.ratio = ratio;
+	joint.ratio_inv = 1.0f/ratio;
 	
-	joint->jAcc = 0.0f;
+	joint.jAcc = 0.0f;
 	
 	return joint;
 }
 
-cpConstraint *
-cpGearJointNew(cpBody *a, cpBody *b, float phase, float ratio)
+cpConstraint 
+cpGearJointNew(cpBody a, cpBody b, float phase, float ratio)
 {
-	return (cpConstraint *)cpGearJointInit(cpGearJointAlloc(), a, b, phase, ratio);
+	return (cpConstraint )cpGearJointInit(cpGearJointAlloc(), a, b, phase, ratio);
 }
 
 void
-cpGearJointSetRatio(cpConstraint *constraint, float value)
+cpGearJointSetRatio(cpConstraint constraint, float value)
 {
 	cpConstraintCheckCast(constraint, cpGearJoint);
-	((cpGearJoint *)constraint)->ratio = value;
-	((cpGearJoint *)constraint)->ratio_inv = 1.0f/value;
+	((cpGearJoint *)constraint).ratio = value;
+	((cpGearJoint *)constraint).ratio_inv = 1.0f/value;
 	cpConstraintActivateBodies(constraint);
 }

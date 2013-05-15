@@ -25,74 +25,74 @@
 static void
 preStep(cpRatchetJoint *joint, float dt)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
-	float angle = joint->angle;
-	float phase = joint->phase;
-	float ratchet = joint->ratchet;
+	float angle = joint.angle;
+	float phase = joint.phase;
+	float ratchet = joint.ratchet;
 	
-	float delta = b->a - a->a;
+	float delta = b.a - a.a;
 	float diff = angle - delta;
 	float pdist = 0.0f;
 	
 	if(diff*ratchet > 0.0f){
 		pdist = diff;
 	} else {
-		joint->angle = cpffloor((delta - phase)/ratchet)*ratchet + phase;
+		joint.angle = cpffloor((delta - phase)/ratchet)*ratchet + phase;
 	}
 	
 	// calculate moment of inertia coefficient.
-	joint->iSum = 1.0f/(a->i_inv + b->i_inv);
+	joint.iSum = 1.0f/(a.i_inv + b.i_inv);
 	
 	// calculate bias velocity
-	float maxBias = joint->constraint.maxBias;
-	joint->bias = cpfclamp(-bias_coef(joint->constraint.errorBias, dt)*pdist/dt, -maxBias, maxBias);
+	float maxBias = joint.constraint.maxBias;
+	joint.bias = cpfclamp(-bias_coef(joint.constraint.errorBias, dt)*pdist/dt, -maxBias, maxBias);
 
 	// If the bias is 0, the joint is not at a limit. Reset the impulse.
-	if(!joint->bias) joint->jAcc = 0.0f;
+	if(!joint.bias) joint.jAcc = 0.0f;
 }
 
 static void
 applyCachedImpulse(cpRatchetJoint *joint, float dt_coef)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
-	float j = joint->jAcc*dt_coef;
-	a->w -= j*a->i_inv;
-	b->w += j*b->i_inv;
+	float j = joint.jAcc*dt_coef;
+	a.w -= j*a.i_inv;
+	b.w += j*b.i_inv;
 }
 
 static void
 applyImpulse(cpRatchetJoint *joint, float dt)
 {
-	if(!joint->bias) return; // early exit
+	if(!joint.bias) return; // early exit
 
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
 	// compute relative rotational velocity
-	float wr = b->w - a->w;
-	float ratchet = joint->ratchet;
+	float wr = b.w - a.w;
+	float ratchet = joint.ratchet;
 	
-	float jMax = joint->constraint.maxForce*dt;
+	float jMax = joint.constraint.maxForce*dt;
 	
 	// compute normal impulse	
-	float j = -(joint->bias + wr)*joint->iSum;
-	float jOld = joint->jAcc;
-	joint->jAcc = cpfclamp((jOld + j)*ratchet, 0.0f, jMax*cpfabs(ratchet))/ratchet;
-	j = joint->jAcc - jOld;
+	float j = -(joint.bias + wr)*joint.iSum;
+	float jOld = joint.jAcc;
+	joint.jAcc = cpfclamp((jOld + j)*ratchet, 0.0f, jMax*cpfabs(ratchet))/ratchet;
+	j = joint.jAcc - jOld;
 	
 	// apply impulse
-	a->w -= j*a->i_inv;
-	b->w += j*b->i_inv;
+	a.w -= j*a.i_inv;
+	b.w += j*b.i_inv;
 }
 
 static float
 getImpulse(cpRatchetJoint *joint)
 {
-	return cpfabs(joint->jAcc);
+	return cpfabs(joint.jAcc);
 }
 
 static cpConstraintClass klass = {
@@ -104,28 +104,28 @@ static cpConstraintClass klass = {
 CP_DefineClassGetter(cpRatchetJoint)
 
 cpRatchetJoint *
-cpRatchetJointAlloc(void)
+cpRatchetJointAlloc()
 {
 	return (cpRatchetJoint *)cpcalloc(1, sizeof(cpRatchetJoint));
 }
 
 cpRatchetJoint *
-cpRatchetJointInit(cpRatchetJoint *joint, cpBody *a, cpBody *b, float phase, float ratchet)
+cpRatchetJointInit(cpRatchetJoint *joint, cpBody a, cpBody b, float phase, float ratchet)
 {
-	cpConstraintInit((cpConstraint *)joint, &klass, a, b);
+	cpConstraintInit((cpConstraint )joint, &klass, a, b);
 	
-	joint->angle = 0.0f;
-	joint->phase = phase;
-	joint->ratchet = ratchet;
+	joint.angle = 0.0f;
+	joint.phase = phase;
+	joint.ratchet = ratchet;
 	
 	// STATIC_BODY_CHECK
-	joint->angle = (b ? b->a : 0.0f) - (a ? a->a : 0.0f);
+	joint.angle = (b ? b.a : 0.0f) - (a ? a.a : 0.0f);
 	
 	return joint;
 }
 
-cpConstraint *
-cpRatchetJointNew(cpBody *a, cpBody *b, float phase, float ratchet)
+cpConstraint 
+cpRatchetJointNew(cpBody a, cpBody b, float phase, float ratchet)
 {
-	return (cpConstraint *)cpRatchetJointInit(cpRatchetJointAlloc(), a, b, phase, ratchet);
+	return (cpConstraint )cpRatchetJointInit(cpRatchetJointAlloc(), a, b, phase, ratchet);
 }

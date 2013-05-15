@@ -130,7 +130,6 @@
     <Compile Include="Chipmunk\constraints\cpSimpleMotor.cs" />
     <Compile Include="Chipmunk\constraints\cpSlideJoint.cs" />
     <Compile Include="Chipmunk\cpArbiter.cs" />
-    <Compile Include="Chipmunk\cpArray.cs" />
     <Compile Include="Chipmunk\cpBB.cs" />
     <Compile Include="Chipmunk\cpBBTree.cs" />
     <Compile Include="Chipmunk\cpBody.cs" />

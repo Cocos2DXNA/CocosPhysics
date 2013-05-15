@@ -31,38 +31,38 @@ cpSpatialIndexFree(cpSpatialIndex *index)
 }
 
 cpSpatialIndex *
-cpSpatialIndexInit(cpSpatialIndex *index, cpSpatialIndexClass *klass, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
+cpSpatialIndexInit(cpSpatialIndex *index, cpSpatialIndexClass klass, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
 {
-	index->klass = klass;
-	index->bbfunc = bbfunc;
-	index->staticIndex = staticIndex;
+	index.klass = klass;
+	index.bbfunc = bbfunc;
+	index.staticIndex = staticIndex;
 	
 	if(staticIndex){
-		cpAssertHard(!staticIndex->dynamicIndex, "This static index is already associated with a dynamic index.");
-		staticIndex->dynamicIndex = index;
+		// cpAssertHard(!staticIndex.dynamicIndex, "This static index is already associated with a dynamic index.");
+		staticIndex.dynamicIndex = index;
 	}
 	
 	return index;
 }
 
-typedef struct dynamicToStaticContext {
+// typedef struct dynamicToStaticContext {
 	cpSpatialIndexBBFunc bbfunc;
 	cpSpatialIndex *staticIndex;
 	cpSpatialIndexQueryFunc queryFunc;
-	void *data;
+	object data;
 } dynamicToStaticContext;
 
 static void
-dynamicToStaticIter(void *obj, dynamicToStaticContext *context)
+dynamicToStaticIter(object obj, dynamicToStaticContext *context)
 {
-	cpSpatialIndexQuery(context->staticIndex, obj, context->bbfunc(obj), context->queryFunc, context->data);
+	cpSpatialIndexQuery(context.staticIndex, obj, context.bbfunc(obj), context.queryFunc, context.data);
 }
 
 void
-cpSpatialIndexCollideStatic(cpSpatialIndex *dynamicIndex, cpSpatialIndex *staticIndex, cpSpatialIndexQueryFunc func, void *data)
+cpSpatialIndexCollideStatic(cpSpatialIndex *dynamicIndex, cpSpatialIndex *staticIndex, cpSpatialIndexQueryFunc func, object data)
 {
 	if(staticIndex && cpSpatialIndexCount(staticIndex) > 0){
-		dynamicToStaticContext context = {dynamicIndex->bbfunc, staticIndex, func, data};
+		dynamicToStaticContext context = {dynamicIndex.bbfunc, staticIndex, func, data};
 		cpSpatialIndexEach(dynamicIndex, (cpSpatialIndexIteratorFunc)dynamicToStaticIter, &context);
 	}
 }

@@ -18,36 +18,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
- 
-namespace Chipmunk
+ using System;
+
+namespace CocosPhysics.Chipmunk
 {
-public static class Physics
+public static partial class Physics {
 public static void
 cpMessage(string condition, string file, int line, bool isError, bool isHardError, string message, params string va_list[])
 {
-	fprintf(stderr, (isError ? "Aborting due to Chipmunk error: " : "Chipmunk warning: "));
+	System.Diagnostics.Debug.WriteLine((isError ? "Aborting due to Chipmunk error: " : "Chipmunk warning: "));
 	
-	va_list vargs;
-	va_start(vargs, message); {
-		vfprintf(stderr, message, vargs);
-		fprintf(stderr, "\n");
-	} va_end(vargs);
+		System.Diagnostics.Debug.WriteLine(message, va_list);
 	
-	fprintf(stderr, "\tFailed condition: %s\n", condition);
-	fprintf(stderr, "\tSource:%s:%d\n", file, line);
-	
-	if(isError) abort();
+	System.Diagnostics.Debug.WriteLine("\tFailed condition: {0}\n", condition);
+	System.Diagnostics.Debug.WriteLine("\tSource:{0}:{1}\n", file, line);
 }
 
-#define STR(s) #s
-#define XSTR(s) STR(s)
-
-string cpVersionString = XSTR(CP_VERSION_MAJOR)"."XSTR(CP_VERSION_MINOR)"."XSTR(CP_VERSION_RELEASE);
+string cpVersionString = "1.0.0.0";
 
 void
-cpInitChipmunk(void)
+cpInitChipmunk()
 {
-	cpAssertWarn(cpFalse, "cpInitChipmunk is deprecated and no longer required. It will be removed in the future.");
 }
 
 //MARK: Misc Functions
@@ -61,7 +52,7 @@ cpMomentForCircle(float m, float r1, float r2, cpVect offset)
 float
 cpAreaForCircle(float r1, float r2)
 {
-	return (float)M_PI*cpfabs(r1*r1 - r2*r2);
+	return (float)System.Math.PI*cpfabs(r1*r1 - r2*r2);
 }
 
 float
@@ -74,7 +65,7 @@ cpMomentForSegment(float m, cpVect a, cpVect b)
 float
 cpAreaForSegment(cpVect a, cpVect b, float r)
 {
-	return r*((float)M_PI*r + 2.0f*cpvdist(a, b));
+	return r*((float)System.Math.PI*r + 2.0f*cpvdist(a, b));
 }
 
 float
@@ -266,7 +257,7 @@ cpConvexHull(int count, cpVect *verts, cpVect *result, int *first, float tol)
 #if defined(__has_extension)
 #if __has_extension(blocks)
 
-static void IteratorFunc(void *ptr, void (^block)(void *ptr)){block(ptr);}
+static void IteratorFunc(object ptr, void (^block)(object ptr)){block(ptr);}
 
 void cpSpaceEachBody_b(cpSpace *space, void (^block)(cpBody *body)){
 	cpSpaceEachBody(space, (cpSpaceBodyIteratorFunc)IteratorFunc, block);
@@ -280,7 +271,7 @@ void cpSpaceEachConstraint_b(cpSpace *space, void (^block)(cpConstraint *constra
 	cpSpaceEachConstraint(space, (cpSpaceConstraintIteratorFunc)IteratorFunc, block);
 }
 
-static void BodyIteratorFunc(cpBody *body, void *ptr, void (^block)(void *ptr)){block(ptr);}
+static void BodyIteratorFunc(cpBody *body, object ptr, void (^block)(object ptr)){block(ptr);}
 
 void cpBodyEachShape_b(cpBody *body, void (^block)(cpShape *shape)){
 	cpBodyEachShape(body, (cpBodyShapeIteratorFunc)BodyIteratorFunc, block);
