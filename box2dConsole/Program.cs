@@ -119,27 +119,33 @@ namespace box2dTest
                 if (iter == 30)
                 {
                     interval++;
+                    iter = 0;
                     bdump = true;
                     //Dump(_world);
+#if DEBUG
                     TimeSpan ts = new TimeSpan(span);
-                    float fs = (float)ts.TotalMilliseconds / (float)iter;
+                    float fs = (float)ts.TotalMilliseconds / (float)(iter + interval*30);
                     Console.WriteLine("{2}: iteration time is {0:F3} ms avg. and is {1:F3} cycles", fs, fs / step, interval);
+#endif
                     iter = 0;
-                    span = 0L;
+//                    span = 0L;
+#if DEBUG
                     int bodyCount = _world.BodyCount;
                     int contactCount = _world.ContactManager.ContactCount;
                     int jointCount = _world.JointCount;
                     Console.WriteLine("{3}:bodies/contacts/joints = {0}/{1}/{2}", bodyCount, contactCount, jointCount, interval);
-
+#endif
                     int proxyCount = _world.GetProxyCount();
                     int treeheight = _world.GetTreeHeight();
                     int balance = _world.GetTreeBalance();
                     float quality = _world.GetTreeQuality();
+#if DEBUG
                     Console.WriteLine("{4}:proxies/height/balance/quality = {0}/{1}/{2}/{3:F3}", proxyCount, treeheight, balance, quality, interval);
                     for (b2Body b = _world.BodyList; b != null; b = b.Next)
                     {
                         Console.WriteLine("Body: p={0:F3},{1:F3} v={2:F3},{3:F3}, w={4:F3}", b.Position.x, b.Position.y, b.LinearVelocity.x, b.LinearVelocity.y, b.AngularVelocity);
                     }
+#endif
                 }
 #if PROFILING
                 b2Profile p = _world.Profile;
@@ -191,6 +197,9 @@ namespace box2dTest
 #if PROFILING
             Dump(_world);
 #endif
+            TimeSpan tsx = new TimeSpan(span);
+            float fsx = (float)tsx.TotalMilliseconds / (float)(iter + interval * 30);
+            Console.WriteLine("FINAL: iteration time is {0:F3} ms avg. and is {1:F3} cycles", fsx, fsx / step);
             if (args.Length == 0)
             {
                 Console.WriteLine("hit <enter> to exit");
