@@ -125,9 +125,9 @@ cpBodySetMoment(cpBody body, float moment)
 }
 
 void
-cpBodyAddShape(cpBody body, cpShape *shape)
+cpBodyAddShape(cpBody body, cpShape shape)
 {
-	cpShape *next = body.shapeList;
+	cpShape next = body.shapeList;
 	if(next) next.prev = shape;
 	
 	shape.next = next;
@@ -135,10 +135,10 @@ cpBodyAddShape(cpBody body, cpShape *shape)
 }
 
 void
-cpBodyRemoveShape(cpBody body, cpShape *shape)
+cpBodyRemoveShape(cpBody body, cpShape shape)
 {
-  cpShape *prev = shape.prev;
-  cpShape *next = shape.next;
+  cpShape prev = shape.prev;
+  cpShape next = shape.next;
   
   if(prev){
 		prev.next = next;
@@ -264,9 +264,9 @@ cpBodyGetVelAtLocalPoint(cpBody body, cpVect point)
 void
 cpBodyEachShape(cpBody body, cpBodyShapeIteratorFunc func, object data)
 {
-	cpShape *shape = body.shapeList;
+	cpShape shape = body.shapeList;
 	while(shape){
-		cpShape *next = shape.next;
+		cpShape next = shape.next;
 		func(body, shape, data);
 		shape = next;
 	}

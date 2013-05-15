@@ -19,7 +19,11 @@
  * SOFTWARE.
  */
  
-#include "chipmunk_private.h"
+using System;
+namespace CocosPhysics.Chipmunk
+{
+    public static partial class Physics
+    {
 
 //MARK: Point Query Functions
 
@@ -43,7 +47,7 @@ PointQuery(struct PointQueryContext *context, cpShape shape, object data)
 }
 
 void
-cpSpacePointQuery(cpSpace *space, cpVect point, cpLayers layers, cpGroup group, cpSpacePointQueryFunc func, object data)
+cpSpacePointQuery(cpSpace space, cpVect point, cpLayers layers, cpGroup group, cpSpacePointQueryFunc func, object data)
 {
 	struct PointQueryContext context = {point, layers, group, func, data};
 	cpBB bb = cpBBNewForCircle(point, 0.0f);
@@ -55,13 +59,13 @@ cpSpacePointQuery(cpSpace *space, cpVect point, cpLayers layers, cpGroup group, 
 }
 
 static void
-PointQueryFirst(cpShape shape, cpShape *outShape)
+PointQueryFirst(cpShape shape, cpShape outShape)
 {
 	if(!shape.sensor) *outShape = shape;
 }
 
 cpShape 
-cpSpacePointQueryFirst(cpSpace *space, cpVect point, cpLayers layers, cpGroup group)
+cpSpacePointQueryFirst(cpSpace space, cpVect point, cpLayers layers, cpGroup group)
 {
 	cpShape shape = null;
 	cpSpacePointQuery(space, point, layers, group, (cpSpacePointQueryFunc)PointQueryFirst, &shape);
@@ -93,7 +97,7 @@ NearestPointQuery(struct NearestPointQueryContext *context, cpShape shape, objec
 }
 
 void
-cpSpaceNearestPointQuery(cpSpace *space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpSpaceNearestPointQueryFunc func, object data)
+cpSpaceNearestPointQuery(cpSpace space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpSpaceNearestPointQueryFunc func, object data)
 {
 	struct NearestPointQueryContext context = {point, maxDistance, layers, group, func};
 	cpBB bb = cpBBNewForCircle(point, cpfmax(maxDistance, 0.0f));
@@ -118,7 +122,7 @@ NearestPointQueryNearest(struct NearestPointQueryContext *context, cpShape shape
 }
 
 cpShape 
-cpSpaceNearestPointQueryNearest(cpSpace *space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpNearestPointQueryInfo out)
+cpSpaceNearestPointQueryNearest(cpSpace space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpNearestPointQueryInfo out)
 {
 	cpNearestPointQueryInfo info = {null, cpvzero, maxDistance};
 	if(out){
@@ -166,7 +170,7 @@ SegmentQuery(struct SegmentQueryContext *context, cpShape shape, object data)
 }
 
 void
-cpSpaceSegmentQuery(cpSpace *space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSpaceSegmentQueryFunc func, object data)
+cpSpaceSegmentQuery(cpSpace space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSpaceSegmentQueryFunc func, object data)
 {
 	struct SegmentQueryContext context = {
 		start, end,
@@ -198,7 +202,7 @@ SegmentQueryFirst(struct SegmentQueryContext *context, cpShape shape, cpSegmentQ
 }
 
 cpShape 
-cpSpaceSegmentQueryFirst(cpSpace *space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSegmentQueryInfo out)
+cpSpaceSegmentQueryFirst(cpSpace space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSegmentQueryInfo out)
 {
 	cpSegmentQueryInfo info = {null, 1.0f, cpvzero};
 	if(out){
@@ -240,7 +244,7 @@ BBQuery(struct BBQueryContext *context, cpShape shape, object data)
 }
 
 void
-cpSpaceBBQuery(cpSpace *space, cpBB bb, cpLayers layers, cpGroup group, cpSpaceBBQueryFunc func, object data)
+cpSpaceBBQuery(cpSpace space, cpBB bb, cpLayers layers, cpGroup group, cpSpaceBBQueryFunc func, object data)
 {
 	struct BBQueryContext context = {bb, layers, group, func};
 	
@@ -299,7 +303,7 @@ ShapeQuery(cpShape a, cpShape b, struct ShapeQueryContext *context)
 }
 
 bool
-cpSpaceShapeQuery(cpSpace *space, cpShape shape, cpSpaceShapeQueryFunc func, object data)
+cpSpaceShapeQuery(cpSpace space, cpShape shape, cpSpaceShapeQueryFunc func, object data)
 {
 	cpBody body = shape.body;
 	cpBB bb = (body ? cpShapeUpdate(shape, body.p, body.rot) : shape.bb);
@@ -311,4 +315,6 @@ cpSpaceShapeQuery(cpSpace *space, cpShape shape, cpSpaceShapeQueryFunc func, obj
 	} cpSpaceUnlock(space, true);
 	
 	return context.anyCollision;
+}
+}
 }

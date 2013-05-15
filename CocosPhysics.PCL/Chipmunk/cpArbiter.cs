@@ -49,7 +49,7 @@ unthreadHelper(cpArbiter arb, cpBody body)
 	if(prev){
 		cpArbiterThreadForBody(prev, body).next = next;
 	} else if(body.arbiterList == arb) {
-		// IFF prev is NULL and body.arbiterList == arb, is arb at the head of the list.
+		// IFF prev is null and body.arbiterList == arb, is arb at the head of the list.
 		// This function may be called for an arbiter that was never in a list.
 		// In that case, we need to protect it from wiping out the body.arbiterList pointer.
 		body.arbiterList = next;
@@ -57,8 +57,8 @@ unthreadHelper(cpArbiter arb, cpBody body)
 	
 	if(next) cpArbiterThreadForBody(next, body).prev = prev;
 	
-	thread.prev = NULL;
-	thread.next = NULL;
+	thread.prev = null;
+	thread.next = null;
 }
 
 void
@@ -82,7 +82,7 @@ int cpArbiterGetCount(cpArbiter arb)
 cpVect
 cpArbiterGetNormal(cpArbiter arb, int i)
 {
-	cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
+	// cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
 	
 	cpVect n = arb.contacts[i].n;
 	return arb.swappedColl ? cpvneg(n) : n;
@@ -91,7 +91,7 @@ cpArbiterGetNormal(cpArbiter arb, int i)
 cpVect
 cpArbiterGetPoint(cpArbiter arb, int i)
 {
-	cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
+	// cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
 	
 	return arb.CP_PRIVATE(contacts)[i].CP_PRIVATE(p);
 }
@@ -99,7 +99,7 @@ cpArbiterGetPoint(cpArbiter arb, int i)
 float
 cpArbiterGetDepth(cpArbiter arb, int i)
 {
-	cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
+	// cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
 	
 	return arb.CP_PRIVATE(contacts)[i].CP_PRIVATE(dist);
 }
@@ -218,36 +218,36 @@ cpArbiterSetSurfaceVelocity(cpArbiter arb, cpVect vr)
 
 
 cpArbiter*
-cpArbiterInit(cpArbiter arb, cpShape *a, cpShape *b)
+cpArbiterInit(cpArbiter arb, cpShape a, cpShape b)
 {
-	arb.handler = NULL;
-	arb.swappedColl = cpFalse;
+	arb.handler = null;
+	arb.swappedColl = false;
 	
 	arb.e = 0.0f;
 	arb.u = 0.0f;
 	arb.surface_vr = cpvzero;
 	
 	arb.numContacts = 0;
-	arb.contacts = NULL;
+	arb.contacts = null;
 	
 	arb.a = a; arb.body_a = a.body;
 	arb.b = b; arb.body_b = b.body;
 	
-	arb.thread_a.next = NULL;
-	arb.thread_b.next = NULL;
-	arb.thread_a.prev = NULL;
-	arb.thread_b.prev = NULL;
+	arb.thread_a.next = null;
+	arb.thread_b.next = null;
+	arb.thread_a.prev = null;
+	arb.thread_b.prev = null;
 	
 	arb.stamp = 0;
 	arb.state = cpArbiterStateFirstColl;
 	
-	arb.data = NULL;
+	arb.data = null;
 	
 	return arb;
 }
 
 void
-cpArbiterUpdate(cpArbiter arb, cpContact contacts, int numContacts, cpCollisionHandler *handler, cpShape *a, cpShape *b)
+cpArbiterUpdate(cpArbiter arb, cpContact contacts, int numContacts, cpCollisionHandler *handler, cpShape a, cpShape b)
 {
 	// Iterate over the possible pairs to look for hash value matches.
 	for(int i=0; i<numContacts; i++){

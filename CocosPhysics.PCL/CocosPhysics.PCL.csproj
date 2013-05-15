@@ -134,7 +134,6 @@
     <Compile Include="Chipmunk\cpBBTree.cs" />
     <Compile Include="Chipmunk\cpBody.cs" />
     <Compile Include="Chipmunk\cpCollision.cs" />
-    <Compile Include="Chipmunk\cpHashSet.cs" />
     <Compile Include="Chipmunk\cpPolyShape.cs" />
     <Compile Include="Chipmunk\cpShape.cs" />
     <Compile Include="Chipmunk\cpSpace.cs" />

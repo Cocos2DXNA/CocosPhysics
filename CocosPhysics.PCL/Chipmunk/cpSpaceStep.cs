@@ -19,12 +19,16 @@
  * SOFTWARE.
  */
  
-#include "chipmunk_private.h"
+using System;
+namespace CocosPhysics.Chipmunk
+{
+    public static partial class Physics
+    {
 
 //MARK: Post Step Callback Functions
 
 cpPostStepCallback *
-cpSpaceGetPostStepCallback(cpSpace *space, object key)
+cpSpaceGetPostStepCallback(cpSpace space, object key)
 {
 	cpArray *arr = space.postStepCallbacks;
 	for(int i=0; i<arr.num; i++){
@@ -35,10 +39,10 @@ cpSpaceGetPostStepCallback(cpSpace *space, object key)
 	return null;
 }
 
-static void PostStepDoNothing(cpSpace *space, object obj, object data){}
+static void PostStepDoNothing(cpSpace space, object obj, object data){}
 
 bool
-cpSpaceAddPostStepCallback(cpSpace *space, cpPostStepFunc func, object key, object data)
+cpSpaceAddPostStepCallback(cpSpace space, cpPostStepFunc func, object key, object data)
 {
 	// cpAssertWarn(space.locked,
 		"Adding a post-step callback when the space is not locked is unnecessary. "
@@ -60,13 +64,13 @@ cpSpaceAddPostStepCallback(cpSpace *space, cpPostStepFunc func, object key, obje
 //MARK: Locking Functions
 
 void
-cpSpaceLock(cpSpace *space)
+cpSpaceLock(cpSpace space)
 {
 	space.locked++;
 }
 
 void
-cpSpaceUnlock(cpSpace *space, bool runPostStep)
+cpSpaceUnlock(cpSpace space, bool runPostStep)
 {
 	space.locked--;
 	// cpAssertHard(space.locked >= 0, "Internal Error: Space lock underflow.");
@@ -119,7 +123,7 @@ struct cpContactBufferHeader {
 } cpContactBuffer;
 
 static cpContactBufferHeader *
-cpSpaceAllocContactBuffer(cpSpace *space)
+cpSpaceAllocContactBuffer(cpSpace space)
 {
 	cpContactBuffer *buffer = (cpContactBuffer *)cpcalloc(1, sizeof(cpContactBuffer));
 	cpArrayPush(space.allocatedBuffers, buffer);
@@ -137,7 +141,7 @@ cpContactBufferHeaderInit(cpContactBufferHeader *header, cpTimestamp stamp, cpCo
 }
 
 void
-cpSpacePushFreshContactBuffer(cpSpace *space)
+cpSpacePushFreshContactBuffer(cpSpace space)
 {
 	cpTimestamp stamp = space.stamp;
 	
@@ -159,7 +163,7 @@ cpSpacePushFreshContactBuffer(cpSpace *space)
 
 
 cpContact 
-cpContactBufferGetArray(cpSpace *space)
+cpContactBufferGetArray(cpSpace space)
 {
 	if(space.contactBuffersHead.numContacts + CP_MAX_CONTACTS_PER_ARBITER > CP_CONTACTS_BUFFER_SIZE){
 		// contact buffer could overflow on the next collision, push a fresh one.
@@ -171,21 +175,21 @@ cpContactBufferGetArray(cpSpace *space)
 }
 
 void
-cpSpacePushContacts(cpSpace *space, int count)
+cpSpacePushContacts(cpSpace space, int count)
 {
 	// cpAssertHard(count <= CP_MAX_CONTACTS_PER_ARBITER, "Internal Error: Contact buffer overflow!");
 	space.contactBuffersHead.numContacts += count;
 }
 
 static void
-cpSpacePopContacts(cpSpace *space, int count){
+cpSpacePopContacts(cpSpace space, int count){
 	space.contactBuffersHead.numContacts -= count;
 }
 
 //MARK: Collision Detection Functions
 
 static object 
-cpSpaceArbiterSetTrans(cpShape *shapes, cpSpace *space)
+cpSpaceArbiterSetTrans(cpShape shapes, cpSpace space)
 {
 	if(space.pooledArbiters.num == 0){
 		// arbiter pool is exhausted, make more
@@ -220,7 +224,7 @@ queryReject(cpShape a, cpShape b)
 
 // Callback from the spatial hash.
 void
-cpSpaceCollideShapes(cpShape a, cpShape b, cpSpace *space)
+cpSpaceCollideShapes(cpShape a, cpShape b, cpSpace space)
 {
 	// Reject any of the simple cases
 	if(queryReject(a,b)) return;
@@ -281,7 +285,7 @@ cpSpaceCollideShapes(cpShape a, cpShape b, cpSpace *space)
 
 // Hashset filter func to throw away old arbiters.
 bool
-cpSpaceArbiterSetFilter(cpArbiter arb, cpSpace *space)
+cpSpaceArbiterSetFilter(cpArbiter arb, cpSpace space)
 {
 	cpTimestamp ticks = space.stamp - arb.stamp;
 	
@@ -324,7 +328,7 @@ cpShapeUpdateFunc(cpShape shape, object unused)
 }
 
 void
-cpSpaceStep(cpSpace *space, float dt)
+cpSpaceStep(cpSpace space, float dt)
 {
 	// don't step if the timestep is 0!
 	if(dt == 0.0f) return;
@@ -433,4 +437,6 @@ cpSpaceStep(cpSpace *space, float dt)
 			handler.postSolve(arb, space, handler.data);
 		}
 	} cpSpaceUnlock(space, true);
+}
+}
 }

@@ -19,14 +19,16 @@
  * SOFTWARE.
  */
  
-#include <string.h>
-
-#include "chipmunk_private.h"
+using System;
+namespace CocosPhysics.Chipmunk
+{
+    public static partial class Physics
+    {
 
 //MARK: Sleeping Functions
 
 void
-cpSpaceActivateBody(cpSpace *space, cpBody body)
+cpSpaceActivateBody(cpSpace space, cpBody body)
 {
 	// cpAssertHard(!cpBodyIsRogue(body), "Internal error: Attempting to activate a rogue body.");
 		
@@ -81,7 +83,7 @@ cpSpaceActivateBody(cpSpace *space, cpBody body)
 }
 
 static void
-cpSpaceDeactivateBody(cpSpace *space, cpBody body)
+cpSpaceDeactivateBody(cpSpace space, cpBody body)
 {
 	// cpAssertHard(!cpBodyIsRogue(body), "Internal error: Attempting to deactivate a rouge body.");
 	
@@ -123,7 +125,7 @@ ComponentActivate(cpBody root)
 	if(!root || !cpBodyIsSleeping(root)) return;
 	// cpAssertHard(!cpBodyIsRogue(root), "Internal Error: ComponentActivate() called on a rogue body.");
 	
-	cpSpace *space = root.space;
+	cpSpace space = root.space;
 	cpBody body = root;
 	while(body){
 		cpBody next = body.node.next;
@@ -221,7 +223,7 @@ ComponentActive(cpBody root, float threshold)
 }
 
 void
-cpSpaceProcessComponents(cpSpace *space, float dt)
+cpSpaceProcessComponents(cpSpace space, float dt)
 {
 	bool sleep = (space.sleepTimeThreshold != float.PositiveInfinity);
 	cpArray *bodies = space.bodies;
@@ -315,7 +317,7 @@ void
 cpBodySleepWithGroup(cpBody body, cpBody group){
 	// cpAssertHard(!cpBodyIsRogue(body), "Rogue (and static) bodies cannot be put to sleep.");
 	
-	cpSpace *space = body.space;
+	cpSpace space = body.space;
 	// cpAssertHard(!space.locked, "Bodies cannot be put to sleep during a query or a call to cpSpaceStep(). Put these calls into a post-step callback.");
 	// cpAssertHard(group == null || cpBodyIsSleeping(group), "Cannot use a non-sleeping body as a group identifier.");
 	
@@ -350,8 +352,10 @@ activateTouchingHelper(cpShape shape, cpContactPointSet *points, cpShape other){
 }
 
 void
-cpSpaceActivateShapesTouchingShape(cpSpace *space, cpShape shape){
+cpSpaceActivateShapesTouchingShape(cpSpace space, cpShape shape){
 	if(space.sleepTimeThreshold != float.PositiveInfinity){
 		cpSpaceShapeQuery(space, shape, (cpSpaceShapeQueryFunc)activateTouchingHelper, shape);
 	}
+}
+    }
 }

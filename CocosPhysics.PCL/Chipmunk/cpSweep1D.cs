@@ -19,7 +19,11 @@
  * SOFTWARE.
  */
 
-#include "chipmunk_private.h"
+using System;
+namespace CocosPhysics.Chipmunk
+{
+    public static partial class Physics
+    {
 
 static cpSpatialIndexClass Klass();
 
@@ -252,3 +256,5 @@ static cpSpatialIndexClass klass = {
 
 static cpSpatialIndexClass Klass(){return &klass;}
 
+}
+}

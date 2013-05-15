@@ -98,12 +98,12 @@ GetBB(cpBBTree tree, object obj)
 static cpBBTree 
 GetTree(cpSpatialIndex *index)
 {
-	return (index && index.klass == Klass() ? (cpBBTree )index : NULL);
+	return (index && index.klass == Klass() ? (cpBBTree )index : null);
 }
 
 static Node 
 GetRootIfTree(cpSpatialIndex *index){
-	return (index && index.klass == Klass() ? ((cpBBTree )index).root : NULL);
+	return (index && index.klass == Klass() ? ((cpBBTree )index).root : null);
 }
 
 static cpBBTree 
@@ -152,7 +152,7 @@ PairFromPool(cpBBTree tree)
 	} else {
 		// Pool is exhausted, make more
 		int count = CP_BUFFER_BYTES/sizeof(Pair);
-		cpAssertHard(count, "Internal Error: Buffer size is too small.");
+		// cpAssertHard(count, "Internal Error: Buffer size is too small.");
 		
 		Pair *buffer = (Pair *)cpcalloc(1, CP_BUFFER_BYTES);
 		cpArrayPush(tree.allocatedBuffers, buffer);
@@ -184,7 +184,7 @@ static void
 PairsClear(Node leaf, cpBBTree tree)
 {
 	Pair *pair = leaf.PAIRS;
-	leaf.PAIRS = NULL;
+	leaf.PAIRS = null;
 	
 	while(pair){
 		if(pair.a.leaf == leaf){
@@ -206,7 +206,7 @@ PairInsert(Node a, Node b, cpBBTree tree)
 {
 	Pair *nextA = a.PAIRS, *nextB = b.PAIRS;
 	Pair *pair = PairFromPool(tree);
-	Pair temp = {{NULL, a, nextA},{NULL, b, nextB}};
+	Pair temp = {{null, a, nextA},{null, b, nextB}};
 	
 	a.PAIRS = b.PAIRS = pair;
 	*pair = temp;
@@ -241,7 +241,7 @@ NodeFromPool(cpBBTree tree)
 	} else {
 		// Pool is exhausted, make more
 		int count = CP_BUFFER_BYTES/sizeof(Node);
-		cpAssertHard(count, "Internal Error: Buffer size is too small.");
+		// cpAssertHard(count, "Internal Error: Buffer size is too small.");
 		
 		Node buffer = (Node )cpcalloc(1, CP_BUFFER_BYTES);
 		cpArrayPush(tree.allocatedBuffers, buffer);
@@ -271,9 +271,9 @@ NodeNew(cpBBTree tree, Node a, Node b)
 {
 	Node node = NodeFromPool(tree);
 	
-	node.obj = NULL;
+	node.obj = null;
 	node.bb = cpBBMerge(a.bb, b.bb);
-	node.parent = NULL;
+	node.parent = null;
 	
 	NodeSetA(node, a);
 	NodeSetB(node, b);
@@ -284,7 +284,7 @@ NodeNew(cpBBTree tree, Node a, Node b)
 static bool
 NodeIsLeaf(Node node)
 {
-	return (node.obj != NULL);
+	return (node.obj != null);
 }
 
 static Node 
@@ -296,8 +296,8 @@ NodeOther(Node node, Node child)
 static void
 NodeReplaceChild(Node parent, Node child, Node value, cpBBTree tree)
 {
-	cpAssertSoft(!NodeIsLeaf(parent), "Internal Error: Cannot replace child of a leaf.");
-	cpAssertSoft(child == parent.A || child == parent.B, "Internal Error: Node is not a child of parent.");
+	// cpAssertSoft(!NodeIsLeaf(parent), "Internal Error: Cannot replace child of a leaf.");
+	// cpAssertSoft(child == parent.A || child == parent.B, "Internal Error: Node is not a child of parent.");
 	
 	if(parent.A == child){
 		NodeRecycle(tree, parent.A);
@@ -323,7 +323,7 @@ cpBBProximity(cpBB a, cpBB b)
 static Node 
 SubtreeInsert(Node subtree, Node leaf, cpBBTree tree)
 {
-	if(subtree == NULL){
+	if(subtree == null){
 		return leaf;
 	} else if(NodeIsLeaf(subtree)){
 		return NodeNew(tree, leaf, subtree);
@@ -396,7 +396,7 @@ static Node
 SubtreeRemove(Node subtree, Node leaf, cpBBTree tree)
 {
 	if(leaf == subtree){
-		return NULL;
+		return null;
 	} else {
 		Node parent = leaf.parent;
 		if(parent == subtree){
@@ -444,13 +444,13 @@ MarkLeaf(Node leaf, MarkContext *context)
 	cpBBTree tree = context.tree;
 	if(leaf.STAMP == GetMasterTree(tree).stamp){
 		Node staticRoot = context.staticRoot;
-		if(staticRoot) MarkLeafQuery(staticRoot, leaf, cpFalse, context);
+		if(staticRoot) MarkLeafQuery(staticRoot, leaf, false, context);
 		
 		for(Node node = leaf; node.parent; node = node.parent){
 			if(node == node.parent.A){
-				MarkLeafQuery(node.parent.B, leaf, cpTrue, context);
+				MarkLeafQuery(node.parent.B, leaf, true, context);
 			} else {
-				MarkLeafQuery(node.parent.A, leaf, cpFalse, context);
+				MarkLeafQuery(node.parent.A, leaf, false, context);
 			}
 		}
 	} else {
@@ -486,9 +486,9 @@ LeafNew(cpBBTree tree, object obj, cpBB bb)
 	node.obj = obj;
 	node.bb = GetBB(tree, obj);
 	
-	node.parent = NULL;
+	node.parent = null;
 	node.STAMP = 0;
-	node.PAIRS = NULL;
+	node.PAIRS = null;
 	
 	return node;
 }
@@ -508,10 +508,10 @@ LeafUpdate(Node leaf, cpBBTree tree)
 		PairsClear(leaf, tree);
 		leaf.STAMP = GetMasterTree(tree).stamp;
 		
-		return cpTrue;
+		return true;
 	}
 	
-	return cpFalse;
+	return false;
 }
 
 static void VoidQueryFunc(object obj1, object obj2, object data){}
@@ -524,12 +524,12 @@ LeafAddPairs(Node leaf, cpBBTree tree)
 		Node dynamicRoot = GetRootIfTree(dynamicIndex);
 		if(dynamicRoot){
 			cpBBTree dynamicTree = GetTree(dynamicIndex);
-			MarkContext context = {dynamicTree, NULL, NULL, NULL};
-			MarkLeafQuery(dynamicRoot, leaf, cpTrue, &context);
+			MarkContext context = {dynamicTree, null, null, null};
+			MarkLeafQuery(dynamicRoot, leaf, true, &context);
 		}
 	} else {
 		Node staticRoot = GetRootIfTree(tree.spatialIndex.staticIndex);
-		MarkContext context = {tree, staticRoot, VoidQueryFunc, NULL};
+		MarkContext context = {tree, staticRoot, VoidQueryFunc, null};
 		MarkLeaf(leaf, &context);
 	}
 }
@@ -559,12 +559,12 @@ cpBBTreeInit(cpBBTree tree, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticI
 {
 	cpSpatialIndexInit((cpSpatialIndex *)tree, Klass(), bbfunc, staticIndex);
 	
-	tree.velocityFunc = NULL;
+	tree.velocityFunc = null;
 	
 	tree.leaves = cpHashSetNew(0, (cpHashSetEqlFunc)leafSetEql);
-	tree.root = NULL;
+	tree.root = null;
 	
-	tree.pooledNodes = NULL;
+	tree.pooledNodes = null;
 	tree.allocatedBuffers = cpArrayNew(0);
 	
 	tree.stamp = 0;
@@ -576,7 +576,7 @@ void
 cpBBTreeSetVelocityFunc(cpSpatialIndex *index, cpBBTreeVelocityFunc func)
 {
 	if(index.klass != Klass()){
-		cpAssertWarn(cpFalse, "Ignoring cpBBTreeSetVelocityFunc() call to non-tree spatial index.");
+		// cpAssertWarn(false, "Ignoring cpBBTreeSetVelocityFunc() call to non-tree spatial index.");
 		return;
 	}
 	
@@ -626,7 +626,7 @@ cpBBTreeRemove(cpBBTree tree, object obj, cpHashValue hashid)
 static bool
 cpBBTreeContains(cpBBTree tree, object obj, cpHashValue hashid)
 {
-	return (cpHashSetFind(tree.leaves, hashid, obj) != NULL);
+	return (cpHashSetFind(tree.leaves, hashid, obj) != null);
 }
 
 //MARK: Reindex
@@ -640,7 +640,7 @@ cpBBTreeReindexQuery(cpBBTree tree, cpSpatialIndexQueryFunc func, object data)
 	cpHashSetEach(tree.leaves, (cpHashSetIteratorFunc)LeafUpdate, tree);
 	
 	cpSpatialIndex *staticIndex = tree.spatialIndex.staticIndex;
-	Node staticRoot = (staticIndex && staticIndex.klass == Klass() ? ((cpBBTree )staticIndex).root : NULL);
+	Node staticRoot = (staticIndex && staticIndex.klass == Klass() ? ((cpBBTree )staticIndex).root : null);
 	
 	MarkContext context = {tree, staticRoot, func, data};
 	MarkSubtree(tree.root, &context);
@@ -652,7 +652,7 @@ cpBBTreeReindexQuery(cpBBTree tree, cpSpatialIndexQueryFunc func, object data)
 static void
 cpBBTreeReindex(cpBBTree tree)
 {
-	cpBBTreeReindexQuery(tree, VoidQueryFunc, NULL);
+	cpBBTreeReindexQuery(tree, VoidQueryFunc, null);
 }
 
 static void
@@ -789,7 +789,7 @@ partitionNodes(cpBBTree tree, Node[] nodes, int count)
 	}
 	
 	if(right == count){
-		Node node = NULL;
+		Node node = null;
 		for(int i=0; i<count; i++) node = SubtreeInsert(node, nodes[i], tree);
 		return node;
 	}
@@ -824,7 +824,7 @@ void
 cpBBTreeOptimize(cpSpatialIndex *index)
 {
 	if(index.klass != &klass){
-		cpAssertWarn(cpFalse, "Ignoring cpBBTreeOptimize() call to non-tree spatial index.");
+		// cpAssertWarn(false, "Ignoring cpBBTreeOptimize() call to non-tree spatial index.");
 		return;
 	}
 	
@@ -877,7 +877,7 @@ NodeRender(Node node, int depth)
 void
 cpBBTreeRenderDebug(cpSpatialIndex *index){
 	if(index.klass != &klass){
-		cpAssertWarn(cpFalse, "Ignoring cpBBTreeRenderDebug() call to non-tree spatial index.");
+		// cpAssertWarn(false, "Ignoring cpBBTreeRenderDebug() call to non-tree spatial index.");
 		return;
 	}
 	

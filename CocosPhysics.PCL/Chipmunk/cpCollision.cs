@@ -19,15 +19,15 @@
  * SOFTWARE.
  */
  
-// // typedef int (*collisionFunc)(cpShape *, cpShape *, cpContact *);
-
+// // typedef int (*collisionFunc)(cpShape , cpShape , cpContact );
+using System;
 namespace CocosPhysics.Chipmunk
 {
 public static partial class Physics {
 // Add contact points for circle to circle collisions.
 // Used by several collision tests.
 static int
-circle2circleQuery(cpVect p1, cpVect p2, float r1, float r2, cpContact *con)
+circle2circleQuery(cpVect p1, cpVect p2, float r1, float r2, cpContact con)
 {
 	float mindist = r1 + r2;
 	cpVect delta = cpvsub(p2, p1);
@@ -39,7 +39,7 @@ circle2circleQuery(cpVect p1, cpVect p2, float r1, float r2, cpContact *con)
 	// Allocate and initialize the contact.
 	cpContactInit(
 		con,
-		cpvadd(p1, cpvmult(delta, 0.5f + (r1 - 0.5f*mindist)/(dist ? dist : INFINITY))),
+		cpvadd(p1, cpvmult(delta, 0.5f + (r1 - 0.5f*mindist)/(dist ? dist : float.PositiveInfinity))),
 		(dist ? cpvmult(delta, 1.0f/dist) : cpv(1.0f, 0.0f)),
 		dist - mindist,
 		0
@@ -50,16 +50,16 @@ circle2circleQuery(cpVect p1, cpVect p2, float r1, float r2, cpContact *con)
 
 // Collide circle shapes.
 static int
-circle2circle(cpShape *shape1, cpShape *shape2, cpContact *arr)
+circle2circle(cpShape shape1, cpShape shape2, cpContact arr)
 {
-	cpCircleShape *circ1 = (cpCircleShape *)shape1; //TODO
-	cpCircleShape *circ2 = (cpCircleShape *)shape2;
+	cpCircleShape circ1 = (cpCircleShape )shape1; //TODO
+	cpCircleShape circ2 = (cpCircleShape )shape2;
 	
 	return circle2circleQuery(circ1.tc, circ2.tc, circ1.r, circ2.r, arr);
 }
 
 static int
-circle2segment(cpCircleShape *circleShape, cpSegmentShape *segmentShape, cpContact *con)
+circle2segment(cpCircleShape circleShape, cpSegmentShape segmentShape, cpContact con)
 {
 	cpVect seg_a = segmentShape.ta;
 	cpVect seg_b = segmentShape.tb;
@@ -86,8 +86,8 @@ circle2segment(cpCircleShape *circleShape, cpSegmentShape *segmentShape, cpConta
 
 // Helper function for working with contact buffers
 // This used to malloc/realloc memory on the fly but was repurposed.
-static cpContact *
-nextContactPoint(cpContact *arr, int *numPtr)
+static cpContact 
+nextContactPoint(cpContact arr, int *numPtr)
 {
 	int index = *numPtr;
 	
@@ -101,7 +101,7 @@ nextContactPoint(cpContact *arr, int *numPtr)
 
 // Find the minimum separating axis for the give poly and axis list.
 static int
-findMSA(cpPolyShape *poly, cpSplittingPlane *planes, int num, float min_out)
+findMSA(cpPolyShape poly, cpSplittingPlane planes, int num, float min_out)
 {
 	int min_index = 0;
 	float min = cpPolyShapeValueOnAxis(poly, planes.n, planes.d);
@@ -125,7 +125,7 @@ findMSA(cpPolyShape *poly, cpSplittingPlane *planes, int num, float min_out)
 // This handles the degenerate case where an overlap was detected, but no vertexes fall inside
 // the opposing polygon. (like a star of david)
 static int
-findVertsFallback(cpContact *arr, cpPolyShape *poly1, cpPolyShape *poly2, cpVect n, float dist)
+findVertsFallback(cpContact arr, cpPolyShape poly1, cpPolyShape poly2, cpVect n, float dist)
 {
 	int num = 0;
 	
@@ -146,7 +146,7 @@ findVertsFallback(cpContact *arr, cpPolyShape *poly1, cpPolyShape *poly2, cpVect
 
 // Add contacts for penetrating vertexes.
 static int
-findVerts(cpContact *arr, cpPolyShape *poly1, cpPolyShape *poly2, cpVect n, float dist)
+findVerts(cpContact arr, cpPolyShape poly1, cpPolyShape poly2, cpVect n, float dist)
 {
 	int num = 0;
 	
@@ -167,10 +167,10 @@ findVerts(cpContact *arr, cpPolyShape *poly1, cpPolyShape *poly2, cpVect n, floa
 
 // Collide poly shapes together.
 static int
-poly2poly(cpShape *shape1, cpShape *shape2, cpContact *arr)
+poly2poly(cpShape shape1, cpShape shape2, cpContact arr)
 {
-	cpPolyShape *poly1 = (cpPolyShape *)shape1;
-	cpPolyShape *poly2 = (cpPolyShape *)shape2;
+	cpPolyShape poly1 = (cpPolyShape )shape1;
+	cpPolyShape poly2 = (cpPolyShape )shape2;
 	
 	float min1;
 	int mini1 = findMSA(poly2, poly1.tPlanes, poly1.numVerts, &min1);
@@ -189,7 +189,7 @@ poly2poly(cpShape *shape1, cpShape *shape2, cpContact *arr)
 
 // Like cpPolyValueOnAxis(), but for segments.
 static float
-segValueOnAxis(cpSegmentShape *seg, cpVect n, float d)
+segValueOnAxis(cpSegmentShape seg, cpVect n, float d)
 {
 	float a = cpvdot(n, seg.ta) - seg.r;
 	float b = cpvdot(n, seg.tb) - seg.r;
@@ -198,7 +198,7 @@ segValueOnAxis(cpSegmentShape *seg, cpVect n, float d)
 
 // Identify vertexes that have penetrated the segment.
 static void
-findPointsBehindSeg(cpContact *arr, int *num, cpSegmentShape *seg, cpPolyShape *poly, float pDist, float coef) 
+findPointsBehindSeg(cpContact arr, int *num, cpSegmentShape seg, cpPolyShape poly, float pDist, float coef) 
 {
 	float dta = cpvcross(seg.tn, seg.ta);
 	float dtb = cpvcross(seg.tn, seg.tb);
@@ -218,11 +218,11 @@ findPointsBehindSeg(cpContact *arr, int *num, cpSegmentShape *seg, cpPolyShape *
 // This one is complicated and gross. Just don't go there...
 // TODO: Comment me!
 static int
-seg2poly(cpShape *shape1, cpShape *shape2, cpContact *arr)
+seg2poly(cpShape shape1, cpShape shape2, cpContact arr)
 {
-	cpSegmentShape *seg = (cpSegmentShape *)shape1;
-	cpPolyShape *poly = (cpPolyShape *)shape2;
-	cpSplittingPlane *planes = poly.tPlanes;
+	cpSegmentShape seg = (cpSegmentShape )shape1;
+	cpPolyShape poly = (cpPolyShape )shape2;
+	cpSplittingPlane planes = poly.tPlanes;
 	
 	float segD = cpvdot(seg.tn, seg.ta);
 	float minNorm = cpPolyShapeValueOnAxis(poly, seg.tn, segD) - seg.r;
@@ -281,11 +281,11 @@ seg2poly(cpShape *shape1, cpShape *shape2, cpContact *arr)
 // This one is less gross, but still gross.
 // TODO: Comment me!
 static int
-circle2poly(cpShape *shape1, cpShape *shape2, cpContact *con)
+circle2poly(cpShape shape1, cpShape shape2, cpContact con)
 {
-	cpCircleShape *circ = (cpCircleShape *)shape1;
-	cpPolyShape *poly = (cpPolyShape *)shape2;
-	cpSplittingPlane *planes = poly.tPlanes;
+	cpCircleShape circ = (cpCircleShape )shape1;
+	cpPolyShape poly = (cpPolyShape )shape2;
+	cpSplittingPlane planes = poly.tPlanes;
 	
 	int mini = 0;
 	float min = cpSplittingPlaneCompare(planes[0], circ.tc) - circ.r;
@@ -325,10 +325,10 @@ circle2poly(cpShape *shape1, cpShape *shape2, cpContact *con)
 
 // Submitted by LegoCyclon
 static int
-seg2seg(cpShape* shape1, cpShape* shape2, cpContact* con)
+seg2seg(cpShape shape1, cpShape shape2, cpContact* con)
 {
-	cpSegmentShape* seg1 = (cpSegmentShape *)shape1;
-	cpSegmentShape* seg2 = (cpSegmentShape *)shape2;
+	cpSegmentShape* seg1 = (cpSegmentShape )shape1;
+	cpSegmentShape* seg2 = (cpSegmentShape )shape2;
 	
 	cpVect v1 = cpvsub(seg1.tb, seg1.ta);
 	cpVect v2 = cpvsub(seg2.tb, seg2.ta);
@@ -383,11 +383,11 @@ seg2seg(cpShape* shape1, cpShape* shape2, cpContact* con)
 
 static collisionFunc builtinCollisionFuncs[9] = {
 	circle2circle,
-	NULL,
-	NULL,
+	null,
+	null,
 	(collisionFunc)circle2segment,
-	NULL,
-	NULL,
+	null,
+	null,
 	circle2poly,
 	seg2poly,
 	poly2poly,
@@ -396,11 +396,11 @@ static collisionFunc *colfuncs = builtinCollisionFuncs;
 
 static collisionFunc segmentCollisions[9] = {
 	circle2circle,
-	NULL,
-	NULL,
+	null,
+	null,
 	(collisionFunc)circle2segment,
 	seg2seg,
-	NULL,
+	null,
 	circle2poly,
 	seg2poly,
 	poly2poly,
@@ -413,10 +413,10 @@ cpEnableSegmentToSegmentCollisions()
 }
 
 int
-cpCollideShapes(cpShape *a, cpShape *b, cpContact *arr)
+cpCollideShapes(cpShape a, cpShape b, cpContact arr)
 {
 	// Their shape types must be in order.
-	cpAssertSoft(a.klass.type <= b.klass.type, "Collision shapes passed to cpCollideShapes() are not sorted.");
+	// cpAssertSoft(a.klass.type <= b.klass.type, "Collision shapes passed to cpCollideShapes() are not sorted.");
 	
 	collisionFunc cfunc = colfuncs[a.klass.type + b.klass.type*CP_NUM_SHAPES];
 	return (cfunc) ? cfunc(a, b, arr) : 0;

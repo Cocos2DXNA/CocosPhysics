@@ -19,8 +19,11 @@
  * SOFTWARE.
  */
 
-#include "chipmunk_private.h"
-#include "prime.h"
+using System;
+namespace CocosPhysics.Chipmunk
+{
+    public static partial class Physics
+    {
 
 // typedef struct cpSpaceHashBin cpSpaceHashBin;
 // typedef struct cpHandle cpHandle;
@@ -632,3 +635,5 @@ cpSpaceHashRenderDebug(cpSpatialIndex *index)
 	}
 }
 #endif
+}
+}
