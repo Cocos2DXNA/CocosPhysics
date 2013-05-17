@@ -18,38 +18,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
- 
-namespace Chipmunk
+
+namespace CocosPhysics.Chipmunk
 {
     public static partial class Physics
-cpVect
-cpvslerp(cpVect v1, cpVect v2, float t)
-{
-	float dot = cpvdot(cpvnormalize(v1), cpvnormalize(v2));
-	float omega = cpfacos(cpfclamp(dot, -1.0f, 1.0f));
-	
-	if(omega < 1e-3){
-		// If the angle between two vectors is very small, lerp instead to avoid precision issues.
-		return cpvlerp(v1, v2, t);
-	} else {
-		float denom = 1.0f/cpfsin(omega);
-		return cpvadd(cpvmult(v1, cpfsin((1.0f - t)*omega)*denom), cpvmult(v2, cpfsin(t*omega)*denom));
-	}
-}
+    {
+        cpVect
+        cpvslerp(cpVect v1, cpVect v2, float t)
+        {
+            float dot = cpvdot(cpvnormalize(v1), cpvnormalize(v2));
+            float omega = cpfacos(cpfclamp(dot, -1.0f, 1.0f));
 
-cpVect
-cpvslerpconst(cpVect v1, cpVect v2, float a)
-{
-	float dot = cpvdot(cpvnormalize(v1), cpvnormalize(v2));
-	float omega = cpfacos(cpfclamp(dot, -1.0f, 1.0f));
-	
-	return cpvslerp(v1, v2, cpfmin(a, omega)/omega);
-}
+            if (omega < 1e-3)
+            {
+                // If the angle between two vectors is very small, lerp instead to avoid precision issues.
+                return cpvlerp(v1, v2, t);
+            }
+            else
+            {
+                float denom = 1.0f / cpfsin(omega);
+                return cpvadd(cpvmult(v1, cpfsin((1.0f - t) * omega) * denom), cpvmult(v2, cpfsin(t * omega) * denom));
+            }
+        }
 
-char*
-cpvstr(cpVect v)
+        cpVect
+        cpvslerpconst(cpVect v1, cpVect v2, float a)
+        {
+            float dot = cpvdot(cpvnormalize(v1), cpvnormalize(v2));
+            float omega = cpfacos(cpfclamp(dot, -1.0f, 1.0f));
+
+            return cpvslerp(v1, v2, cpfmin(a, omega) / omega);
+        }
+
+        char*
+        cpvstr(cpVect v)
 {
 	static char str[256];
 	sprintf(str, "(% .3f, % .3f)", v.x, v.y);
 	return str;
+}
+    }
 }

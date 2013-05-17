@@ -23,7 +23,7 @@
 // Values approximately double.
 // http://planetmath.org/encyclopedia/GoodHashTablePrimes.html
 
-namespace Chipmunk
+namespace CocosPhysics.Chipmunk
 {
     public static partial class Chipmunk
     {

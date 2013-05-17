@@ -24,28 +24,28 @@
 
 static float
 defaultSpringTorque(cpDampedRotarySpring *spring, float relativeAngle){
-	return (relativeAngle - spring->restAngle)*spring->stiffness;
+	return (relativeAngle - spring.restAngle)*spring.stiffness;
 }
 
 static void
 preStep(cpDampedRotarySpring *spring, float dt)
 {
-	cpBody *a = spring->constraint.a;
-	cpBody *b = spring->constraint.b;
+	cpBody a = spring.constraint.a;
+	cpBody b = spring.constraint.b;
 	
-	float moment = a->i_inv + b->i_inv;
-	cpAssertSoft(moment != 0.0, "Unsolvable spring.");
-	spring->iSum = 1.0f/moment;
+	float moment = a.i_inv + b.i_inv;
+	// cpAssertSoft(moment != 0.0, "Unsolvable spring.");
+	spring.iSum = 1.0f/moment;
 
-	spring->w_coef = 1.0f - cpfexp(-spring->damping*dt*moment);
-	spring->target_wrn = 0.0f;
+	spring.w_coef = 1.0f - cpfexp(-spring.damping*dt*moment);
+	spring.target_wrn = 0.0f;
 
 	// apply spring torque
-	float j_spring = spring->springTorqueFunc((cpConstraint *)spring, a->a - b->a)*dt;
-	spring->jAcc = j_spring;
+	float j_spring = spring.springTorqueFunc((cpConstraint )spring, a.a - b.a)*dt;
+	spring.jAcc = j_spring;
 	
-	a->w -= j_spring*a->i_inv;
-	b->w += j_spring*b->i_inv;
+	a.w -= j_spring*a.i_inv;
+	b.w += j_spring*b.i_inv;
 }
 
 static void applyCachedImpulse(cpDampedRotarySpring *spring, float dt_coef){}
@@ -53,29 +53,29 @@ static void applyCachedImpulse(cpDampedRotarySpring *spring, float dt_coef){}
 static void
 applyImpulse(cpDampedRotarySpring *spring, float dt)
 {
-	cpBody *a = spring->constraint.a;
-	cpBody *b = spring->constraint.b;
+	cpBody a = spring.constraint.a;
+	cpBody b = spring.constraint.b;
 	
 	// compute relative velocity
-	float wrn = a->w - b->w;//normal_relative_velocity(a, b, r1, r2, n) - spring->target_vrn;
+	float wrn = a.w - b.w;//normal_relative_velocity(a, b, r1, r2, n) - spring.target_vrn;
 	
 	// compute velocity loss from drag
 	// not 100% certain this is derived correctly, though it makes sense
-	float w_damp = (spring->target_wrn - wrn)*spring->w_coef;
-	spring->target_wrn = wrn + w_damp;
+	float w_damp = (spring.target_wrn - wrn)*spring.w_coef;
+	spring.target_wrn = wrn + w_damp;
 	
-	//apply_impulses(a, b, spring->r1, spring->r2, cpvmult(spring->n, v_damp*spring->nMass));
-	float j_damp = w_damp*spring->iSum;
-	spring->jAcc += j_damp;
+	//apply_impulses(a, b, spring.r1, spring.r2, cpvmult(spring.n, v_damp*spring.nMass));
+	float j_damp = w_damp*spring.iSum;
+	spring.jAcc += j_damp;
 	
-	a->w += j_damp*a->i_inv;
-	b->w -= j_damp*b->i_inv;
+	a.w += j_damp*a.i_inv;
+	b.w -= j_damp*b.i_inv;
 }
 
 static float
 getImpulse(cpDampedRotarySpring *spring)
 {
-	return spring->jAcc;
+	return spring.jAcc;
 }
 
 static cpConstraintClass klass = {
@@ -87,28 +87,28 @@ static cpConstraintClass klass = {
 CP_DefineClassGetter(cpDampedRotarySpring)
 
 cpDampedRotarySpring *
-cpDampedRotarySpringAlloc(void)
+cpDampedRotarySpringAlloc()
 {
 	return (cpDampedRotarySpring *)cpcalloc(1, sizeof(cpDampedRotarySpring));
 }
 
 cpDampedRotarySpring *
-cpDampedRotarySpringInit(cpDampedRotarySpring *spring, cpBody *a, cpBody *b, float restAngle, float stiffness, float damping)
+cpDampedRotarySpringInit(cpDampedRotarySpring *spring, cpBody a, cpBody b, float restAngle, float stiffness, float damping)
 {
-	cpConstraintInit((cpConstraint *)spring, &klass, a, b);
+	cpConstraintInit((cpConstraint )spring, &klass, a, b);
 	
-	spring->restAngle = restAngle;
-	spring->stiffness = stiffness;
-	spring->damping = damping;
-	spring->springTorqueFunc = (cpDampedRotarySpringTorqueFunc)defaultSpringTorque;
+	spring.restAngle = restAngle;
+	spring.stiffness = stiffness;
+	spring.damping = damping;
+	spring.springTorqueFunc = (cpDampedRotarySpringTorqueFunc)defaultSpringTorque;
 	
-	spring->jAcc = 0.0f;
+	spring.jAcc = 0.0f;
 	
 	return spring;
 }
 
-cpConstraint *
-cpDampedRotarySpringNew(cpBody *a, cpBody *b, float restAngle, float stiffness, float damping)
+cpConstraint 
+cpDampedRotarySpringNew(cpBody a, cpBody b, float restAngle, float stiffness, float damping)
 {
-	return (cpConstraint *)cpDampedRotarySpringInit(cpDampedRotarySpringAlloc(), a, b, restAngle, stiffness, damping);
+	return (cpConstraint )cpDampedRotarySpringInit(cpDampedRotarySpringAlloc(), a, b, restAngle, stiffness, damping);
 }

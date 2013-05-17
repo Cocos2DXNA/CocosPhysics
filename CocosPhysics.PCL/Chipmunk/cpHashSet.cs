@@ -22,8 +22,8 @@
 #include "chipmunk_private.h"
 #include "prime.h"
 
-typedef struct cpHashSetBin {
-	void *elt;
+// typedef struct cpHashSetBin {
+	object elt;
 	cpHashValue hash;
 	struct cpHashSetBin *next;
 } cpHashSetBin;
@@ -32,7 +32,7 @@ struct cpHashSet {
 	unsigned int entries, size;
 	
 	cpHashSetEqlFunc eql;
-	void *default_value;
+	object default_value;
 	
 	cpHashSetBin **table;
 	cpHashSetBin *pooledBins;
@@ -44,10 +44,10 @@ void
 cpHashSetFree(cpHashSet *set)
 {
 	if(set){
-		cpfree(set->table);
+		cpfree(set.table);
 		
-		cpArrayFreeEach(set->allocatedBuffers, cpfree);
-		cpArrayFree(set->allocatedBuffers);
+		cpArrayFreeEach(set.allocatedBuffers, cpfree);
+		cpArrayFree(set.allocatedBuffers);
 		
 		cpfree(set);
 	}
@@ -58,84 +58,84 @@ cpHashSetNew(int size, cpHashSetEqlFunc eqlFunc)
 {
 	cpHashSet *set = (cpHashSet *)cpcalloc(1, sizeof(cpHashSet));
 	
-	set->size = next_prime(size);
-	set->entries = 0;
+	set.size = next_prime(size);
+	set.entries = 0;
 	
-	set->eql = eqlFunc;
-	set->default_value = NULL;
+	set.eql = eqlFunc;
+	set.default_value = null;
 	
-	set->table = (cpHashSetBin **)cpcalloc(set->size, sizeof(cpHashSetBin *));
-	set->pooledBins = NULL;
+	set.table = (cpHashSetBin **)cpcalloc(set.size, sizeof(cpHashSetBin *));
+	set.pooledBins = null;
 	
-	set->allocatedBuffers = cpArrayNew(0);
+	set.allocatedBuffers = cpArrayNew(0);
 	
 	return set;
 }
 
 void
-cpHashSetSetDefaultValue(cpHashSet *set, void *default_value)
+cpHashSetSetDefaultValue(cpHashSet *set, object default_value)
 {
-	set->default_value = default_value;
+	set.default_value = default_value;
 }
 
 static int
 setIsFull(cpHashSet *set)
 {
-	return (set->entries >= set->size);
+	return (set.entries >= set.size);
 }
 
 static void
 cpHashSetResize(cpHashSet *set)
 {
 	// Get the next approximate doubled prime.
-	unsigned int newSize = next_prime(set->size + 1);
+	unsigned int newSize = next_prime(set.size + 1);
 	// Allocate a new table.
 	cpHashSetBin **newTable = (cpHashSetBin **)cpcalloc(newSize, sizeof(cpHashSetBin *));
 	
 	// Iterate over the chains.
-	for(unsigned int i=0; i<set->size; i++){
+	for(unsigned int i=0; i<set.size; i++){
 		// Rehash the bins into the new table.
-		cpHashSetBin *bin = set->table[i];
+		cpHashSetBin *bin = set.table[i];
 		while(bin){
-			cpHashSetBin *next = bin->next;
+			cpHashSetBin *next = bin.next;
 			
-			cpHashValue idx = bin->hash%newSize;
-			bin->next = newTable[idx];
+			cpHashValue idx = bin.hash%newSize;
+			bin.next = newTable[idx];
 			newTable[idx] = bin;
 			
 			bin = next;
 		}
 	}
 	
-	cpfree(set->table);
+	cpfree(set.table);
 	
-	set->table = newTable;
-	set->size = newSize;
+	set.table = newTable;
+	set.size = newSize;
 }
 
 static void
 recycleBin(cpHashSet *set, cpHashSetBin *bin)
 {
-	bin->next = set->pooledBins;
-	set->pooledBins = bin;
-	bin->elt = NULL;
+	bin.next = set.pooledBins;
+	set.pooledBins = bin;
+	bin.elt = null;
 }
 
 static cpHashSetBin *
 getUnusedBin(cpHashSet *set)
 {
-	cpHashSetBin *bin = set->pooledBins;
+	cpHashSetBin *bin = set.pooledBins;
 	
 	if(bin){
-		set->pooledBins = bin->next;
+		set.pooledBins = bin.next;
 		return bin;
 	} else {
 		// Pool is exhausted, make more
 		int count = CP_BUFFER_BYTES/sizeof(cpHashSetBin);
-		cpAssertHard(count, "Internal Error: Buffer size is too small.");
+		// cpAssertHard(count, "Internal Error: Buffer size is too small.");
 		
 		cpHashSetBin *buffer = (cpHashSetBin *)cpcalloc(1, CP_BUFFER_BYTES);
-		cpArrayPush(set->allocatedBuffers, buffer);
+		cpArrayPush(set.allocatedBuffers, buffer);
 		
 		// push all but the first one, return it instead
 		for(int i=1; i<count; i++) recycleBin(set, buffer + i);
@@ -146,104 +146,104 @@ getUnusedBin(cpHashSet *set)
 int
 cpHashSetCount(cpHashSet *set)
 {
-	return set->entries;
+	return set.entries;
 }
 
-void *
-cpHashSetInsert(cpHashSet *set, cpHashValue hash, void *ptr, void *data, cpHashSetTransFunc trans)
+object 
+cpHashSetInsert(cpHashSet *set, cpHashValue hash, object ptr, object data, cpHashSetTransFunc trans)
 {
-	cpHashValue idx = hash%set->size;
+	cpHashValue idx = hash%set.size;
 	
 	// Find the bin with the matching element.
-	cpHashSetBin *bin = set->table[idx];
-	while(bin && !set->eql(ptr, bin->elt))
-		bin = bin->next;
+	cpHashSetBin *bin = set.table[idx];
+	while(bin && !set.eql(ptr, bin.elt))
+		bin = bin.next;
 	
 	// Create it if necessary.
 	if(!bin){
 		bin = getUnusedBin(set);
-		bin->hash = hash;
-		bin->elt = (trans ? trans(ptr, data) : data);
+		bin.hash = hash;
+		bin.elt = (trans ? trans(ptr, data) : data);
 		
-		bin->next = set->table[idx];
-		set->table[idx] = bin;
+		bin.next = set.table[idx];
+		set.table[idx] = bin;
 		
-		set->entries++;
+		set.entries++;
 		if(setIsFull(set)) cpHashSetResize(set);
 	}
 	
-	return bin->elt;
+	return bin.elt;
 }
 
-void *
-cpHashSetRemove(cpHashSet *set, cpHashValue hash, void *ptr)
+object 
+cpHashSetRemove(cpHashSet *set, cpHashValue hash, object ptr)
 {
-	cpHashValue idx = hash%set->size;
+	cpHashValue idx = hash%set.size;
 	
-	cpHashSetBin **prev_ptr = &set->table[idx];
-	cpHashSetBin *bin = set->table[idx];
+	cpHashSetBin **prev_ptr = &set.table[idx];
+	cpHashSetBin *bin = set.table[idx];
 	
 	// Find the bin
-	while(bin && !set->eql(ptr, bin->elt)){
-		prev_ptr = &bin->next;
-		bin = bin->next;
+	while(bin && !set.eql(ptr, bin.elt)){
+		prev_ptr = &bin.next;
+		bin = bin.next;
 	}
 	
 	// Remove it if it exists.
 	if(bin){
 		// Update the previous linked list pointer
-		(*prev_ptr) = bin->next;
-		set->entries--;
+		(*prev_ptr) = bin.next;
+		set.entries--;
 		
-		void *elt = bin->elt;
+		object elt = bin.elt;
 		recycleBin(set, bin);
 		
 		return elt;
 	}
 	
-	return NULL;
+	return null;
 }
 
-void *
-cpHashSetFind(cpHashSet *set, cpHashValue hash, void *ptr)
+object 
+cpHashSetFind(cpHashSet *set, cpHashValue hash, object ptr)
 {	
-	cpHashValue idx = hash%set->size;
-	cpHashSetBin *bin = set->table[idx];
-	while(bin && !set->eql(ptr, bin->elt))
-		bin = bin->next;
+	cpHashValue idx = hash%set.size;
+	cpHashSetBin *bin = set.table[idx];
+	while(bin && !set.eql(ptr, bin.elt))
+		bin = bin.next;
 		
-	return (bin ? bin->elt : set->default_value);
+	return (bin ? bin.elt : set.default_value);
 }
 
 void
-cpHashSetEach(cpHashSet *set, cpHashSetIteratorFunc func, void *data)
+cpHashSetEach(cpHashSet *set, cpHashSetIteratorFunc func, object data)
 {
-	for(unsigned int i=0; i<set->size; i++){
-		cpHashSetBin *bin = set->table[i];
+	for(unsigned int i=0; i<set.size; i++){
+		cpHashSetBin *bin = set.table[i];
 		while(bin){
-			cpHashSetBin *next = bin->next;
-			func(bin->elt, data);
+			cpHashSetBin *next = bin.next;
+			func(bin.elt, data);
 			bin = next;
 		}
 	}
 }
 
 void
-cpHashSetFilter(cpHashSet *set, cpHashSetFilterFunc func, void *data)
+cpHashSetFilter(cpHashSet *set, cpHashSetFilterFunc func, object data)
 {
-	for(unsigned int i=0; i<set->size; i++){
+	for(unsigned int i=0; i<set.size; i++){
 		// The rest works similarly to cpHashSetRemove() above.
-		cpHashSetBin **prev_ptr = &set->table[i];
-		cpHashSetBin *bin = set->table[i];
+		cpHashSetBin **prev_ptr = &set.table[i];
+		cpHashSetBin *bin = set.table[i];
 		while(bin){
-			cpHashSetBin *next = bin->next;
+			cpHashSetBin *next = bin.next;
 			
-			if(func(bin->elt, data)){
-				prev_ptr = &bin->next;
+			if(func(bin.elt, data)){
+				prev_ptr = &bin.next;
 			} else {
 				(*prev_ptr) = next;
 
-				set->entries--;
+				set.entries--;
 				recycleBin(set, bin);
 			}
 			

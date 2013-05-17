@@ -25,60 +25,60 @@
 static void
 preStep(cpPinJoint *joint, float dt)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
-	joint->r1 = cpvrotate(joint->anchr1, a->rot);
-	joint->r2 = cpvrotate(joint->anchr2, b->rot);
+	joint.r1 = cpvrotate(joint.anchr1, a.rot);
+	joint.r2 = cpvrotate(joint.anchr2, b.rot);
 	
-	cpVect delta = cpvsub(cpvadd(b->p, joint->r2), cpvadd(a->p, joint->r1));
+	cpVect delta = cpvsub(cpvadd(b.p, joint.r2), cpvadd(a.p, joint.r1));
 	float dist = cpvlength(delta);
-	joint->n = cpvmult(delta, 1.0f/(dist ? dist : (float)INFINITY));
+	joint.n = cpvmult(delta, 1.0f/(dist ? dist : float.PositiveInfinity));
 	
 	// calculate mass normal
-	joint->nMass = 1.0f/k_scalar(a, b, joint->r1, joint->r2, joint->n);
+	joint.nMass = 1.0f/k_scalar(a, b, joint.r1, joint.r2, joint.n);
 	
 	// calculate bias velocity
-	float maxBias = joint->constraint.maxBias;
-	joint->bias = cpfclamp(-bias_coef(joint->constraint.errorBias, dt)*(dist - joint->dist)/dt, -maxBias, maxBias);
+	float maxBias = joint.constraint.maxBias;
+	joint.bias = cpfclamp(-bias_coef(joint.constraint.errorBias, dt)*(dist - joint.dist)/dt, -maxBias, maxBias);
 }
 
 static void
 applyCachedImpulse(cpPinJoint *joint, float dt_coef)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
 	
-	cpVect j = cpvmult(joint->n, joint->jnAcc*dt_coef);
-	apply_impulses(a, b, joint->r1, joint->r2, j);
+	cpVect j = cpvmult(joint.n, joint.jnAcc*dt_coef);
+	apply_impulses(a, b, joint.r1, joint.r2, j);
 }
 
 static void
 applyImpulse(cpPinJoint *joint, float dt)
 {
-	cpBody *a = joint->constraint.a;
-	cpBody *b = joint->constraint.b;
-	cpVect n = joint->n;
+	cpBody a = joint.constraint.a;
+	cpBody b = joint.constraint.b;
+	cpVect n = joint.n;
 
 	// compute relative velocity
-	float vrn = normal_relative_velocity(a, b, joint->r1, joint->r2, n);
+	float vrn = normal_relative_velocity(a, b, joint.r1, joint.r2, n);
 	
-	float jnMax = joint->constraint.maxForce*dt;
+	float jnMax = joint.constraint.maxForce*dt;
 	
 	// compute normal impulse
-	float jn = (joint->bias - vrn)*joint->nMass;
-	float jnOld = joint->jnAcc;
-	joint->jnAcc = cpfclamp(jnOld + jn, -jnMax, jnMax);
-	jn = joint->jnAcc - jnOld;
+	float jn = (joint.bias - vrn)*joint.nMass;
+	float jnOld = joint.jnAcc;
+	joint.jnAcc = cpfclamp(jnOld + jn, -jnMax, jnMax);
+	jn = joint.jnAcc - jnOld;
 	
 	// apply impulse
-	apply_impulses(a, b, joint->r1, joint->r2, cpvmult(n, jn));
+	apply_impulses(a, b, joint.r1, joint.r2, cpvmult(n, jn));
 }
 
 static float
 getImpulse(cpPinJoint *joint)
 {
-	return cpfabs(joint->jnAcc);
+	return cpfabs(joint.jnAcc);
 }
 
 static cpConstraintClass klass = {
@@ -91,33 +91,33 @@ CP_DefineClassGetter(cpPinJoint)
 
 
 cpPinJoint *
-cpPinJointAlloc(void)
+cpPinJointAlloc()
 {
 	return (cpPinJoint *)cpcalloc(1, sizeof(cpPinJoint));
 }
 
 cpPinJoint *
-cpPinJointInit(cpPinJoint *joint, cpBody *a, cpBody *b, cpVect anchr1, cpVect anchr2)
+cpPinJointInit(cpPinJoint *joint, cpBody a, cpBody b, cpVect anchr1, cpVect anchr2)
 {
 	cpConstraintInit((cpConstraint *)joint, &klass, a, b);
 	
-	joint->anchr1 = anchr1;
-	joint->anchr2 = anchr2;
+	joint.anchr1 = anchr1;
+	joint.anchr2 = anchr2;
 	
 	// STATIC_BODY_CHECK
-	cpVect p1 = (a ? cpvadd(a->p, cpvrotate(anchr1, a->rot)) : anchr1);
-	cpVect p2 = (b ? cpvadd(b->p, cpvrotate(anchr2, b->rot)) : anchr2);
-	joint->dist = cpvlength(cpvsub(p2, p1));
+	cpVect p1 = (a ? cpvadd(a.p, cpvrotate(anchr1, a.rot)) : anchr1);
+	cpVect p2 = (b ? cpvadd(b.p, cpvrotate(anchr2, b.rot)) : anchr2);
+	joint.dist = cpvlength(cpvsub(p2, p1));
 	
-	cpAssertWarn(joint->dist > 0.0, "You created a 0 length pin joint. A pivot joint will be much more stable.");
+	// cpAssertWarn(joint.dist > 0.0, "You created a 0 length pin joint. A pivot joint will be much more stable.");
 
-	joint->jnAcc = 0.0f;
+	joint.jnAcc = 0.0f;
 	
 	return joint;
 }
 
 cpConstraint *
-cpPinJointNew(cpBody *a, cpBody *b, cpVect anchr1, cpVect anchr2)
+cpPinJointNew(cpBody a, cpBody b, cpVect anchr1, cpVect anchr2)
 {
 	return (cpConstraint *)cpPinJointInit(cpPinJointAlloc(), a, b, anchr1, anchr2);
 }

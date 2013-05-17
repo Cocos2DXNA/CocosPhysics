@@ -19,18 +19,22 @@
  * SOFTWARE.
  */
 
-#include "chipmunk_private.h"
+using System;
+namespace CocosPhysics.Chipmunk
+{
+    public static partial class Physics
+    {
 
-static cpSpatialIndexClass *Klass();
+static cpSpatialIndexClass Klass();
 
 //MARK: Basic Structures
 
-typedef struct Bounds {
+// typedef struct Bounds {
 	float min, max;
 } Bounds;
 
-typedef struct TableCell {
-	void *obj;
+// typedef struct TableCell {
+	object obj;
 	Bounds bounds;
 } TableCell;
 
@@ -57,16 +61,16 @@ BBToBounds(cpSweep1D *sweep, cpBB bb)
 }
 
 static TableCell
-MakeTableCell(cpSweep1D *sweep, void *obj)
+MakeTableCell(cpSweep1D *sweep, object obj)
 {
-	TableCell cell = {obj, BBToBounds(sweep, sweep->spatialIndex.bbfunc(obj))};
+	TableCell cell = {obj, BBToBounds(sweep, sweep.spatialIndex.bbfunc(obj))};
 	return cell;
 }
 
 //MARK: Memory Management Functions
 
 cpSweep1D *
-cpSweep1DAlloc(void)
+cpSweep1DAlloc()
 {
 	return (cpSweep1D *)cpcalloc(1, sizeof(cpSweep1D));
 }
@@ -74,8 +78,8 @@ cpSweep1DAlloc(void)
 static void
 ResizeTable(cpSweep1D *sweep, int size)
 {
-	sweep->max = size;
-	sweep->table = (TableCell *)cprealloc(sweep->table, size*sizeof(TableCell));
+	sweep.max = size;
+	sweep.table = (TableCell *)cprealloc(sweep.table, size*sizeof(TableCell));
 }
 
 cpSpatialIndex *
@@ -83,7 +87,7 @@ cpSweep1DInit(cpSweep1D *sweep, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *sta
 {
 	cpSpatialIndexInit((cpSpatialIndex *)sweep, Klass(), bbfunc, staticIndex);
 	
-	sweep->num = 0;
+	sweep.num = 0;
 	ResizeTable(sweep, 32);
 	
 	return (cpSpatialIndex *)sweep;
@@ -98,8 +102,8 @@ cpSweep1DNew(cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
 static void
 cpSweep1DDestroy(cpSweep1D *sweep)
 {
-	cpfree(sweep->table);
-	sweep->table = NULL;
+	cpfree(sweep.table);
+	sweep.table = null;
 }
 
 //MARK: Misc
@@ -107,48 +111,48 @@ cpSweep1DDestroy(cpSweep1D *sweep)
 static int
 cpSweep1DCount(cpSweep1D *sweep)
 {
-	return sweep->num;
+	return sweep.num;
 }
 
 static void
-cpSweep1DEach(cpSweep1D *sweep, cpSpatialIndexIteratorFunc func, void *data)
+cpSweep1DEach(cpSweep1D *sweep, cpSpatialIndexIteratorFunc func, object data)
 {
-	TableCell *table = sweep->table;
-	for(int i=0, count=sweep->num; i<count; i++) func(table[i].obj, data);
+	TableCell *table = sweep.table;
+	for(int i=0, count=sweep.num; i<count; i++) func(table[i].obj, data);
 }
 
 static int
-cpSweep1DContains(cpSweep1D *sweep, void *obj, cpHashValue hashid)
+cpSweep1DContains(cpSweep1D *sweep, object obj, cpHashValue hashid)
 {
-	TableCell *table = sweep->table;
-	for(int i=0, count=sweep->num; i<count; i++){
-		if(table[i].obj == obj) return cpTrue;
+	TableCell *table = sweep.table;
+	for(int i=0, count=sweep.num; i<count; i++){
+		if(table[i].obj == obj) return true;
 	}
 	
-	return cpFalse;
+	return false;
 }
 
 //MARK: Basic Operations
 
 static void
-cpSweep1DInsert(cpSweep1D *sweep, void *obj, cpHashValue hashid)
+cpSweep1DInsert(cpSweep1D *sweep, object obj, cpHashValue hashid)
 {
-	if(sweep->num == sweep->max) ResizeTable(sweep, sweep->max*2);
+	if(sweep.num == sweep.max) ResizeTable(sweep, sweep.max*2);
 	
-	sweep->table[sweep->num] = MakeTableCell(sweep, obj);
-	sweep->num++;
+	sweep.table[sweep.num] = MakeTableCell(sweep, obj);
+	sweep.num++;
 }
 
 static void
-cpSweep1DRemove(cpSweep1D *sweep, void *obj, cpHashValue hashid)
+cpSweep1DRemove(cpSweep1D *sweep, object obj, cpHashValue hashid)
 {
-	TableCell *table = sweep->table;
-	for(int i=0, count=sweep->num; i<count; i++){
+	TableCell *table = sweep.table;
+	for(int i=0, count=sweep.num; i<count; i++){
 		if(table[i].obj == obj){
-			int num = --sweep->num;
+			int num = --sweep.num;
 			
 			table[i] = table[num];
-			table[num].obj = NULL;
+			table[num].obj = null;
 			
 			return;
 		}
@@ -158,7 +162,7 @@ cpSweep1DRemove(cpSweep1D *sweep, void *obj, cpHashValue hashid)
 //MARK: Reindexing Functions
 
 static void
-cpSweep1DReindexObject(cpSweep1D *sweep, void *obj, cpHashValue hashid)
+cpSweep1DReindexObject(cpSweep1D *sweep, object obj, cpHashValue hashid)
 {
 	// Nothing to do here
 }
@@ -173,28 +177,28 @@ cpSweep1DReindex(cpSweep1D *sweep)
 //MARK: Query Functions
 
 static void
-cpSweep1DQuery(cpSweep1D *sweep, void *obj, cpBB bb, cpSpatialIndexQueryFunc func, void *data)
+cpSweep1DQuery(cpSweep1D *sweep, object obj, cpBB bb, cpSpatialIndexQueryFunc func, object data)
 {
 	// Implementing binary search here would allow you to find an upper limit
 	// but not a lower limit. Probably not worth the hassle.
 	
 	Bounds bounds = BBToBounds(sweep, bb);
 	
-	TableCell *table = sweep->table;
-	for(int i=0, count=sweep->num; i<count; i++){
+	TableCell *table = sweep.table;
+	for(int i=0, count=sweep.num; i<count; i++){
 		TableCell cell = table[i];
 		if(BoundsOverlap(bounds, cell.bounds) && obj != cell.obj) func(obj, cell.obj, data);
 	}
 }
 
 static void
-cpSweep1DSegmentQuery(cpSweep1D *sweep, void *obj, cpVect a, cpVect b, float t_exit, cpSpatialIndexSegmentQueryFunc func, void *data)
+cpSweep1DSegmentQuery(cpSweep1D *sweep, object obj, cpVect a, cpVect b, float t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
 {
 	cpBB bb = cpBBExpand(cpBBNew(a.x, a.y, a.x, a.y), b);
 	Bounds bounds = BBToBounds(sweep, bb);
 	
-	TableCell *table = sweep->table;
-	for(int i=0, count=sweep->num; i<count; i++){
+	TableCell *table = sweep.table;
+	for(int i=0, count=sweep.num; i<count; i++){
 		TableCell cell = table[i];
 		if(BoundsOverlap(bounds, cell.bounds)) func(obj, cell.obj, data);
 	}
@@ -205,18 +209,18 @@ cpSweep1DSegmentQuery(cpSweep1D *sweep, void *obj, cpVect a, cpVect b, float t_e
 static int
 TableSort(TableCell *a, TableCell *b)
 {
-	return (a->bounds.min < b->bounds.min ? -1 : (a->bounds.min > b->bounds.min ? 1 : 0));
+	return (a.bounds.min < b.bounds.min ? -1 : (a.bounds.min > b.bounds.min ? 1 : 0));
 }
 
 static void
-cpSweep1DReindexQuery(cpSweep1D *sweep, cpSpatialIndexQueryFunc func, void *data)
+cpSweep1DReindexQuery(cpSweep1D *sweep, cpSpatialIndexQueryFunc func, object data)
 {
-	TableCell *table = sweep->table;
-	int count = sweep->num;
+	TableCell *table = sweep.table;
+	int count = sweep.num;
 	
 	// Update bounds and sort
 	for(int i=0; i<count; i++) table[i] = MakeTableCell(sweep, table[i].obj);
-	qsort(table, count, sizeof(TableCell), (int (*)(void *, void *))TableSort); // TODO use insertion sort instead
+	qsort(table, count, sizeof(TableCell), (int (*)(object , object ))TableSort); // TODO use insertion sort instead
 	
 	for(int i=0; i<count; i++){
 		TableCell cell = table[i];
@@ -229,7 +233,7 @@ cpSweep1DReindexQuery(cpSweep1D *sweep, cpSpatialIndexQueryFunc func, void *data
 	
 	// Reindex query is also responsible for colliding against the static index.
 	// Fortunately there is a helper function for that.
-	cpSpatialIndexCollideStatic((cpSpatialIndex *)sweep, sweep->spatialIndex.staticIndex, func, data);
+	cpSpatialIndexCollideStatic((cpSpatialIndex *)sweep, sweep.spatialIndex.staticIndex, func, data);
 }
 
 static cpSpatialIndexClass klass = {
@@ -250,5 +254,7 @@ static cpSpatialIndexClass klass = {
 	(cpSpatialIndexSegmentQueryImpl)cpSweep1DSegmentQuery,
 };
 
-static cpSpatialIndexClass *Klass(){return &klass;}
+static cpSpatialIndexClass Klass(){return &klass;}
 
+}
+}

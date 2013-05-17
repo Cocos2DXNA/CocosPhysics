@@ -24,10 +24,10 @@
 
 // TODO: Comment me!
 
-void cpConstraintDestroy(cpConstraint *constraint){}
+void cpConstraintDestroy(cpConstraint constraint){}
 
 void
-cpConstraintFree(cpConstraint *constraint)
+cpConstraintFree(cpConstraint constraint)
 {
 	if(constraint){
 		cpConstraintDestroy(constraint);
@@ -38,21 +38,21 @@ cpConstraintFree(cpConstraint *constraint)
 // *** declared in util.h TODO move declaration to chipmunk_private.h
 
 void
-cpConstraintInit(cpConstraint *constraint, cpConstraintClass *klass, cpBody *a, cpBody *b)
+cpConstraintInit(cpConstraint constraint, cpConstraintClass *klass, cpBody a, cpBody b)
 {
-	constraint->klass = klass;
+	constraint.klass = klass;
 	
-	constraint->a = a;
-	constraint->b = b;
-	constraint->space = NULL;
+	constraint.a = a;
+	constraint.b = b;
+	constraint.space = null;
 	
-	constraint->next_a = NULL;
-	constraint->next_b = NULL;
+	constraint.next_a = null;
+	constraint.next_b = null;
 	
-	constraint->maxForce = (float)INFINITY;
-	constraint->errorBias = cpfpow(1.0f - 0.1f, 60.0f);
-	constraint->maxBias = (float)INFINITY;
+	constraint.maxForce = float.PositiveInfinity;
+	constraint.errorBias = cpfpow(1.0f - 0.1f, 60.0f);
+	constraint.maxBias = float.PositiveInfinity;
 	
-	constraint->preSolve = NULL;
-	constraint->postSolve = NULL;
+	constraint.preSolve = null;
+	constraint.postSolve = null;
 }

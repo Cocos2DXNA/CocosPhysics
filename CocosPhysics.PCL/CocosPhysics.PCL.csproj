@@ -130,12 +130,10 @@
     <Compile Include="Chipmunk\constraints\cpSimpleMotor.cs" />
     <Compile Include="Chipmunk\constraints\cpSlideJoint.cs" />
     <Compile Include="Chipmunk\cpArbiter.cs" />
-    <Compile Include="Chipmunk\cpArray.cs" />
     <Compile Include="Chipmunk\cpBB.cs" />
     <Compile Include="Chipmunk\cpBBTree.cs" />
     <Compile Include="Chipmunk\cpBody.cs" />
     <Compile Include="Chipmunk\cpCollision.cs" />
-    <Compile Include="Chipmunk\cpHashSet.cs" />
     <Compile Include="Chipmunk\cpPolyShape.cs" />
     <Compile Include="Chipmunk\cpShape.cs" />
     <Compile Include="Chipmunk\cpSpace.cs" />

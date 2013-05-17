@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-namespace Chipmunk
+namespace CocosPhysics.Chipmunk
 {
     public static partial class Physics
     {

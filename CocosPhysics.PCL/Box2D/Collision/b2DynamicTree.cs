@@ -63,7 +63,7 @@ namespace Box2D.Collision
     {
         private int m_root;
 
-        private b2TreeNode[] m_nodes;
+        private b2TreeNode[]  m_nodes;
         private int m_nodeCount;
         private int m_nodeCapacity;
 
@@ -112,7 +112,7 @@ namespace Box2D.Collision
                 Debug.Assert(m_nodeCount == m_nodeCapacity);
 
                 // The free list is empty. Rebuild a bigger pool.
-                b2TreeNode[] oldNodes = m_nodes;
+                b2TreeNode[]  oldNodes = m_nodes;
                 m_nodeCapacity *= 2;
                 m_nodes = new b2TreeNode[m_nodeCapacity];
 
