@@ -24,7 +24,7 @@ namespace CocosPhysics.Chipmunk
     public static partial class Physics
     {
 public static void
-preStep(cpSlideJoint *joint, float dt)
+preStep(cpSlideJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -32,9 +32,9 @@ preStep(cpSlideJoint *joint, float dt)
 	joint.r1 = cpvrotate(joint.anchr1, a.rot);
 	joint.r2 = cpvrotate(joint.anchr2, b.rot);
 	
-	cpVect delta = cpvsub(cpvadd(b.p, joint.r2), cpvadd(a.p, joint.r1));
-	float dist = cpvlength(delta);
-	float pdist = 0.0f;
+	cpVect delta = cpVect.Sub(cpVect.Add(b.p, joint.r2), cpVect.Add(a.p, joint.r1));
+	double dist = cpvlength(delta);
+	double pdist = 0.0f;
 	if(dist > joint.max) {
 		pdist = dist - joint.max;
 		joint.n = cpvnormalize_safe(delta);
@@ -50,22 +50,22 @@ preStep(cpSlideJoint *joint, float dt)
 	joint.nMass = 1.0f/k_scalar(a, b, joint.r1, joint.r2, joint.n);
 	
 	// calculate bias velocity
-	float maxBias = joint.constraint.maxBias;
+	double maxBias = joint.constraint.maxBias;
 	joint.bias = cpfclamp(-bias_coef(joint.constraint.errorBias, dt)*pdist/dt, -maxBias, maxBias);
 }
 
 static void
-applyCachedImpulse(cpSlideJoint *joint, float dt_coef)
+applyCachedImpulse(cpSlideJoint *joint, double dt_coef)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
-	cpVect j = cpvmult(joint.n, joint.jnAcc*dt_coef);
+	cpVect j = cpVect.Multiply(joint.n, joint.jnAcc*dt_coef);
 	apply_impulses(a, b, joint.r1, joint.r2, j);
 }
 
 static void
-applyImpulse(cpSlideJoint *joint, float dt)
+applyImpulse(cpSlideJoint *joint, double dt)
 {
 	if(cpveql(joint.n, cpvzero)) return;  // early exit
 
@@ -78,22 +78,22 @@ applyImpulse(cpSlideJoint *joint, float dt)
 		
 	// compute relative velocity
 	cpVect vr = relative_velocity(a, b, r1, r2);
-	float vrn = cpvdot(vr, n);
+	double vrn = cpVect.Dot(vr, n);
 	
 	// compute normal impulse
-	float jn = (joint.bias - vrn)*joint.nMass;
-	float jnOld = joint.jnAcc;
+	double jn = (joint.bias - vrn)*joint.nMass;
+	double jnOld = joint.jnAcc;
 	joint.jnAcc = cpfclamp(jnOld + jn, -joint.constraint.maxForce*dt, 0.0f);
 	jn = joint.jnAcc - jnOld;
 	
 	// apply impulse
-	apply_impulses(a, b, joint.r1, joint.r2, cpvmult(n, jn));
+	apply_impulses(a, b, joint.r1, joint.r2, cpVect.Multiply(n, jn));
 }
 
-static float
+static double
 getImpulse(cpConstraint joint)
 {
-	return cpfabs(((cpSlideJoint *)joint).jnAcc);
+	return System.Math.Abs(((cpSlideJoint *)joint).jnAcc);
 }
 
 static cpConstraintClass klass = {
@@ -111,7 +111,7 @@ cpSlideJointAlloc()
 }
 
 cpSlideJoint *
-cpSlideJointInit(cpSlideJoint *joint, cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, float min, float max)
+cpSlideJointInit(cpSlideJoint *joint, cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, double min, double max)
 {
 	cpConstraintInit((cpConstraint )joint, &klass, a, b);
 	
@@ -126,7 +126,7 @@ cpSlideJointInit(cpSlideJoint *joint, cpBody a, cpBody b, cpVect anchr1, cpVect 
 }
 
 cpConstraint 
-cpSlideJointNew(cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, float min, float max)
+cpSlideJointNew(cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, double min, double max)
 {
 	return (cpConstraint )cpSlideJointInit(cpSlideJointAlloc(), a, b, anchr1, anchr2, min, max);
 }

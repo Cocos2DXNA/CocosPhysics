@@ -30,18 +30,18 @@ namespace CocosPhysics.Chipmunk
             cpVect[] src = poly.verts;
             cpVect[] dst = poly.tVerts;
 
-            float l = float.PositiveInfinity, r = float.NegativeInfinity;
-            float b = float.PositiveInfinity, t = float.NegativeInfinity;
+            double l = double.PositiveInfinity, r = double.NegativeInfinity;
+            double b = double.PositiveInfinity, t = double.NegativeInfinity;
 
             for (int i = 0; i < poly.numVerts; i++)
             {
-                cpVect v = cpvadd(p, cpvrotate(src[i], rot));
+                cpVect v = cpVect.Add(p, cpvrotate(src[i], rot));
 
                 dst[i] = v;
-                l = cpfmin(l, v.x);
-                r = cpfmax(r, v.x);
-                b = cpfmin(b, v.y);
-                t = cpfmax(t, v.y);
+                l = System.Math.Min(l, v.x);
+                r = System.Math.Max(r, v.x);
+                b = System.Math.Min(b, v.y);
+                t = System.Math.Max(t, v.y);
             }
 
             return cpBBNew(l, b, r, t);
@@ -57,7 +57,7 @@ namespace CocosPhysics.Chipmunk
             {
                 cpVect n = cpvrotate(src[i].n, rot);
                 dst[i].n = n;
-                dst[i].d = cpvdot(p, n) + src[i].d;
+                dst[i].d = cpVect.Dot(p, n) + src[i].d;
             }
         }
 
@@ -85,7 +85,7 @@ namespace CocosPhysics.Chipmunk
             cpVect[] verts = poly.tVerts;
 
             cpVect v0 = verts[count - 1];
-            float minDist = float.PositiveInfinity;
+            double minDist = double.PositiveInfinity;
             cpVect closestPoint = cpvzero;
             bool outside = false;
 
@@ -96,7 +96,7 @@ namespace CocosPhysics.Chipmunk
                 cpVect v1 = verts[i];
                 cpVect closest = cpClosetPointOnSegment(p, v0, v1);
 
-                float dist = cpvdist(p, closest);
+                double dist = cpVect.Distance(p, closest);
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -121,17 +121,17 @@ namespace CocosPhysics.Chipmunk
             for (int i = 0; i < numVerts; i++)
             {
                 cpVect n = axes[i].n;
-                float an = cpvdot(a, n);
+                double an = cpVect.Dot(a, n);
                 if (axes[i].d > an) continue;
 
-                float bn = cpvdot(b, n);
-                float t = (axes[i].d - an) / (bn - an);
+                double bn = cpVect.Dot(b, n);
+                double t = (axes[i].d - an) / (bn - an);
                 if (t < 0.0f || 1.0f < t) continue;
 
                 cpVect point = cpvlerp(a, b, t);
-                float dt = -cpvcross(n, point);
-                float dtMin = -cpvcross(n, verts[i]);
-                float dtMax = -cpvcross(n, verts[(i + 1) % numVerts]);
+                double dt = -cpVect.CrossProduct(n, point);
+                double dtMin = -cpVect.CrossProduct(n, verts[i]);
+                double dtMax = -cpVect.CrossProduct(n, verts[(i + 1) % numVerts]);
 
                 if (dtMin <= dt && dt <= dtMax)
                 {
@@ -159,7 +159,7 @@ namespace CocosPhysics.Chipmunk
                 cpVect b = verts[(i + 1) % numVerts];
                 cpVect c = verts[(i + 2) % numVerts];
 
-                if (cpvcross(cpvsub(b, a), cpvsub(c, a)) > 0.0f)
+                if (cpVect.CrossProduct(cpVect.Sub(b, a), cpVect.Sub(c, a)) > 0.0f)
                 {
                     return false;
                 }
@@ -199,13 +199,13 @@ namespace CocosPhysics.Chipmunk
 
             for (int i = 0; i < numVerts; i++)
             {
-                cpVect a = cpvadd(offset, verts[i]);
-                cpVect b = cpvadd(offset, verts[(i + 1) % numVerts]);
-                cpVect n = cpvnormalize(cpvperp(cpvsub(b, a)));
+                cpVect a = cpVect.Add(offset, verts[i]);
+                cpVect b = cpVect.Add(offset, verts[(i + 1) % numVerts]);
+                cpVect n = cpvnormalize(cpvperp(cpVect.Sub(b, a)));
 
                 poly.verts[i] = a;
                 poly.planes[i].n = n;
-                poly.planes[i].d = cpvdot(n, a);
+                poly.planes[i].d = cpVect.Dot(n, a);
             }
 
         }
@@ -226,10 +226,10 @@ namespace CocosPhysics.Chipmunk
         }
 
         cpPolyShape
-        cpBoxShapeInit(cpPolyShape poly, cpBody body, float width, float height)
+        cpBoxShapeInit(cpPolyShape poly, cpBody body, double width, double height)
         {
-            float hw = width / 2.0f;
-            float hh = height / 2.0f;
+            double hw = width / 2.0f;
+            double hh = height / 2.0f;
 
             return cpBoxShapeInit2(poly, body, cpBBNew(-hw, -hh, hw, hh));
         }
@@ -248,7 +248,7 @@ namespace CocosPhysics.Chipmunk
         }
 
         cpShape
-        cpBoxShapeNew(cpBody body, float width, float height)
+        cpBoxShapeNew(cpBody body, double width, double height)
         {
             return (cpShape)cpBoxShapeInit(new cpPolyShape(), body, width, height);
         }

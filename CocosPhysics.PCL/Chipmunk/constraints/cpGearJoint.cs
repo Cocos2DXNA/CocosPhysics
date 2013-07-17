@@ -23,7 +23,7 @@
 #include "constraints/util.h"
 
 static void
-preStep(cpGearJoint *joint, float dt)
+preStep(cpGearJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -32,35 +32,35 @@ preStep(cpGearJoint *joint, float dt)
 	joint.iSum = 1.0f/(a.i_inv*joint.ratio_inv + joint.ratio*b.i_inv);
 	
 	// calculate bias velocity
-	float maxBias = joint.constraint.maxBias;
+	double maxBias = joint.constraint.maxBias;
 	joint.bias = cpfclamp(-bias_coef(joint.constraint.errorBias, dt)*(b.a*joint.ratio - a.a - joint.phase)/dt, -maxBias, maxBias);
 }
 
 static void
-applyCachedImpulse(cpGearJoint *joint, float dt_coef)
+applyCachedImpulse(cpGearJoint *joint, double dt_coef)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
-	float j = joint.jAcc*dt_coef;
+	double j = joint.jAcc*dt_coef;
 	a.w -= j*a.i_inv*joint.ratio_inv;
 	b.w += j*b.i_inv;
 }
 
 static void
-applyImpulse(cpGearJoint *joint, float dt)
+applyImpulse(cpGearJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
 	// compute relative rotational velocity
-	float wr = b.w*joint.ratio - a.w;
+	double wr = b.w*joint.ratio - a.w;
 	
-	float jMax = joint.constraint.maxForce*dt;
+	double jMax = joint.constraint.maxForce*dt;
 	
 	// compute normal impulse	
-	float j = (joint.bias - wr)*joint.iSum;
-	float jOld = joint.jAcc;
+	double j = (joint.bias - wr)*joint.iSum;
+	double jOld = joint.jAcc;
 	joint.jAcc = cpfclamp(jOld + j, -jMax, jMax);
 	j = joint.jAcc - jOld;
 	
@@ -69,10 +69,10 @@ applyImpulse(cpGearJoint *joint, float dt)
 	b.w += j*b.i_inv;
 }
 
-static float
+static double
 getImpulse(cpGearJoint *joint)
 {
-	return cpfabs(joint.jAcc);
+	return System.Math.Abs(joint.jAcc);
 }
 
 static cpConstraintClass klass = {
@@ -90,7 +90,7 @@ cpGearJointAlloc()
 }
 
 cpGearJoint *
-cpGearJointInit(cpGearJoint *joint, cpBody a, cpBody b, float phase, float ratio)
+cpGearJointInit(cpGearJoint *joint, cpBody a, cpBody b, double phase, double ratio)
 {
 	cpConstraintInit((cpConstraint )joint, &klass, a, b);
 	
@@ -104,13 +104,13 @@ cpGearJointInit(cpGearJoint *joint, cpBody a, cpBody b, float phase, float ratio
 }
 
 cpConstraint 
-cpGearJointNew(cpBody a, cpBody b, float phase, float ratio)
+cpGearJointNew(cpBody a, cpBody b, double phase, double ratio)
 {
 	return (cpConstraint )cpGearJointInit(cpGearJointAlloc(), a, b, phase, ratio);
 }
 
 void
-cpGearJointSetRatio(cpConstraint constraint, float value)
+cpGearJointSetRatio(cpConstraint constraint, double value)
 {
 	cpConstraintCheckCast(constraint, cpGearJoint);
 	((cpGearJoint *)constraint).ratio = value;

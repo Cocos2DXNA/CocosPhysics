@@ -213,7 +213,7 @@ FloodFillComponent(cpBody root, cpBody body)
 }
 
 static bool
-ComponentActive(cpBody root, float threshold)
+ComponentActive(cpBody root, double threshold)
 {
 	CP_BODY_FOREACH_COMPONENT(root, body){
 		if(body.node.idleTime < threshold) return true;
@@ -223,9 +223,9 @@ ComponentActive(cpBody root, float threshold)
 }
 
 void
-cpSpaceProcessComponents(cpSpace space, float dt)
+cpSpaceProcessComponents(cpSpace space, double dt)
 {
-	bool sleep = (space.sleepTimeThreshold != float.PositiveInfinity);
+	bool sleep = (space.sleepTimeThreshold != double.PositiveInfinity);
 	cpArray *bodies = space.bodies;
 	
 #ifndef NDEBUG
@@ -239,15 +239,15 @@ cpSpaceProcessComponents(cpSpace space, float dt)
 	
 	// Calculate the kinetic energy of all the bodies.
 	if(sleep){
-		float dv = space.idleSpeedThreshold;
-		float dvsq = (dv ? dv*dv : cpvlengthsq(space.gravity)*dt*dt);
+		double dv = space.idleSpeedThreshold;
+		double dvsq = (dv ? dv*dv : cpVect.LengthSQ(space.gravity)*dt*dt);
 		
 		// update idling and reset component nodes
 		for(int i=0; i<bodies.num; i++){
 			cpBody body = (cpBody)bodies.arr[i];
 			
 			// Need to deal with infinite mass objects
-			float keThreshold = (dvsq ? body.m*dvsq : 0.0f);
+			double keThreshold = (dvsq ? body.m*dvsq : 0.0f);
 			body.node.idleTime = (cpBodyKineticEnergy(body) > keThreshold ? 0.0f : body.node.idleTime + dt);
 		}
 	}
@@ -353,7 +353,7 @@ activateTouchingHelper(cpShape shape, cpContactPointSet *points, cpShape other){
 
 void
 cpSpaceActivateShapesTouchingShape(cpSpace space, cpShape shape){
-	if(space.sleepTimeThreshold != float.PositiveInfinity){
+	if(space.sleepTimeThreshold != double.PositiveInfinity){
 		cpSpaceShapeQuery(space, shape, (cpSpaceShapeQueryFunc)activateTouchingHelper, shape);
 	}
 }

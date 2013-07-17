@@ -104,17 +104,17 @@ cpShapePointQuery(cpShape shape, cpVect p){
         {
                 null, 
                 cpvzero, 
-                float.PositiveInfinity
+                double.PositiveInfinity
         };
 	cpShapeNearestPointQuery(shape, p, ref info);
 	
 	return (info.d < 0.0f);
 }
 
-float
+double
 cpShapeNearestPointQuery(cpShape shape, cpVect p, ref cpNearestPointQueryInfo info)
 {
-	cpNearestPointQueryInfo blank = new cpNearestPointQueryInfo() {null, cpvzero, float.PositiveInfinity};
+	cpNearestPointQueryInfo blank = new cpNearestPointQueryInfo() {null, cpvzero, double.PositiveInfinity};
 	info = blank;
 	shape.klass.nearestPointQuery(shape, p, info);
 	return info.d;
@@ -130,7 +130,7 @@ cpShapeSegmentQuery(cpShape shape, cpVect a, cpVect b, ref cpSegmentQueryInfo in
 	if(nearest.d <= 0.0){
 		info.shape = shape;
 		info.t = 0.0;
-		info.n = cpvnormalize(cpvsub(a, nearest.p));
+		info.n = cpvnormalize(cpVect.Sub(a, nearest.p));
 	} else {
 		shape.klass.segmentQuery(shape, a, b, info);
 	}
@@ -141,36 +141,36 @@ cpShapeSegmentQuery(cpShape shape, cpVect a, cpVect b, ref cpSegmentQueryInfo in
 static cpBB
 cpCircleShapeCacheData(cpCircleShape circle, cpVect p, cpVect rot)
 {
-	cpVect c = circle.tc = cpvadd(p, cpvrotate(circle.c, rot));
+	cpVect c = circle.tc = cpVect.Add(p, cpvrotate(circle.c, rot));
 	return cpBBNewForCircle(c, circle.r);
 }
 
 static void
 cpCicleShapeNearestPointQuery(cpCircleShape circle, cpVect p, cpNearestPointQueryInfo info)
 {
-	cpVect delta = cpvsub(p, circle.tc);
-	float d = cpvlength(delta);
-	float r = circle.r;
+	cpVect delta = cpVect.Sub(p, circle.tc);
+	double d = cpvlength(delta);
+	double r = circle.r;
 	
 	info.shape = (cpShape )circle;
-	info.p = cpvadd(circle.tc, cpvmult(delta, r/d)); // TODO div/0
+	info.p = cpVect.Add(circle.tc, cpVect.Multiply(delta, r/d)); // TODO div/0
 	info.d = d - r;
 }
 
 static void
-circleSegmentQuery(cpShape shape, cpVect center, float r, cpVect a, cpVect b, cpSegmentQueryInfo info)
+circleSegmentQuery(cpShape shape, cpVect center, double r, cpVect a, cpVect b, cpSegmentQueryInfo info)
 {
-	cpVect da = cpvsub(a, center);
-	cpVect db = cpvsub(b, center);
+	cpVect da = cpVect.Sub(a, center);
+	cpVect db = cpVect.Sub(b, center);
 	
-	float qa = cpvdot(da, da) - 2.0f*cpvdot(da, db) + cpvdot(db, db);
-	float qb = -2.0f*cpvdot(da, da) + 2.0f*cpvdot(da, db);
-	float qc = cpvdot(da, da) - r*r;
+	double qa = cpVect.Dot(da, da) - 2.0f*cpVect.Dot(da, db) + cpVect.Dot(db, db);
+	double qb = -2.0f*cpVect.Dot(da, da) + 2.0f*cpVect.Dot(da, db);
+	double qc = cpVect.Dot(da, da) - r*r;
 	
-	float det = qb*qb - 4.0f*qa*qc;
+	double det = qb*qb - 4.0f*qa*qc;
 	
 	if(det >= 0.0f){
-		float t = (-qb - cpfsqrt(det))/(2.0f*qa);
+		double t = (-qb - System.Math.Sqrt(det))/(2.0f*qa);
 		if(0.0f<= t && t <= 1.0f){
 			info.shape = shape;
 			info.t = t;
@@ -195,7 +195,7 @@ static cpShapeClass cpCircleShapeClass = new cpShapeClass()
 };
 
 cpCircleShape 
-cpCircleShapeInit(cpCircleShape circle, cpBody body, float radius, cpVect offset)
+cpCircleShapeInit(cpCircleShape circle, cpBody body, double radius, cpVect offset)
 {
 	circle.c = offset;
 	circle.r = radius;
@@ -206,24 +206,24 @@ cpCircleShapeInit(cpCircleShape circle, cpBody body, float radius, cpVect offset
 }
 
 cpShape 
-cpCircleShapeNew(cpBody body, float radius, cpVect offset)
+cpCircleShapeNew(cpBody body, double radius, cpVect offset)
 {
 	return (cpShape )cpCircleShapeInit(new cpCircleShape(), body, radius, offset);
 }
 
 // CP_DefineShapeGetter(cpCircleShape, cpVect, c, Offset)
-// CP_DefineShapeGetter(cpCircleShape, float, r, Radius)
+// CP_DefineShapeGetter(cpCircleShape, double, r, Radius)
 
 
 
 static cpBB
 cpSegmentShapeCacheData(cpSegmentShape seg, cpVect p, cpVect rot)
 {
-	seg.ta = cpvadd(p, cpvrotate(seg.a, rot));
-	seg.tb = cpvadd(p, cpvrotate(seg.b, rot));
+	seg.ta = cpVect.Add(p, cpvrotate(seg.a, rot));
+	seg.tb = cpVect.Add(p, cpvrotate(seg.b, rot));
 	seg.tn = cpvrotate(seg.n, rot);
 	
-	float l,r,b,t;
+	double l,r,b,t;
 	
 	if(seg.ta.x < seg.tb.x){
 		l = seg.ta.x;
@@ -241,7 +241,7 @@ cpSegmentShapeCacheData(cpSegmentShape seg, cpVect p, cpVect rot)
 		t = seg.ta.y;
 	}
 	
-	float rad = seg.r;
+	double rad = seg.r;
 	return cpBBNew(l - rad, b - rad, r + rad, t + rad);
 }
 
@@ -250,12 +250,12 @@ cpSegmentShapeNearestPointQuery(cpSegmentShape seg, cpVect p, cpNearestPointQuer
 {
 	cpVect closest = cpClosetPointOnSegment(p, seg.ta, seg.tb);
 	
-	cpVect delta = cpvsub(p, closest);
-	float d = cpvlength(delta);
-	float r = seg.r;
+	cpVect delta = cpVect.Sub(p, closest);
+	double d = cpvlength(delta);
+	double r = seg.r;
 	
 	info.shape = (cpShape )seg;
-	info.p = (d ? cpvadd(closest, cpvmult(delta, r/d)) : closest);
+	info.p = (d ? cpVect.Add(closest, cpVect.Multiply(delta, r/d)) : closest);
 	info.d = d - r;
 }
 
@@ -263,21 +263,21 @@ static void
 cpSegmentShapeSegmentQuery(cpSegmentShape seg, cpVect a, cpVect b, cpSegmentQueryInfo info)
 {
 	cpVect n = seg.tn;
-	float d = cpvdot(cpvsub(seg.ta, a), n);
-	float r = seg.r;
+	double d = cpVect.Dot(cpVect.Sub(seg.ta, a), n);
+	double r = seg.r;
 	
 	cpVect flipped_n = (d > 0.0f ? cpvneg(n) : n);
-	cpVect seg_offset = cpvsub(cpvmult(flipped_n, r), a);
+	cpVect seg_offset = cpVect.Sub(cpVect.Multiply(flipped_n, r), a);
 	
 	// Make the endpoints relative to 'a' and move them by the thickness of the segment.
-	cpVect seg_a = cpvadd(seg.ta, seg_offset);
-	cpVect seg_b = cpvadd(seg.tb, seg_offset);
-	cpVect delta = cpvsub(b, a);
+	cpVect seg_a = cpVect.Add(seg.ta, seg_offset);
+	cpVect seg_b = cpVect.Add(seg.tb, seg_offset);
+	cpVect delta = cpVect.Sub(b, a);
 	
-	if(cpvcross(delta, seg_a)*cpvcross(delta, seg_b) <= 0.0f){
-		float d_offset = d + (d > 0.0f ? -r : r);
-		float ad = -d_offset;
-		float bd = cpvdot(delta, n) - d_offset;
+	if(cpVect.CrossProduct(delta, seg_a)*cpVect.CrossProduct(delta, seg_b) <= 0.0f){
+		double d_offset = d + (d > 0.0f ? -r : r);
+		double ad = -d_offset;
+		double bd = cpVect.Dot(delta, n) - d_offset;
 		
 		if(ad*bd < 0.0f){
 			info.shape = (cpShape )seg;
@@ -307,11 +307,11 @@ static cpShapeClass cpSegmentShapeClass = {
 };
 
 cpSegmentShape 
-cpSegmentShapeInit(cpSegmentShape seg, cpBody body, cpVect a, cpVect b, float r)
+cpSegmentShapeInit(cpSegmentShape seg, cpBody body, cpVect a, cpVect b, double r)
 {
 	seg.a = a;
 	seg.b = b;
-	seg.n = cpvperp(cpvnormalize(cpvsub(b, a)));
+	seg.n = cpvperp(cpvnormalize(cpVect.Sub(b, a)));
 	
 	seg.r = r;
 	
@@ -324,7 +324,7 @@ cpSegmentShapeInit(cpSegmentShape seg, cpBody body, cpVect a, cpVect b, float r)
 }
 
 cpShape
-cpSegmentShapeNew(cpBody body, cpVect a, cpVect b, float r)
+cpSegmentShapeNew(cpBody body, cpVect a, cpVect b, double r)
 {
 	return (cpShape )cpSegmentShapeInit(new cpSegmentShape(), body, a, b, r);
 }
@@ -332,7 +332,7 @@ cpSegmentShapeNew(cpBody body, cpVect a, cpVect b, float r)
 CP_DefineShapeGetter(cpSegmentShape, cpVect, a, A)
 CP_DefineShapeGetter(cpSegmentShape, cpVect, b, B)
 CP_DefineShapeGetter(cpSegmentShape, cpVect, n, Normal)
-CP_DefineShapeGetter(cpSegmentShape, float, r, Radius)
+CP_DefineShapeGetter(cpSegmentShape, double, r, Radius)
 
 void
 cpSegmentShapeSetNeighbors(cpShape shape, cpVect prev, cpVect next)
@@ -340,14 +340,14 @@ cpSegmentShapeSetNeighbors(cpShape shape, cpVect prev, cpVect next)
 	// cpAssertHard(shape.klass == &cpSegmentShapeClass, "Shape is not a segment shape.");
 	cpSegmentShape seg = (cpSegmentShape )shape;
 	
-	seg.a_tangent = cpvsub(prev, seg.a);
-	seg.b_tangent = cpvsub(next, seg.b);
+	seg.a_tangent = cpVect.Sub(prev, seg.a);
+	seg.b_tangent = cpVect.Sub(next, seg.b);
 }
 
 // Unsafe API (chipmunk_unsafe.h)
 
 void
-cpCircleShapeSetRadius(cpShape shape, float radius)
+cpCircleShapeSetRadius(cpShape shape, double radius)
 {
 	// cpAssertHard(shape.klass == &cpCircleShapeClass, "Shape is not a circle shape.");
 	cpCircleShape circle = (cpCircleShape )shape;
@@ -372,11 +372,11 @@ cpSegmentShapeSetEndpoints(cpShape shape, cpVect a, cpVect b)
 	
 	seg.a = a;
 	seg.b = b;
-	seg.n = cpvperp(cpvnormalize(cpvsub(b, a)));
+	seg.n = cpvperp(cpvnormalize(cpVect.Sub(b, a)));
 }
 
 void
-cpSegmentShapeSetRadius(cpShape shape, float radius)
+cpSegmentShapeSetRadius(cpShape shape, double radius)
 {
 	// cpAssertHard(shape.klass == &cpSegmentShapeClass, "Shape is not a segment shape.");
 	cpSegmentShape seg = (cpSegmentShape )shape;

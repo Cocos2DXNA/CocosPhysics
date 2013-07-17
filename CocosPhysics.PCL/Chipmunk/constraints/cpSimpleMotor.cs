@@ -23,7 +23,7 @@
 #include "constraints/util.h"
 
 static void
-preStep(cpSimpleMotor *joint, float dt)
+preStep(cpSimpleMotor *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -33,30 +33,30 @@ preStep(cpSimpleMotor *joint, float dt)
 }
 
 static void
-applyCachedImpulse(cpSimpleMotor *joint, float dt_coef)
+applyCachedImpulse(cpSimpleMotor *joint, double dt_coef)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
-	float j = joint.jAcc*dt_coef;
+	double j = joint.jAcc*dt_coef;
 	a.w -= j*a.i_inv;
 	b.w += j*b.i_inv;
 }
 
 static void
-applyImpulse(cpSimpleMotor *joint, float dt)
+applyImpulse(cpSimpleMotor *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
 	// compute relative rotational velocity
-	float wr = b.w - a.w + joint.rate;
+	double wr = b.w - a.w + joint.rate;
 	
-	float jMax = joint.constraint.maxForce*dt;
+	double jMax = joint.constraint.maxForce*dt;
 	
 	// compute normal impulse	
-	float j = -wr*joint.iSum;
-	float jOld = joint.jAcc;
+	double j = -wr*joint.iSum;
+	double jOld = joint.jAcc;
 	joint.jAcc = cpfclamp(jOld + j, -jMax, jMax);
 	j = joint.jAcc - jOld;
 	
@@ -65,10 +65,10 @@ applyImpulse(cpSimpleMotor *joint, float dt)
 	b.w += j*b.i_inv;
 }
 
-static float
+static double
 getImpulse(cpSimpleMotor *joint)
 {
-	return cpfabs(joint.jAcc);
+	return System.Math.Abs(joint.jAcc);
 }
 
 static cpConstraintClass klass = {
@@ -86,7 +86,7 @@ cpSimpleMotorAlloc()
 }
 
 cpSimpleMotor *
-cpSimpleMotorInit(cpSimpleMotor *joint, cpBody a, cpBody b, float rate)
+cpSimpleMotorInit(cpSimpleMotor *joint, cpBody a, cpBody b, double rate)
 {
 	cpConstraintInit((cpConstraint )joint, &klass, a, b);
 	
@@ -98,7 +98,7 @@ cpSimpleMotorInit(cpSimpleMotor *joint, cpBody a, cpBody b, float rate)
 }
 
 cpConstraint 
-cpSimpleMotorNew(cpBody a, cpBody b, float rate)
+cpSimpleMotorNew(cpBody a, cpBody b, double rate)
 {
 	return (cpConstraint )cpSimpleMotorInit(cpSimpleMotorAlloc(), a, b, rate);
 }

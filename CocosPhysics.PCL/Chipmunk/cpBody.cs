@@ -33,7 +33,7 @@ cpBodyAlloc()
 }
 
 cpBody 
-cpBodyInit(cpBody body, float m, float i)
+cpBodyInit(cpBody body, double m, double i)
 {
 	body.space = null;
 	body.shapeList = null;
@@ -56,8 +56,8 @@ cpBodyInit(cpBody body, float m, float i)
 	body.v_bias = cpvzero;
 	body.w_bias = 0.0f;
 	
-	body.v_limit = float.PositiveInfinity;
-	body.w_limit = float.PositiveInfinity;
+	body.v_limit = double.PositiveInfinity;
+	body.w_limit = double.PositiveInfinity;
 	
 	body.data = null;
 	
@@ -70,7 +70,7 @@ cpBodyInit(cpBody body, float m, float i)
 }
 
 cpBody
-cpBodyNew(float m, float i)
+cpBodyNew(double m, double i)
 {
 	return cpBodyInit(cpBodyAlloc(), m, i);
 }
@@ -78,8 +78,8 @@ cpBodyNew(float m, float i)
 cpBody 
 cpBodyInitStatic(cpBody body)
 {
-	cpBodyInit(body, float.PositiveInfinity, float.PositiveInfinity);
-	body.node.idleTime = float.PositiveInfinity;
+	cpBodyInit(body, double.PositiveInfinity, double.PositiveInfinity);
+	body.node.idleTime = double.PositiveInfinity;
 	
 	return body;
 }
@@ -103,7 +103,7 @@ cpBodyFree(cpBody body)
 
 
 void
-cpBodySetMass(cpBody body, float mass)
+cpBodySetMass(cpBody body, double mass)
 {
 	// cpAssertHard(mass > 0.0f, "Mass must be positive and non-zero.");
 	
@@ -114,7 +114,7 @@ cpBodySetMass(cpBody body, float mass)
 }
 
 void
-cpBodySetMoment(cpBody body, float moment)
+cpBodySetMoment(cpBody body, double moment)
 {
 	// cpAssertHard(moment > 0.0f, "Moment of Inertia must be positive and non-zero.");
 	
@@ -183,35 +183,35 @@ cpBodySetPos(cpBody body, cpVect pos)
 }
 
 static void
-setAngle(cpBody body, float angle)
+setAngle(cpBody body, double angle)
 {
-	body.a = angle;//fmod(a, (float)System.Math.PI*2.0f);
+	body.a = angle;//fmod(a, (double)System.Math.PI*2.0f);
 	body.rot = cpvforangle(angle);
 	cpBodyAssertSane(body);
 }
 
 void
-cpBodySetAngle(cpBody body, float angle)
+cpBodySetAngle(cpBody body, double angle)
 {
 	cpBodyActivate(body);
 	setAngle(body, angle);
 }
 
 void
-cpBodyUpdateVelocity(cpBody body, cpVect gravity, float damping, float dt)
+cpBodyUpdateVelocity(cpBody body, cpVect gravity, double damping, double dt)
 {
-	body.v = cpvclamp(cpvadd(cpvmult(body.v, damping), cpvmult(cpvadd(gravity, cpvmult(body.f, body.m_inv)), dt)), body.v_limit);
+	body.v = cpvclamp(cpVect.Add(cpVect.Multiply(body.v, damping), cpVect.Multiply(cpVect.Add(gravity, cpVect.Multiply(body.f, body.m_inv)), dt)), body.v_limit);
 	
-	float w_limit = body.w_limit;
+	double w_limit = body.w_limit;
 	body.w = cpfclamp(body.w*damping + body.t*body.i_inv*dt, -w_limit, w_limit);
 	
 	cpBodySanityCheck(body);
 }
 
 void
-cpBodyUpdatePosition(cpBody body, float dt)
+cpBodyUpdatePosition(cpBody body, double dt)
 {
-	body.p = cpvadd(body.p, cpvmult(cpvadd(body.v, body.v_bias), dt));
+	body.p = cpVect.Add(body.p, cpVect.Multiply(cpVect.Add(body.v, body.v_bias), dt));
 	setAngle(body, body.a + (body.w + body.w_bias)*dt);
 	
 	body.v_bias = cpvzero;
@@ -232,8 +232,8 @@ void
 cpBodyApplyForce(cpBody body, cpVect force, cpVect r)
 {
 	cpBodyActivate(body);
-	body.f = cpvadd(body.f, force);
-	body.t += cpvcross(r, force);
+	body.f = cpVect.Add(body.f, force);
+	body.t += cpVect.CrossProduct(r, force);
 }
 
 void
@@ -246,13 +246,13 @@ cpBodyApplyImpulse(cpBody body, cpVect j, cpVect r)
 static cpVect
 cpBodyGetVelAtPoint(cpBody body, cpVect r)
 {
-	return cpvadd(body.v, cpvmult(cpvperp(r), body.w));
+	return cpVect.Add(body.v, cpVect.Multiply(cpvperp(r), body.w));
 }
 
 cpVect
 cpBodyGetVelAtWorldPoint(cpBody body, cpVect point)
 {
-	return cpBodyGetVelAtPoint(body, cpvsub(point, body.p));
+	return cpBodyGetVelAtPoint(body, cpVect.Sub(point, body.p));
 }
 
 cpVect

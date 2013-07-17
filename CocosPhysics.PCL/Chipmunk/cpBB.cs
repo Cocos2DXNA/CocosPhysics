@@ -26,13 +26,13 @@ namespace CocosPhysics.Chipmunk
         cpVect
         cpBBWrapVect(cpBB bb, cpVect v)
         {
-            float ix = cpfabs(bb.r - bb.l);
-            float modx = cpfmod(v.x - bb.l, ix);
-            float x = (modx > 0.0f) ? modx : modx + ix;
+            double ix = System.Math.Abs(bb.r - bb.l);
+            double modx = System.Math.Mod(v.x - bb.l, ix);
+            double x = (modx > 0.0f) ? modx : modx + ix;
 
-            float iy = cpfabs(bb.t - bb.b);
-            float mody = cpfmod(v.y - bb.b, iy);
-            float y = (mody > 0.0f) ? mody : mody + iy;
+            double iy = System.Math.Abs(bb.t - bb.b);
+            double mody = System.Math.Mod(v.y - bb.b, iy);
+            double y = (mody > 0.0f) ? mody : mody + iy;
 
             return cpv(x + bb.l, y + bb.b);
         }

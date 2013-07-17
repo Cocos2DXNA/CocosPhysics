@@ -95,7 +95,7 @@ cpSpaceInit(cpSpace space)
 	space.damping = 1.0f;
 	
 	space.collisionSlop = 0.1f;
-	space.collisionBias = cpfpow(1.0f - 0.1f, 60.0f);
+	space.collisionBias = System.Math.Pow(1.0f - 0.1f, 60.0f);
 	space.collisionPersistence = 3;
 	
 	space.locked = 0;
@@ -111,7 +111,7 @@ cpSpaceInit(cpSpace space)
 	space.sleepingComponents = cpArrayNew(0);
 	space.rousedBodies = cpArrayNew(0);
 	
-	space.sleepTimeThreshold = float.PositiveInfinity;
+	space.sleepTimeThreshold = double.PositiveInfinity;
 	space.idleSpeedThreshold = 0.0f;
 	space.enableContactGraph = false;
 	
@@ -439,13 +439,13 @@ cpSpaceConvertBodyToStatic(cpSpace space, cpBody body)
 	// cpAssertHard(cpBodyIsRogue(body), "Remove the body from the space before calling this function.");
 	// cpAssertSpaceUnlocked(space);
 	
-	cpBodySetMass(body, float.PositiveInfinity);
-	cpBodySetMoment(body, float.PositiveInfinity);
+	cpBodySetMass(body, double.PositiveInfinity);
+	cpBodySetMoment(body, double.PositiveInfinity);
 	
 	cpBodySetVel(body, cpvzero);
 	cpBodySetAngVel(body, 0.0f);
 	
-	body.node.idleTime = float.PositiveInfinity;
+	body.node.idleTime = double.PositiveInfinity;
 	CP_BODY_FOREACH_SHAPE(body, shape){
 		cpSpatialIndexRemove(space.activeShapes, shape, shape.hashid);
 		cpSpatialIndexInsert(space.staticShapes, shape, shape.hashid);
@@ -453,7 +453,7 @@ cpSpaceConvertBodyToStatic(cpSpace space, cpBody body)
 }
 
 void
-cpSpaceConvertBodyToDynamic(cpSpace space, cpBody body, float m, float i)
+cpSpaceConvertBodyToDynamic(cpSpace space, cpBody body, double m, double i)
 {
 	// cpAssertHard(cpBodyIsStatic(body), "Body is already dynamic.");
 	// cpAssertSpaceUnlocked(space);
@@ -574,7 +574,7 @@ copyShapes(cpShape shape, cpSpatialIndex *index)
 }
 
 void
-cpSpaceUseSpatialHash(cpSpace space, float dim, int count)
+cpSpaceUseSpatialHash(cpSpace space, double dim, int count)
 {
 	cpSpatialIndex *staticShapes = cpSpaceHashNew(dim, count, (cpSpatialIndexBBFunc)cpShapeGetBB, null);
 	cpSpatialIndex *activeShapes = cpSpaceHashNew(dim, count, (cpSpatialIndexBBFunc)cpShapeGetBB, staticShapes);

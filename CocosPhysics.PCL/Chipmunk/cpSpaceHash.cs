@@ -32,7 +32,7 @@ struct cpSpaceHash {
 	cpSpatialIndex spatialIndex;
 	
 	int numcells;
-	float celldim;
+	double celldim;
 	
 	cpSpaceHashBin **table;
 	cpHashSet *handleSet;
@@ -174,7 +174,7 @@ cpSpaceHashAllocTable(cpSpaceHash *hash, int numcells)
 static cpSpatialIndexClass Klass();
 
 cpSpatialIndex *
-cpSpaceHashInit(cpSpaceHash *hash, float celldim, int numcells, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
+cpSpaceHashInit(cpSpaceHash *hash, double celldim, int numcells, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
 {
 	cpSpatialIndexInit((cpSpatialIndex *)hash, Klass(), bbfunc, staticIndex);
 	
@@ -194,7 +194,7 @@ cpSpaceHashInit(cpSpaceHash *hash, float celldim, int numcells, cpSpatialIndexBB
 }
 
 cpSpatialIndex *
-cpSpaceHashNew(float celldim, int cells, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
+cpSpaceHashNew(double celldim, int cells, cpSpatialIndexBBFunc bbfunc, cpSpatialIndex *staticIndex)
 {
 	return cpSpaceHashInit(cpSpaceHashAlloc(), celldim, cells, bbfunc, staticIndex);
 }
@@ -235,7 +235,7 @@ hash_func(cpHashValue x, cpHashValue y, cpHashValue n)
 // Much faster than (int)floor(f)
 // Profiling showed floor() to be a sizable performance hog
 static int
-floor_int(float f)
+floor_int(double f)
 {
 	int i = (int)f;
 	return (f < 0.0f && f != i ? i - 1 : i);
@@ -245,7 +245,7 @@ static void
 hashHandle(cpSpaceHash *hash, cpHandle *hand, cpBB bb)
 {
 	// Find the dimensions in cell coordinates.
-	float dim = hash.celldim;
+	double dim = hash.celldim;
 	int l = floor_int(bb.l/dim); // Fix by ShiftZ
 	int r = floor_int(bb.r/dim);
 	int b = floor_int(bb.b/dim);
@@ -380,7 +380,7 @@ static void
 cpSpaceHashQuery(cpSpaceHash *hash, object obj, cpBB bb, cpSpatialIndexQueryFunc func, object data)
 {
 	// Get the dimensions in cell coordinates.
-	float dim = hash.celldim;
+	double dim = hash.celldim;
 	int l = floor_int(bb.l/dim);  // Fix by ShiftZ
 	int r = floor_int(bb.r/dim);
 	int b = floor_int(bb.b/dim);
@@ -414,7 +414,7 @@ queryRehash_helper(cpHandle *hand, queryRehashContext *context)
 	cpSpatialIndexQueryFunc func = context.func;
 	object data = context.data;
 
-	float dim = hash.celldim;
+	double dim = hash.celldim;
 	int n = hash.numcells;
 
 	object obj = hand.obj;
@@ -459,10 +459,10 @@ cpSpaceHashReindexQuery(cpSpaceHash *hash, cpSpatialIndexQueryFunc func, object 
 	cpSpatialIndexCollideStatic((cpSpatialIndex *)hash, hash.spatialIndex.staticIndex, func, data);
 }
 
-static float
+static double
 segmentQuery_helper(cpSpaceHash *hash, cpSpaceHashBin **bin_ptr, object obj, cpSpatialIndexSegmentQueryFunc func, object data)
 {
-	float t = 1.0f;
+	double t = 1.0f;
 	 
 	restart:
 	for(cpSpaceHashBin *bin = *bin_ptr; bin; bin = bin.next){
@@ -473,7 +473,7 @@ segmentQuery_helper(cpSpaceHash *hash, cpSpaceHashBin **bin_ptr, object obj, cpS
 		if(hand.stamp == hash.stamp){
 			continue;
 		} else if(other){
-			t = cpfmin(t, func(obj, other, data));
+			t = System.Math.Min(t, func(obj, other, data));
 			hand.stamp = hash.stamp;
 		} else {
 			// The object for this handle has been removed
@@ -488,48 +488,48 @@ segmentQuery_helper(cpSpaceHash *hash, cpSpaceHashBin **bin_ptr, object obj, cpS
 
 // modified from http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
 static void
-cpSpaceHashSegmentQuery(cpSpaceHash *hash, object obj, cpVect a, cpVect b, float t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
+cpSpaceHashSegmentQuery(cpSpaceHash *hash, object obj, cpVect a, cpVect b, double t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
 {
-	a = cpvmult(a, 1.0f/hash.celldim);
-	b = cpvmult(b, 1.0f/hash.celldim);
+	a = cpVect.Multiply(a, 1.0f/hash.celldim);
+	b = cpVect.Multiply(b, 1.0f/hash.celldim);
 	
 	int cell_x = floor_int(a.x), cell_y = floor_int(a.y);
 
-	float t = 0;
+	double t = 0;
 
 	int x_inc, y_inc;
-	float temp_v, temp_h;
+	double temp_v, temp_h;
 
 	if (b.x > a.x){
 		x_inc = 1;
-		temp_h = (cpffloor(a.x + 1.0f) - a.x);
+		temp_h = (System.Math.Floor(a.x + 1.0f) - a.x);
 	} else {
 		x_inc = -1;
-		temp_h = (a.x - cpffloor(a.x));
+		temp_h = (a.x - System.Math.Floor(a.x));
 	}
 
 	if (b.y > a.y){
 		y_inc = 1;
-		temp_v = (cpffloor(a.y + 1.0f) - a.y);
+		temp_v = (System.Math.Floor(a.y + 1.0f) - a.y);
 	} else {
 		y_inc = -1;
-		temp_v = (a.y - cpffloor(a.y));
+		temp_v = (a.y - System.Math.Floor(a.y));
 	}
 	
 	// Division by zero is *very* slow on ARM
-	float dx = cpfabs(b.x - a.x), dy = cpfabs(b.y - a.y);
-	float dt_dx = (dx ? 1.0f/dx : float.PositiveInfinity), dt_dy = (dy ? 1.0f/dy : float.PositiveInfinity);
+	double dx = System.Math.Abs(b.x - a.x), dy = System.Math.Abs(b.y - a.y);
+	double dt_dx = (dx ? 1.0f/dx : double.PositiveInfinity), dt_dy = (dy ? 1.0f/dy : double.PositiveInfinity);
 	
 	// fix NANs in horizontal directions
-	float next_h = (temp_h ? temp_h*dt_dx : dt_dx);
-	float next_v = (temp_v ? temp_v*dt_dy : dt_dy);
+	double next_h = (temp_h ? temp_h*dt_dx : dt_dx);
+	double next_v = (temp_v ? temp_v*dt_dy : dt_dy);
 	
 	int n = hash.numcells;
 	cpSpaceHashBin **table = hash.table;
 
 	while(t < t_exit){
 		cpHashValue idx = hash_func(cell_x, cell_y, n);
-		t_exit = cpfmin(t_exit, segmentQuery_helper(hash, &table[idx], obj, func, data));
+		t_exit = System.Math.Min(t_exit, segmentQuery_helper(hash, &table[idx], obj, func, data));
 
 		if (next_v < next_h){
 			cell_y += y_inc;
@@ -548,7 +548,7 @@ cpSpaceHashSegmentQuery(cpSpaceHash *hash, object obj, cpVect a, cpVect b, float
 //MARK: Misc
 
 void
-cpSpaceHashResize(cpSpaceHash *hash, float celldim, int numcells)
+cpSpaceHashResize(cpSpaceHash *hash, double celldim, int numcells)
 {
 	if(hash.spatialIndex.klass != Klass()){
 		// cpAssertWarn(false, "Ignoring cpSpaceHashResize() call to non-cpSpaceHash spatial index.");
@@ -612,7 +612,7 @@ cpSpaceHashRenderDebug(cpSpatialIndex *index)
 	cpSpaceHash *hash = (cpSpaceHash *)index;
 	cpBB bb = cpBBNew(-320, -240, 320, 240);
 	
-	float dim = hash.celldim;
+	double dim = hash.celldim;
 	int n = hash.numcells;
 	
 	int l = (int)floor(bb.l/dim);
@@ -628,7 +628,7 @@ cpSpaceHashRenderDebug(cpSpatialIndex *index)
 			for(cpSpaceHashBin *bin = hash.table[index]; bin; bin = bin.next)
 				cell_count++;
 			
-			GLfloat v = 1.0f - (GLfloat)cell_count/10.0f;
+			GLdouble v = 1.0f - (GLdouble)cell_count/10.0f;
 			glColor3f(v,v,v);
 			glRectf(i*dim, j*dim, (i + 1)*dim, (j + 1)*dim);
 		}

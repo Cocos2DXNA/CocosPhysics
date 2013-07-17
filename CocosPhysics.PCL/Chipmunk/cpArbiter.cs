@@ -23,7 +23,7 @@ namespace CocosPhysics.Chipmunk
 {
 public static class Physics {
 cpContact
-cpContactInit(cpContact con, cpVect p, cpVect n, float dist, cpHashValue hash)
+cpContactInit(cpContact con, cpVect p, cpVect n, double dist, cpHashValue hash)
 {
 	con.p = p;
 	con.n = n;
@@ -96,7 +96,7 @@ cpArbiterGetPoint(cpArbiter arb, int i)
 	return arb.CP_PRIVATE(contacts)[i].CP_PRIVATE(p);
 }
 
-float
+double
 cpArbiterGetDepth(cpArbiter arb, int i)
 {
 	// cpAssertHard(0 <= i && i < cpArbiterGetCount(arb), "Index error: The specified contact index is invalid for this arbiter");
@@ -140,7 +140,7 @@ cpArbiterTotalImpulse(cpArbiter arb)
 	
 	for(int i=0, count=cpArbiterGetCount(arb); i<count; i++){
 		cpContact con = &contacts[i];
-		sum = cpvadd(sum, cpvmult(con.n, con.jnAcc));
+		sum = cpVect.Add(sum, cpVect.Multiply(con.n, con.jnAcc));
 	}
 	
 	return (arb.swappedColl ? sum : cpvneg(sum));
@@ -154,23 +154,23 @@ cpArbiterTotalImpulseWithFriction(cpArbiter arb)
 	
 	for(int i=0, count=cpArbiterGetCount(arb); i<count; i++){
 		cpContact con = &contacts[i];
-		sum = cpvadd(sum, cpvrotate(con.n, cpv(con.jnAcc, con.jtAcc)));
+		sum = cpVect.Add(sum, cpvrotate(con.n, cpv(con.jnAcc, con.jtAcc)));
 	}
 		
 	return (arb.swappedColl ? sum : cpvneg(sum));
 }
 
-float
+double
 cpArbiterTotalKE(cpArbiter arb)
 {
-	float eCoef = (1 - arb.e)/(1 + arb.e);
-	float sum = 0.0;
+	double eCoef = (1 - arb.e)/(1 + arb.e);
+	double sum = 0.0;
 	
 	cpContact contacts = arb.contacts;
 	for(int i=0, count=cpArbiterGetCount(arb); i<count; i++){
 		cpContact con = &contacts[i];
-		float jnAcc = con.jnAcc;
-		float jtAcc = con.jtAcc;
+		double jnAcc = con.jnAcc;
+		double jtAcc = con.jtAcc;
 		
 		sum += eCoef*jnAcc*jnAcc/con.nMass + jtAcc*jtAcc/con.tMass;
 	}
@@ -180,10 +180,10 @@ cpArbiterTotalKE(cpArbiter arb)
 
 // TODO this really shouldn't be a library function probably.
 // Should either decide to put it in the API or throw it in a demo.
-//float
+//double
 //cpContactsEstimateCrushingImpulse(cpContact contacts, int numContacts)
 //{
-//	float fsum = 0.0f;
+//	double fsum = 0.0f;
 //	cpVect vsum = cpvzero;
 //	
 //	for(int i=0; i<numContacts; i++){
@@ -191,10 +191,10 @@ cpArbiterTotalKE(cpArbiter arb)
 //		cpVect j = cpvrotate(con.n, cpv(con.jnAcc, con.jtAcc));
 //		
 //		fsum += cpvlength(j);
-//		vsum = cpvadd(vsum, j);
+//		vsum = cpVect.Add(vsum, j);
 //	}
 //	
-//	float vmag = cpvlength(vsum);
+//	double vmag = cpvlength(vsum);
 //	return fsum - vmag;
 //}
 
@@ -207,13 +207,13 @@ cpArbiterIgnore(cpArbiter arb)
 cpVect
 cpArbiterGetSurfaceVelocity(cpArbiter arb)
 {
-	return cpvmult(arb.surface_vr, arb.swappedColl ? -1.0f : 1.0);
+	return cpVect.Multiply(arb.surface_vr, arb.swappedColl ? -1.0f : 1.0);
 }
 
 void
 cpArbiterSetSurfaceVelocity(cpArbiter arb, cpVect vr)
 {
-	arb.surface_vr = cpvmult(vr, arb.swappedColl ? -1.0f : 1.0);
+	arb.surface_vr = cpVect.Multiply(vr, arb.swappedColl ? -1.0f : 1.0);
 }
 
 
@@ -277,8 +277,8 @@ cpArbiterUpdate(cpArbiter arb, cpContact contacts, int numContacts, cpCollisionH
 	// Currently all contacts will have the same normal.
 	// This may change in the future.
 	cpVect n = (numContacts ? contacts[0].n : cpvzero);
-	cpVect surface_vr = cpvsub(a.surface_v, b.surface_v);
-	arb.surface_vr = cpvsub(surface_vr, cpvmult(n, cpvdot(surface_vr, n)));
+	cpVect surface_vr = cpVect.Sub(a.surface_v, b.surface_v);
+	arb.surface_vr = cpVect.Sub(surface_vr, cpVect.Multiply(n, cpVect.Dot(surface_vr, n)));
 	
 	// For collisions between two similar primitive types, the order could have been swapped.
 	arb.a = a; arb.body_a = a.body;
@@ -289,7 +289,7 @@ cpArbiterUpdate(cpArbiter arb, cpContact contacts, int numContacts, cpCollisionH
 }
 
 void
-cpArbiterPreStep(cpArbiter arb, float dt, float slop, float bias)
+cpArbiterPreStep(cpArbiter arb, double dt, double slop, double bias)
 {
 	cpBody a = arb.body_a;
 	cpBody b = arb.body_b;
@@ -298,15 +298,15 @@ cpArbiterPreStep(cpArbiter arb, float dt, float slop, float bias)
 		cpContact con = &arb.contacts[i];
 		
 		// Calculate the offsets.
-		con.r1 = cpvsub(con.p, a.p);
-		con.r2 = cpvsub(con.p, b.p);
+		con.r1 = cpVect.Sub(con.p, a.p);
+		con.r2 = cpVect.Sub(con.p, b.p);
 		
 		// Calculate the mass normal and mass tangent.
 		con.nMass = 1.0f/k_scalar(a, b, con.r1, con.r2, con.n);
 		con.tMass = 1.0f/k_scalar(a, b, con.r1, con.r2, cpvperp(con.n));
 				
 		// Calculate the target bias velocity.
-		con.bias = -bias*cpfmin(0.0f, con.dist + slop)/dt;
+		con.bias = -bias*System.Math.Min(0.0f, con.dist + slop)/dt;
 		con.jBias = 0.0f;
 		
 		// Calculate the target bounce velocity.
@@ -315,7 +315,7 @@ cpArbiterPreStep(cpArbiter arb, float dt, float slop, float bias)
 }
 
 void
-cpArbiterApplyCachedImpulse(cpArbiter arb, float dt_coef)
+cpArbiterApplyCachedImpulse(cpArbiter arb, double dt_coef)
 {
 	if(cpArbiterIsFirstContact(arb)) return;
 	
@@ -325,7 +325,7 @@ cpArbiterApplyCachedImpulse(cpArbiter arb, float dt_coef)
 	for(int i=0; i<arb.numContacts; i++){
 		cpContact con = &arb.contacts[i];
 		cpVect j = cpvrotate(con.n, cpv(con.jnAcc, con.jtAcc));
-		apply_impulses(a, b, con.r1, con.r2, cpvmult(j, dt_coef));
+		apply_impulses(a, b, con.r1, con.r2, cpVect.Multiply(j, dt_coef));
 	}
 }
 
@@ -337,37 +337,37 @@ cpArbiterApplyImpulse(cpArbiter arb)
 	cpBody a = arb.body_a;
 	cpBody b = arb.body_b;
 	cpVect surface_vr = arb.surface_vr;
-	float friction = arb.u;
+	double friction = arb.u;
 
 	for(int i=0; i<arb.numContacts; i++){
 		cpContact con = arb.contacts[i];
-		float nMass = con.nMass;
+		double nMass = con.nMass;
 		cpVect n = con.n;
 		cpVect r1 = con.r1;
 		cpVect r2 = con.r2;
 		
-		cpVect vb1 = cpvadd(a.v_bias, cpvmult(cpvperp(r1), a.w_bias));
-		cpVect vb2 = cpvadd(b.v_bias, cpvmult(cpvperp(r2), b.w_bias));
-		cpVect vr = cpvadd(relative_velocity(a, b, r1, r2), surface_vr);
+		cpVect vb1 = cpVect.Add(a.v_bias, cpVect.Multiply(cpvperp(r1), a.w_bias));
+		cpVect vb2 = cpVect.Add(b.v_bias, cpVect.Multiply(cpvperp(r2), b.w_bias));
+		cpVect vr = cpVect.Add(relative_velocity(a, b, r1, r2), surface_vr);
 		
-		float vbn = cpvdot(cpvsub(vb2, vb1), n);
-		float vrn = cpvdot(vr, n);
-		float vrt = cpvdot(vr, cpvperp(n));
+		double vbn = cpVect.Dot(cpVect.Sub(vb2, vb1), n);
+		double vrn = cpVect.Dot(vr, n);
+		double vrt = cpVect.Dot(vr, cpvperp(n));
 		
-		float jbn = (con.bias - vbn)*nMass;
-		float jbnOld = con.jBias;
-		con.jBias = cpfmax(jbnOld + jbn, 0.0f);
+		double jbn = (con.bias - vbn)*nMass;
+		double jbnOld = con.jBias;
+		con.jBias = System.Math.Max(jbnOld + jbn, 0.0f);
 		
-		float jn = -(con.bounce + vrn)*nMass;
-		float jnOld = con.jnAcc;
-		con.jnAcc = cpfmax(jnOld + jn, 0.0f);
+		double jn = -(con.bounce + vrn)*nMass;
+		double jnOld = con.jnAcc;
+		con.jnAcc = System.Math.Max(jnOld + jn, 0.0f);
 		
-		float jtMax = friction*con.jnAcc;
-		float jt = -vrt*con.tMass;
-		float jtOld = con.jtAcc;
+		double jtMax = friction*con.jnAcc;
+		double jt = -vrt*con.tMass;
+		double jtOld = con.jtAcc;
 		con.jtAcc = cpfclamp(jtOld + jt, -jtMax, jtMax);
 		
-		apply_bias_impulses(a, b, r1, r2, cpvmult(n, con.jBias - jbnOld));
+		apply_bias_impulses(a, b, r1, r2, cpVect.Multiply(n, con.jBias - jbnOld));
 		apply_impulses(a, b, r1, r2, cpvrotate(n, cpv(con.jnAcc - jnOld, con.jtAcc - jtOld)));
 	}
 }

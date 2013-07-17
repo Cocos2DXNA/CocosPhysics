@@ -23,7 +23,7 @@
 #include "constraints/util.h"
 
 static void
-preStep(cpGrooveJoint *joint, float dt)
+preStep(cpGrooveJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -34,51 +34,51 @@ preStep(cpGrooveJoint *joint, float dt)
 
 	// calculate axis
 	cpVect n = cpvrotate(joint.grv_n, a.rot);
-	float d = cpvdot(ta, n);
+	double d = cpVect.Dot(ta, n);
 	
 	joint.grv_tn = n;
 	joint.r2 = cpvrotate(joint.anchr2, b.rot);
 	
 	// calculate tangential distance along the axis of r2
-	float td = cpvcross(cpvadd(b.p, joint.r2), n);
+	double td = cpVect.CrossProduct(cpVect.Add(b.p, joint.r2), n);
 	// calculate clamping factor and r2
-	if(td <= cpvcross(ta, n)){
+	if(td <= cpVect.CrossProduct(ta, n)){
 		joint.clamp = 1.0f;
-		joint.r1 = cpvsub(ta, a.p);
-	} else if(td >= cpvcross(tb, n)){
+		joint.r1 = cpVect.Sub(ta, a.p);
+	} else if(td >= cpVect.CrossProduct(tb, n)){
 		joint.clamp = -1.0f;
-		joint.r1 = cpvsub(tb, a.p);
+		joint.r1 = cpVect.Sub(tb, a.p);
 	} else {
 		joint.clamp = 0.0f;
-		joint.r1 = cpvsub(cpvadd(cpvmult(cpvperp(n), -td), cpvmult(n, d)), a.p);
+		joint.r1 = cpVect.Sub(cpVect.Add(cpVect.Multiply(cpvperp(n), -td), cpVect.Multiply(n, d)), a.p);
 	}
 	
 	// Calculate mass tensor
 	joint.k = k_tensor(a, b, joint.r1, joint.r2);
 	
 	// calculate bias velocity
-	cpVect delta = cpvsub(cpvadd(b.p, joint.r2), cpvadd(a.p, joint.r1));
-	joint.bias = cpvclamp(cpvmult(delta, -bias_coef(joint.constraint.errorBias, dt)/dt), joint.constraint.maxBias);
+	cpVect delta = cpVect.Sub(cpVect.Add(b.p, joint.r2), cpVect.Add(a.p, joint.r1));
+	joint.bias = cpvclamp(cpVect.Multiply(delta, -bias_coef(joint.constraint.errorBias, dt)/dt), joint.constraint.maxBias);
 }
 
 static void
-applyCachedImpulse(cpGrooveJoint *joint, float dt_coef)
+applyCachedImpulse(cpGrooveJoint *joint, double dt_coef)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 		
-	apply_impulses(a, b, joint.r1, joint.r2, cpvmult(joint.jAcc, dt_coef));
+	apply_impulses(a, b, joint.r1, joint.r2, cpVect.Multiply(joint.jAcc, dt_coef));
 }
 
 static cpVect
-grooveConstrain(cpGrooveJoint *joint, cpVect j, float dt){
+grooveConstrain(cpGrooveJoint *joint, cpVect j, double dt){
 	cpVect n = joint.grv_tn;
-	cpVect jClamp = (joint.clamp*cpvcross(j, n) > 0.0f) ? j : cpvproject(j, n);
+	cpVect jClamp = (joint.clamp*cpVect.CrossProduct(j, n) > 0.0f) ? j : cpvproject(j, n);
 	return cpvclamp(jClamp, joint.constraint.maxForce*dt);
 }
 
 static void
-applyImpulse(cpGrooveJoint *joint, float dt)
+applyImpulse(cpGrooveJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -89,16 +89,16 @@ applyImpulse(cpGrooveJoint *joint, float dt)
 	// compute impulse
 	cpVect vr = relative_velocity(a, b, r1, r2);
 
-	cpVect j = cpMat2x2Transform(joint.k, cpvsub(joint.bias, vr));
+	cpVect j = cpMat2x2Transform(joint.k, cpVect.Sub(joint.bias, vr));
 	cpVect jOld = joint.jAcc;
-	joint.jAcc = grooveConstrain(joint, cpvadd(jOld, j), dt);
-	j = cpvsub(joint.jAcc, jOld);
+	joint.jAcc = grooveConstrain(joint, cpVect.Add(jOld, j), dt);
+	j = cpVect.Sub(joint.jAcc, jOld);
 	
 	// apply impulse
 	apply_impulses(a, b, joint.r1, joint.r2, j);
 }
 
-static float
+static double
 getImpulse(cpGrooveJoint *joint)
 {
 	return cpvlength(joint.jAcc);
@@ -125,7 +125,7 @@ cpGrooveJointInit(cpGrooveJoint *joint, cpBody a, cpBody b, cpVect groove_a, cpV
 	
 	joint.grv_a = groove_a;
 	joint.grv_b = groove_b;
-	joint.grv_n = cpvperp(cpvnormalize(cpvsub(groove_b, groove_a)));
+	joint.grv_n = cpvperp(cpvnormalize(cpVect.Sub(groove_b, groove_a)));
 	joint.anchr2 = anchr2;
 	
 	joint.jAcc = cpvzero;
@@ -146,7 +146,7 @@ cpGrooveJointSetGrooveA(cpConstraint constraint, cpVect value)
 	cpConstraintCheckCast(constraint, cpGrooveJoint);
 	
 	g.grv_a = value;
-	g.grv_n = cpvperp(cpvnormalize(cpvsub(g.grv_b, value)));
+	g.grv_n = cpvperp(cpvnormalize(cpVect.Sub(g.grv_b, value)));
 	
 	cpConstraintActivateBodies(constraint);
 }
@@ -158,7 +158,7 @@ cpGrooveJointSetGrooveB(cpConstraint constraint, cpVect value)
 	cpConstraintCheckCast(constraint, cpGrooveJoint);
 	
 	g.grv_b = value;
-	g.grv_n = cpvperp(cpvnormalize(cpvsub(value, g.grv_a)));
+	g.grv_n = cpvperp(cpvnormalize(cpVect.Sub(value, g.grv_a)));
 	
 	cpConstraintActivateBodies(constraint);
 }

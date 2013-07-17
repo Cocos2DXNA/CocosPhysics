@@ -22,13 +22,13 @@
 #include "chipmunk_private.h"
 #include "constraints/util.h"
 
-static float
-defaultSpringForce(cpDampedSpring *spring, float dist){
+static double
+defaultSpringForce(cpDampedSpring *spring, double dist){
 	return (spring.restLength - dist)*spring.stiffness;
 }
 
 static void
-preStep(cpDampedSpring *spring, float dt)
+preStep(cpDampedSpring *spring, double dt)
 {
 	cpBody a = spring.constraint.a;
 	cpBody b = spring.constraint.b;
@@ -36,27 +36,27 @@ preStep(cpDampedSpring *spring, float dt)
 	spring.r1 = cpvrotate(spring.anchr1, a.rot);
 	spring.r2 = cpvrotate(spring.anchr2, b.rot);
 	
-	cpVect delta = cpvsub(cpvadd(b.p, spring.r2), cpvadd(a.p, spring.r1));
-	float dist = cpvlength(delta);
-	spring.n = cpvmult(delta, 1.0f/(dist ? dist : float.PositiveInfinity));
+	cpVect delta = cpVect.Sub(cpVect.Add(b.p, spring.r2), cpVect.Add(a.p, spring.r1));
+	double dist = cpvlength(delta);
+	spring.n = cpVect.Multiply(delta, 1.0f/(dist ? dist : double.PositiveInfinity));
 	
-	float k = k_scalar(a, b, spring.r1, spring.r2, spring.n);
+	double k = k_scalar(a, b, spring.r1, spring.r2, spring.n);
 	// cpAssertSoft(k != 0.0, "Unsolvable spring.");
 	spring.nMass = 1.0f/k;
 	
 	spring.target_vrn = 0.0f;
-	spring.v_coef = 1.0f - cpfexp(-spring.damping*dt*k);
+	spring.v_coef = 1.0f - System.Math.Exp(-spring.damping*dt*k);
 
 	// apply spring force
-	float f_spring = spring.springForceFunc((cpConstraint )spring, dist);
-	float j_spring = spring.jAcc = f_spring*dt;
-	apply_impulses(a, b, spring.r1, spring.r2, cpvmult(spring.n, j_spring));
+	double f_spring = spring.springForceFunc((cpConstraint )spring, dist);
+	double j_spring = spring.jAcc = f_spring*dt;
+	apply_impulses(a, b, spring.r1, spring.r2, cpVect.Multiply(spring.n, j_spring));
 }
 
-static void applyCachedImpulse(cpDampedSpring *spring, float dt_coef){}
+static void applyCachedImpulse(cpDampedSpring *spring, double dt_coef){}
 
 static void
-applyImpulse(cpDampedSpring *spring, float dt)
+applyImpulse(cpDampedSpring *spring, double dt)
 {
 	cpBody a = spring.constraint.a;
 	cpBody b = spring.constraint.b;
@@ -66,18 +66,18 @@ applyImpulse(cpDampedSpring *spring, float dt)
 	cpVect r2 = spring.r2;
 
 	// compute relative velocity
-	float vrn = normal_relative_velocity(a, b, r1, r2, n);
+	double vrn = normal_relative_velocity(a, b, r1, r2, n);
 	
 	// compute velocity loss from drag
-	float v_damp = (spring.target_vrn - vrn)*spring.v_coef;
+	double v_damp = (spring.target_vrn - vrn)*spring.v_coef;
 	spring.target_vrn = vrn + v_damp;
 	
-	float j_damp = v_damp*spring.nMass;
+	double j_damp = v_damp*spring.nMass;
 	spring.jAcc += j_damp;
-	apply_impulses(a, b, spring.r1, spring.r2, cpvmult(spring.n, j_damp));
+	apply_impulses(a, b, spring.r1, spring.r2, cpVect.Multiply(spring.n, j_damp));
 }
 
-static float
+static double
 getImpulse(cpDampedSpring *spring)
 {
 	return spring.jAcc;
@@ -98,7 +98,7 @@ cpDampedSpringAlloc()
 }
 
 cpDampedSpring *
-cpDampedSpringInit(cpDampedSpring *spring, cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, float restLength, float stiffness, float damping)
+cpDampedSpringInit(cpDampedSpring *spring, cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, double restLength, double stiffness, double damping)
 {
 	cpConstraintInit((cpConstraint )spring, cpDampedSpringGetClass(), a, b);
 	
@@ -116,7 +116,7 @@ cpDampedSpringInit(cpDampedSpring *spring, cpBody a, cpBody b, cpVect anchr1, cp
 }
 
 cpConstraint 
-cpDampedSpringNew(cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, float restLength, float stiffness, float damping)
+cpDampedSpringNew(cpBody a, cpBody b, cpVect anchr1, cpVect anchr2, double restLength, double stiffness, double damping)
 {
 	return (cpConstraint )cpDampedSpringInit(cpDampedSpringAlloc(), a, b, anchr1, anchr2, restLength, stiffness, damping);
 }
