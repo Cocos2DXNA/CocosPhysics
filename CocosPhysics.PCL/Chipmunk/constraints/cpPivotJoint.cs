@@ -23,7 +23,7 @@
 #include "constraints/util.h"
 
 static void
-preStep(cpPivotJoint *joint, float dt)
+preStep(cpPivotJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -35,21 +35,21 @@ preStep(cpPivotJoint *joint, float dt)
 	joint. k = k_tensor(a, b, joint.r1, joint.r2);
 	
 	// calculate bias velocity
-	cpVect delta = cpvsub(cpvadd(b.p, joint.r2), cpvadd(a.p, joint.r1));
-	joint.bias = cpvclamp(cpvmult(delta, -bias_coef(joint.constraint.errorBias, dt)/dt), joint.constraint.maxBias);
+	cpVect delta = cpVect.Sub(cpVect.Add(b.p, joint.r2), cpVect.Add(a.p, joint.r1));
+	joint.bias = cpvclamp(cpVect.Multiply(delta, -bias_coef(joint.constraint.errorBias, dt)/dt), joint.constraint.maxBias);
 }
 
 static void
-applyCachedImpulse(cpPivotJoint *joint, float dt_coef)
+applyCachedImpulse(cpPivotJoint *joint, double dt_coef)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
-	apply_impulses(a, b, joint.r1, joint.r2, cpvmult(joint.jAcc, dt_coef));
+	apply_impulses(a, b, joint.r1, joint.r2, cpVect.Multiply(joint.jAcc, dt_coef));
 }
 
 static void
-applyImpulse(cpPivotJoint *joint, float dt)
+applyImpulse(cpPivotJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -61,16 +61,16 @@ applyImpulse(cpPivotJoint *joint, float dt)
 	cpVect vr = relative_velocity(a, b, r1, r2);
 	
 	// compute normal impulse
-	cpVect j = cpMat2x2Transform(joint.k, cpvsub(joint.bias, vr));
+	cpVect j = cpMat2x2Transform(joint.k, cpVect.Sub(joint.bias, vr));
 	cpVect jOld = joint.jAcc;
-	joint.jAcc = cpvclamp(cpvadd(joint.jAcc, j), joint.constraint.maxForce*dt);
-	j = cpvsub(joint.jAcc, jOld);
+	joint.jAcc = cpvclamp(cpVect.Add(joint.jAcc, j), joint.constraint.maxForce*dt);
+	j = cpVect.Sub(joint.jAcc, jOld);
 	
 	// apply impulse
 	apply_impulses(a, b, joint.r1, joint.r2, j);
 }
 
-static float
+static double
 getImpulse(cpConstraint joint)
 {
 	return cpvlength(((cpPivotJoint *)joint).jAcc);

@@ -49,9 +49,9 @@ cpConstraintInit(cpConstraint constraint, cpConstraintClass *klass, cpBody a, cp
 	constraint.next_a = null;
 	constraint.next_b = null;
 	
-	constraint.maxForce = float.PositiveInfinity;
-	constraint.errorBias = cpfpow(1.0f - 0.1f, 60.0f);
-	constraint.maxBias = float.PositiveInfinity;
+	constraint.maxForce = double.PositiveInfinity;
+	constraint.errorBias = System.Math.Pow(1.0f - 0.1f, 60.0f);
+	constraint.maxBias = double.PositiveInfinity;
 	
 	constraint.preSolve = null;
 	constraint.postSolve = null;

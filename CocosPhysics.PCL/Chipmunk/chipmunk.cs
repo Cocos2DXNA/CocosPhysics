@@ -23,6 +23,11 @@
 namespace CocosPhysics.Chipmunk
 {
 public static partial class Physics {
+    public struct cpMat2x2 {
+	// Row major [[a, b][c d]]
+	public double a, b, c, d;
+};
+
 public static void
 cpMessage(string condition, string file, int line, bool isError, bool isHardError, string message, params string va_list[])
 {
@@ -43,42 +48,42 @@ cpInitChipmunk()
 
 //MARK: Misc Functions
 
-float
-cpMomentForCircle(float m, float r1, float r2, cpVect offset)
+double
+cpMomentForCircle(double m, double r1, double r2, cpVect offset)
 {
-	return m*(0.5f*(r1*r1 + r2*r2) + cpvlengthsq(offset));
+	return m*(0.5f*(r1*r1 + r2*r2) + offset.LengthSQ);
 }
 
-float
-cpAreaForCircle(float r1, float r2)
+double
+cpAreaForCircle(double r1, double r2)
 {
-	return (float)System.Math.PI*cpfabs(r1*r1 - r2*r2);
+	return (double)System.Math.PI*System.Math.Abs(r1*r1 - r2*r2);
 }
 
-float
-cpMomentForSegment(float m, cpVect a, cpVect b)
+double
+cpMomentForSegment(double m, cpVect a, cpVect b)
 {
-	cpVect offset = cpvmult(cpvadd(a, b), 0.5f);
-	return m*(cpvdistsq(b, a)/12.0f + cpvlengthsq(offset));
+	cpVect offset = cpVect.Multiply(cpVect.Add(a, b), 0.5);
+	return m*(cpVect.DistanceSQ(b, a)/12.0f + offset.LengthSQ);
 }
 
-float
-cpAreaForSegment(cpVect a, cpVect b, float r)
+double
+cpAreaForSegment(cpVect a, cpVect b, double r)
 {
-	return r*((float)System.Math.PI*r + 2.0f*cpvdist(a, b));
+	return r*((double)System.Math.PI*r + 2.0*cpVect.Distance(a, b));
 }
 
-float
-cpMomentForPoly(float m, int numVerts, cpVect[] verts, cpVect offset)
+double
+cpMomentForPoly(double m, int numVerts, cpVect[] verts, cpVect offset)
 {
-	float sum1 = 0.0f;
-	float sum2 = 0.0f;
+	double sum1 = 0.0f;
+	double sum2 = 0.0f;
 	for(int i=0; i<numVerts; i++){
-		cpVect v1 = cpvadd(verts[i], offset);
-		cpVect v2 = cpvadd(verts[(i+1)%numVerts], offset);
+		cpVect v1 = cpVect.Add(verts[i], offset);
+		cpVect v2 = cpVect.Add(verts[(i+1)%numVerts], offset);
 		
-		float a = cpvcross(v2, v1);
-		float b = cpvdot(v1, v1) + cpvdot(v1, v2) + cpvdot(v2, v2);
+		double a = cpVect.CrossProduct(v2, v1);
+		double b = cpVect.Dot(v1, v1) + cpVect.Dot(v1, v2) + cpVect.Dot(v2, v2);
 		
 		sum1 += a*b;
 		sum2 += a;
@@ -87,12 +92,12 @@ cpMomentForPoly(float m, int numVerts, cpVect[] verts, cpVect offset)
 	return (m*sum1)/(6.0f*sum2);
 }
 
-float
+double
 cpAreaForPoly(int numVerts, cpVect[] verts)
 {
-	float area = 0.0f;
+	double area = 0.0f;
 	for(int i=0; i<numVerts; i++){
-		area += cpvcross(verts[i], verts[(i+1)%numVerts]);
+		area += cpVect.CrossProduct(verts[i], verts[(i+1)%numVerts]);
 	}
 	
 	return -area/2.0f;
@@ -101,19 +106,19 @@ cpAreaForPoly(int numVerts, cpVect[] verts)
 cpVect
 cpCentroidForPoly(int numVerts, cpVect[] verts)
 {
-	float sum = 0.0f;
+	double sum = 0.0f;
 	cpVect vsum = cpvzero;
 	
 	for(int i=0; i<numVerts; i++){
 		cpVect v1 = verts[i];
 		cpVect v2 = verts[(i+1)%numVerts];
-		float cross = cpvcross(v1, v2);
+		double cross = cpVect.CrossProduct(v1, v2);
 		
 		sum += cross;
-		vsum = cpvadd(vsum, cpvmult(cpvadd(v1, v2), cross));
+		vsum = cpVect.Add(vsum, cpVect.Multiply(cpVect.Add(v1, v2), cross));
 	}
 	
-	return cpvmult(vsum, 1.0f/(3.0f*sum));
+	return cpVect.Multiply(vsum, 1.0f/(3.0f*sum));
 }
 
 void
@@ -121,33 +126,33 @@ cpRecenterPoly(int numVerts, cpVect[] verts){
 	cpVect centroid = cpCentroidForPoly(numVerts, verts);
 	
 	for(int i=0; i<numVerts; i++){
-		verts[i] = cpvsub(verts[i], centroid);
+		verts[i] = cpVect.Sub(verts[i], centroid);
 	}
 }
 
-float
-cpMomentForBox(float m, float width, float height)
+double
+cpMomentForBox(double m, double width, double height)
 {
 	return m*(width*width + height*height)/12.0f;
 }
 
-float
-cpMomentForBox2(float m, cpBB box)
+double
+cpMomentForBox2(double m, cpBB box)
 {
-	float width = box.r - box.l;
-	float height = box.t - box.b;
-	cpVect offset = cpvmult(cpv(box.l + box.r, box.b + box.t), 0.5f);
+	double width = box.r - box.l;
+	double height = box.t - box.b;
+	cpVect offset = cpVect.Multiply(cpv(box.l + box.r, box.b + box.t), 0.5f);
 	
-	// TODO NaN when offset is 0 and m is float.PositiveInfinity
-	return cpMomentForBox(m, width, height) + m*cpvlengthsq(offset);
+	// TODO NaN when offset is 0 and m is double.PositiveInfinity
+	return cpMomentForBox(m, width, height) + m*offset.LengthSQ;
 }
 
 //MARK: Quick Hull
 
 void
-cpLoopIndexes(cpVect[] verts, int count, int *start, int *end)
+cpLoopIndexes(cpVect[] verts, int count, ref int start, ref int end)
 {
-	(*start) = (*end) = 0;
+	start = end = 0;
 	cpVect min = verts[0];
 	cpVect max = min;
 	
@@ -156,30 +161,28 @@ cpLoopIndexes(cpVect[] verts, int count, int *start, int *end)
 		
     if(v.x < min.x || (v.x == min.x && v.y < min.y)){
       min = v;
-      (*start) = i;
+      start = i;
     } else if(v.x > max.x || (v.x == max.x && v.y > max.y)){
 			max = v;
-			(*end) = i;
+			end = i;
 		}
 	}
 }
 
-#define SWAP(__A__, __B__) {cpVect __TMP__ = __A__; __A__ = __B__; __B__ = __TMP__;}
-
 static int
-QHullPartition(cpVect[] verts, int count, cpVect a, cpVect b, float tol)
+QHullPartition(cpVect[] verts, int count, cpVect a, cpVect b, double tol)
 {
 	if(count == 0) return 0;
 	
-	float max = 0;
+	double max = 0;
 	int pivot = 0;
 	
-	cpVect delta = cpvsub(b, a);
-	float valueTol = tol*cpvlength(delta);
+	cpVect delta = cpVect.Sub(b, a);
+	double valueTol = tol*delta.Length;
 	
 	int head = 0;
 	for(int tail = count-1; head <= tail;){
-		float value = cpvcross(delta, cpvsub(verts[head], a));
+		double value = cpVect.CrossProduct(delta, cpVect.Sub(verts[head], a));
 		if(value > valueTol){
 			if(value > max){
 				max = value;
@@ -188,125 +191,74 @@ QHullPartition(cpVect[] verts, int count, cpVect a, cpVect b, float tol)
 			
 			head++;
 		} else {
-			SWAP(verts[head], verts[tail]);
+			SWAP(ref verts[head], ref verts[tail]);
 			tail--;
 		}
 	}
 	
 	// move the new pivot to the front if it's not already there.
-	if(pivot != 0) SWAP(verts[0], verts[pivot]);
+	if(pivot != 0) SWAP(ref verts[0], ref verts[pivot]);
 	return head;
 }
 
 static int
-QHullReduce(float tol, cpVect[] verts, int count, cpVect a, cpVect pivot, cpVect b, cpVect *result)
+QHullReduce(double tol, cpVect[] verts, int offset, int count, cpVect a, cpVect pivot, cpVect b, cpVect[] result, int roffset)
 {
 	if(count < 0){
 		return 0;
 	} else if(count == 0) {
-		result[0] = pivot;
+		result[roffset] = pivot;
 		return 1;
 	} else {
-		int left_count = QHullPartition(verts, count, a, pivot, tol);
-		int index = QHullReduce(tol, verts + 1, left_count - 1, a, verts[0], pivot, result);
+		int left_count = QHullPartition(verts, offset, count, a, pivot, tol);
+		int index = QHullReduce(tol, verts, offset + 1, left_count - 1, a, verts[offset], pivot, result, roffset);
 		
-		result[index++] = pivot;
-		
-		int right_count = QHullPartition(verts + left_count, count - left_count, pivot, b, tol);
-		return index + QHullReduce(tol, verts + left_count + 1, right_count - 1, pivot, verts[left_count], b, result + index);
+		result[roffset + index] = pivot;
+		index++;
+
+		int right_count = QHullPartition(verts, offset, offset + left_count, count - left_count, pivot, b, tol);
+		return index + QHullReduce(tol, verts, offset + left_count + 1, right_count - 1, pivot, verts[offset + left_count], b, result, index);
 	}
 }
+
+    static void SWAP(ref cpVect a, ref cpVect b) {
+        cpVect h = a;
+        a = b;
+        b = h;
+    }
 
 // QuickHull seemed like a neat algorithm, and efficient-ish for large input sets.
 // My implementation performs an in place reduction using the result array as scratch space.
 int
-cpConvexHull(int count, cpVect[] verts, cpVect *result, int *first, float tol)
+cpConvexHull(int count, cpVect[] verts, int offset, cpVect[] result, ref int first, double tol)
 {
-	if(result){
+	if(result != null){
 		// Copy the line vertexes into the empty part of the result polyline to use as a scratch buffer.
-		memcpy(result, verts, count*sizeof(cpVect));
+        Array.Copy(verts, offset, result, 0, count);
+        verts.CopyTo(result, count);
 	} else {
 		// If a result array was not specified, reduce the input instead.
-		result = verts;
+        verts.CopyTo(result, 0);
 	}
 	
 	// Degenerate case, all poins are the same.
 	int start, end;
-	cpLoopIndexes(verts, count, &start, &end);
+	cpLoopIndexes(verts, count, ref start, ref end);
 	if(start == end){
-		if(first) (*first) = 0;
+		first = 0;
 		return 1;
 	}
 	
-	SWAP(result[0], result[start]);
-	SWAP(result[1], result[end == 0 ? start : end]);
+	SWAP(ref result[0], ref result[start]);
+	SWAP(ref result[1], ref result[end == 0 ? start : end]);
 	
 	cpVect a = result[0];
 	cpVect b = result[1];
 	
-	if(first) (*first) = start;
-	int resultCount = QHullReduce(tol, result + 2, count - 2, a, b, a, result + 1) + 1;
-	// cpAssertSoft(cpPolyValidate(result, resultCount),
-		"Internal error: cpConvexHull() and cpPolyValidate() did not agree."
-		"Please report this error with as much info as you can.");
+	first = start;
+	int resultCount = QHullReduce(tol, result, 2, count - 2, a, b, a, result, 1) + 1;
 	return resultCount;
 }
-
-//MARK: Alternate Block Iterators
-
-#if defined(__has_extension)
-#if __has_extension(blocks)
-
-static void IteratorFunc(object ptr, void (^block)(object ptr)){block(ptr);}
-
-void cpSpaceEachBody_b(cpSpace space, void (^block)(cpBody body)){
-	cpSpaceEachBody(space, (cpSpaceBodyIteratorFunc)IteratorFunc, block);
-}
-
-void cpSpaceEachShape_b(cpSpace space, void (^block)(cpShape shape)){
-	cpSpaceEachShape(space, (cpSpaceShapeIteratorFunc)IteratorFunc, block);
-}
-
-void cpSpaceEachConstraint_b(cpSpace space, void (^block)(cpConstraint constraint)){
-	cpSpaceEachConstraint(space, (cpSpaceConstraintIteratorFunc)IteratorFunc, block);
-}
-
-static void BodyIteratorFunc(cpBody body, object ptr, void (^block)(object ptr)){block(ptr);}
-
-void cpBodyEachShape_b(cpBody body, void (^block)(cpShape shape)){
-	cpBodyEachShape(body, (cpBodyShapeIteratorFunc)BodyIteratorFunc, block);
-}
-
-void cpBodyEachConstraint_b(cpBody body, void (^block)(cpConstraint constraint)){
-	cpBodyEachConstraint(body, (cpBodyConstraintIteratorFunc)BodyIteratorFunc, block);
-}
-
-void cpBodyEachArbiter_b(cpBody body, void (^block)(cpArbiter arbiter)){
-	cpBodyEachArbiter(body, (cpBodyArbiterIteratorFunc)BodyIteratorFunc, block);
-}
-
-static void NearestPointQueryIteratorFunc(cpShape shape, float distance, cpVect point, cpSpaceNearestPointQueryBlock block){block(shape, distance, point);}
-void cpSpaceNearestPointQuery_b(cpSpace space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpSpaceNearestPointQueryBlock block){
-	cpSpaceNearestPointQuery(space, point, maxDistance, layers, group, (cpSpaceNearestPointQueryFunc)NearestPointQueryIteratorFunc, block);
-}
-
-static void SegmentQueryIteratorFunc(cpShape shape, float t, cpVect n, cpSpaceSegmentQueryBlock block){block(shape, t, n);}
-void cpSpaceSegmentQuery_b(cpSpace space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSpaceSegmentQueryBlock block){
-	cpSpaceSegmentQuery(space, start, end, layers, group, (cpSpaceSegmentQueryFunc)SegmentQueryIteratorFunc, block);
-}
-
-void cpSpaceBBQuery_b(cpSpace space, cpBB bb, cpLayers layers, cpGroup group, cpSpaceBBQueryBlock block){
-	cpSpaceBBQuery(space, bb, layers, group, (cpSpaceBBQueryFunc)IteratorFunc, block);
-}
-
-static void ShapeQueryIteratorFunc(cpShape shape, cpContactPointSet *points, cpSpaceShapeQueryBlock block){block(shape, points);}
-bool cpSpaceShapeQuery_b(cpSpace space, cpShape shape, cpSpaceShapeQueryBlock block){
-	return cpSpaceShapeQuery(space, shape, (cpSpaceShapeQueryFunc)ShapeQueryIteratorFunc, block);
-}
-
-#endif
-#endif
-
-#include "chipmunk_ffi.h"
 }
 }
+

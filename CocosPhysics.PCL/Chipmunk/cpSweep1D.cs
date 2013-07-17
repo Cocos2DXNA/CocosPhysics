@@ -30,7 +30,7 @@ static cpSpatialIndexClass Klass();
 //MARK: Basic Structures
 
 // typedef struct Bounds {
-	float min, max;
+	double min, max;
 } Bounds;
 
 // typedef struct TableCell {
@@ -192,7 +192,7 @@ cpSweep1DQuery(cpSweep1D *sweep, object obj, cpBB bb, cpSpatialIndexQueryFunc fu
 }
 
 static void
-cpSweep1DSegmentQuery(cpSweep1D *sweep, object obj, cpVect a, cpVect b, float t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
+cpSweep1DSegmentQuery(cpSweep1D *sweep, object obj, cpVect a, cpVect b, double t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
 {
 	cpBB bb = cpBBExpand(cpBBNew(a.x, a.y, a.x, a.y), b);
 	Bounds bounds = BBToBounds(sweep, bb);
@@ -224,7 +224,7 @@ cpSweep1DReindexQuery(cpSweep1D *sweep, cpSpatialIndexQueryFunc func, object dat
 	
 	for(int i=0; i<count; i++){
 		TableCell cell = table[i];
-		float max = cell.bounds.max;
+		double max = cell.bounds.max;
 		
 		for(int j=i+1; table[j].bounds.min < max && j<count; j++){
 			func(cell.obj, table[j].obj, data);

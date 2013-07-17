@@ -22,24 +22,33 @@
 using System;
 namespace CocosPhysics.Chipmunk
 {
-    public static partial class Physics
-    {
+    public delegate void cpSpatialIndexQueryFunc(cpShape s, object d);
+    public delegate void cpSpaceNearestPointQueryFunc(cpShape s, ref cpShape outShape);
 
-//MARK: Point Query Functions
+struct BBQueryContext {
+	cpBB bb;
+	cpLayers layers;
+	cpGroup group;
+	cpSpaceBBQueryFunc func;
+};
 
 struct PointQueryContext {
 	cpVect point;
 	cpLayers layers;
 	cpGroup group;
-	cpSpacePointQueryFunc func;
+    cpSpatialIndexQueryFunc func;
 	object data;
 };
 
+    public static partial class Physics
+    {
+
+
 static void 
-PointQuery(struct PointQueryContext *context, cpShape shape, object data)
+PointQuery(ref PointQueryContext context, cpShape shape, object data)
 {
 	if(
-		!(shape.group && context.group == shape.group) && (context.layers&shape.layers) &&
+		!(shape.group && context.group == shape.group) && (context.layers & shape.layers) &&
 		cpShapePointQuery(shape, context.point)
 	){
 		context.func(shape, context.data);
@@ -53,22 +62,23 @@ cpSpacePointQuery(cpSpace space, cpVect point, cpLayers layers, cpGroup group, c
 	cpBB bb = cpBBNewForCircle(point, 0.0f);
 	
 	cpSpaceLock(space); {
-    cpSpatialIndexQuery(space.activeShapes, &context, bb, (cpSpatialIndexQueryFunc)PointQuery, data);
-    cpSpatialIndexQuery(space.staticShapes, &context, bb, (cpSpatialIndexQueryFunc)PointQuery, data);
+    cpSpatialIndexQuery(space.activeShapes, ref context, bb, new cpSpatialIndexQueryFunc(PointQuery), data);
+    cpSpatialIndexQuery(space.staticShapes, ref context, bb, new cpSpatialIndexQueryFunc(PointQuery), data);
 	} cpSpaceUnlock(space, true);
 }
 
 static void
-PointQueryFirst(cpShape shape, cpShape outShape)
+PointQueryFirst(cpShape shape, ref cpShape outShape)
 {
-	if(!shape.sensor) *outShape = shape;
+	if(!shape.sensor) 
+        outShape = shape;
 }
 
 cpShape 
 cpSpacePointQueryFirst(cpSpace space, cpVect point, cpLayers layers, cpGroup group)
 {
 	cpShape shape = null;
-	cpSpacePointQuery(space, point, layers, group, (cpSpacePointQueryFunc)PointQueryFirst, &shape);
+	cpSpacePointQuery(space, point, layers, group, new cpSpacePointQueryFunc(PointQueryFirst), ref shape);
 	
 	return shape;
 }
@@ -77,7 +87,7 @@ cpSpacePointQueryFirst(cpSpace space, cpVect point, cpLayers layers, cpGroup gro
 
 struct NearestPointQueryContext {
 	cpVect point;
-	float maxDistance;
+	double maxDistance;
 	cpLayers layers;
 	cpGroup group;
 	cpSpaceNearestPointQueryFunc func;
@@ -97,10 +107,10 @@ NearestPointQuery(struct NearestPointQueryContext *context, cpShape shape, objec
 }
 
 void
-cpSpaceNearestPointQuery(cpSpace space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpSpaceNearestPointQueryFunc func, object data)
+cpSpaceNearestPointQuery(cpSpace space, cpVect point, double maxDistance, cpLayers layers, cpGroup group, cpSpaceNearestPointQueryFunc func, object data)
 {
 	struct NearestPointQueryContext context = {point, maxDistance, layers, group, func};
-	cpBB bb = cpBBNewForCircle(point, cpfmax(maxDistance, 0.0f));
+	cpBB bb = cpBBNewForCircle(point, System.Math.Max(maxDistance, 0.0f));
 	
 	cpSpaceLock(space); {
 		cpSpatialIndexQuery(space.activeShapes, &context, bb, (cpSpatialIndexQueryFunc)NearestPointQuery, data);
@@ -122,7 +132,7 @@ NearestPointQueryNearest(struct NearestPointQueryContext *context, cpShape shape
 }
 
 cpShape 
-cpSpaceNearestPointQueryNearest(cpSpace space, cpVect point, float maxDistance, cpLayers layers, cpGroup group, cpNearestPointQueryInfo out)
+cpSpaceNearestPointQueryNearest(cpSpace space, cpVect point, double maxDistance, cpLayers layers, cpGroup group, cpNearestPointQueryInfo out)
 {
 	cpNearestPointQueryInfo info = {null, cpvzero, maxDistance};
 	if(out){
@@ -137,7 +147,7 @@ cpSpaceNearestPointQueryNearest(cpSpace space, cpVect point, float maxDistance, 
 		null
 	};
 	
-	cpBB bb = cpBBNewForCircle(point, cpfmax(maxDistance, 0.0f));
+	cpBB bb = cpBBNewForCircle(point, System.Math.Max(maxDistance, 0.0f));
 	cpSpatialIndexQuery(space.activeShapes, &context, bb, (cpSpatialIndexQueryFunc)NearestPointQueryNearest, out);
 	cpSpatialIndexQuery(space.staticShapes, &context, bb, (cpSpatialIndexQueryFunc)NearestPointQueryNearest, out);
 	
@@ -154,8 +164,8 @@ struct SegmentQueryContext {
 	cpSpaceSegmentQueryFunc func;
 };
 
-static float
-SegmentQuery(struct SegmentQueryContext *context, cpShape shape, object data)
+static double
+SegmentQuery(ref SegmentQueryContext context, cpShape shape, object data)
 {
 	cpSegmentQueryInfo info;
 	
@@ -178,14 +188,12 @@ cpSpaceSegmentQuery(cpSpace space, cpVect start, cpVect end, cpLayers layers, cp
 		func,
 	};
 	
-	cpSpaceLock(space); {
-    cpSpatialIndexSegmentQuery(space.staticShapes, &context, start, end, 1.0f, (cpSpatialIndexSegmentQueryFunc)SegmentQuery, data);
-    cpSpatialIndexSegmentQuery(space.activeShapes, &context, start, end, 1.0f, (cpSpatialIndexSegmentQueryFunc)SegmentQuery, data);
-	} cpSpaceUnlock(space, true);
+    cpSpatialIndexSegmentQuery(space.staticShapes, ref context, start, end, 1.0f, new cpSpatialIndexSegmentQueryFunc(SegmentQuery), data);
+    cpSpatialIndexSegmentQuery(space.activeShapes, ref context, start, end, 1.0f, new cpSpatialIndexSegmentQueryFunc(SegmentQuery), data);
 }
 
-static float
-SegmentQueryFirst(struct SegmentQueryContext *context, cpShape shape, cpSegmentQueryInfo out)
+static double
+SegmentQueryFirst(struct SegmentQueryContext *context, cpShape shape, ref cpSegmentQueryInfo queryOut)
 {
 	cpSegmentQueryInfo info;
 	
@@ -195,7 +203,7 @@ SegmentQueryFirst(struct SegmentQueryContext *context, cpShape shape, cpSegmentQ
 		cpShapeSegmentQuery(shape, context.start, context.end, ref info) &&
 		info.t < out.t
 	){
-		(*out) = info;
+		queryOut = info;
 	}
 	
 	return out.t;
@@ -225,12 +233,6 @@ cpSpaceSegmentQueryFirst(cpSpace space, cpVect start, cpVect end, cpLayers layer
 
 //MARK: BB Query Functions
 
-struct BBQueryContext {
-	cpBB bb;
-	cpLayers layers;
-	cpGroup group;
-	cpSpaceBBQueryFunc func;
-};
 
 static void 
 BBQuery(struct BBQueryContext *context, cpShape shape, object data)
@@ -309,12 +311,11 @@ cpSpaceShapeQuery(cpSpace space, cpShape shape, cpSpaceShapeQueryFunc func, obje
 	cpBB bb = (body ? cpShapeUpdate(shape, body.p, body.rot) : shape.bb);
 	struct ShapeQueryContext context = {func, data, false};
 	
-	cpSpaceLock(space); {
-    cpSpatialIndexQuery(space.activeShapes, shape, bb, (cpSpatialIndexQueryFunc)ShapeQuery, &context);
-    cpSpatialIndexQuery(space.staticShapes, shape, bb, (cpSpatialIndexQueryFunc)ShapeQuery, &context);
-	} cpSpaceUnlock(space, true);
+    cpSpatialIndexQuery(space.activeShapes, shape, bb, new cpSpatialIndexQueryFunc(ShapeQuery), ref context);
+    cpSpatialIndexQuery(space.staticShapes, shape, bb, new cpSpatialIndexQueryFunc(ShapeQuery), ref context);
 	
 	return context.anyCollision;
 }
 }
-}
+}+
+

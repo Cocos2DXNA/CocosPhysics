@@ -23,7 +23,7 @@
 #include "constraints/util.h"
 
 static void
-preStep(cpPinJoint *joint, float dt)
+preStep(cpPinJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
@@ -31,54 +31,54 @@ preStep(cpPinJoint *joint, float dt)
 	joint.r1 = cpvrotate(joint.anchr1, a.rot);
 	joint.r2 = cpvrotate(joint.anchr2, b.rot);
 	
-	cpVect delta = cpvsub(cpvadd(b.p, joint.r2), cpvadd(a.p, joint.r1));
-	float dist = cpvlength(delta);
-	joint.n = cpvmult(delta, 1.0f/(dist ? dist : float.PositiveInfinity));
+	cpVect delta = cpVect.Sub(cpVect.Add(b.p, joint.r2), cpVect.Add(a.p, joint.r1));
+	double dist = cpvlength(delta);
+	joint.n = cpVect.Multiply(delta, 1.0f/(dist ? dist : double.PositiveInfinity));
 	
 	// calculate mass normal
 	joint.nMass = 1.0f/k_scalar(a, b, joint.r1, joint.r2, joint.n);
 	
 	// calculate bias velocity
-	float maxBias = joint.constraint.maxBias;
+	double maxBias = joint.constraint.maxBias;
 	joint.bias = cpfclamp(-bias_coef(joint.constraint.errorBias, dt)*(dist - joint.dist)/dt, -maxBias, maxBias);
 }
 
 static void
-applyCachedImpulse(cpPinJoint *joint, float dt_coef)
+applyCachedImpulse(cpPinJoint *joint, double dt_coef)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	
-	cpVect j = cpvmult(joint.n, joint.jnAcc*dt_coef);
+	cpVect j = cpVect.Multiply(joint.n, joint.jnAcc*dt_coef);
 	apply_impulses(a, b, joint.r1, joint.r2, j);
 }
 
 static void
-applyImpulse(cpPinJoint *joint, float dt)
+applyImpulse(cpPinJoint *joint, double dt)
 {
 	cpBody a = joint.constraint.a;
 	cpBody b = joint.constraint.b;
 	cpVect n = joint.n;
 
 	// compute relative velocity
-	float vrn = normal_relative_velocity(a, b, joint.r1, joint.r2, n);
+	double vrn = normal_relative_velocity(a, b, joint.r1, joint.r2, n);
 	
-	float jnMax = joint.constraint.maxForce*dt;
+	double jnMax = joint.constraint.maxForce*dt;
 	
 	// compute normal impulse
-	float jn = (joint.bias - vrn)*joint.nMass;
-	float jnOld = joint.jnAcc;
+	double jn = (joint.bias - vrn)*joint.nMass;
+	double jnOld = joint.jnAcc;
 	joint.jnAcc = cpfclamp(jnOld + jn, -jnMax, jnMax);
 	jn = joint.jnAcc - jnOld;
 	
 	// apply impulse
-	apply_impulses(a, b, joint.r1, joint.r2, cpvmult(n, jn));
+	apply_impulses(a, b, joint.r1, joint.r2, cpVect.Multiply(n, jn));
 }
 
-static float
+static double
 getImpulse(cpPinJoint *joint)
 {
-	return cpfabs(joint.jnAcc);
+	return System.Math.Abs(joint.jnAcc);
 }
 
 static cpConstraintClass klass = {
@@ -105,9 +105,9 @@ cpPinJointInit(cpPinJoint *joint, cpBody a, cpBody b, cpVect anchr1, cpVect anch
 	joint.anchr2 = anchr2;
 	
 	// STATIC_BODY_CHECK
-	cpVect p1 = (a ? cpvadd(a.p, cpvrotate(anchr1, a.rot)) : anchr1);
-	cpVect p2 = (b ? cpvadd(b.p, cpvrotate(anchr2, b.rot)) : anchr2);
-	joint.dist = cpvlength(cpvsub(p2, p1));
+	cpVect p1 = (a ? cpVect.Add(a.p, cpvrotate(anchr1, a.rot)) : anchr1);
+	cpVect p2 = (b ? cpVect.Add(b.p, cpvrotate(anchr2, b.rot)) : anchr2);
+	joint.dist = cpvlength(cpVect.Sub(p2, p1));
 	
 	// cpAssertWarn(joint.dist > 0.0, "You created a 0 length pin joint. A pivot joint will be much more stable.");
 

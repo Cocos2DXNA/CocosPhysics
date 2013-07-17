@@ -218,7 +218,7 @@ queryReject(cpShape a, cpShape b)
 		// Don't collide objects that don't share at least on layer.
 		|| !(a.layers & b.layers)
 		// Don't collide infinite mass objects
-		|| (a.body.m == float.PositiveInfinity && b.body.m == float.PositiveInfinity)
+		|| (a.body.m == double.PositiveInfinity && b.body.m == double.PositiveInfinity)
 	);
 }
 
@@ -328,14 +328,14 @@ cpShapeUpdateFunc(cpShape shape, object unused)
 }
 
 void
-cpSpaceStep(cpSpace space, float dt)
+cpSpaceStep(cpSpace space, double dt)
 {
 	// don't step if the timestep is 0!
 	if(dt == 0.0f) return;
 	
 	space.stamp++;
 	
-	float prev_dt = space.curr_dt;
+	double prev_dt = space.curr_dt;
 	space.curr_dt = dt;
 		
 	cpArray *bodies = space.bodies;
@@ -375,8 +375,8 @@ cpSpaceStep(cpSpace space, float dt)
 		cpHashSetFilter(space.cachedArbiters, (cpHashSetFilterFunc)cpSpaceArbiterSetFilter, space);
 
 		// Prestep the arbiters and constraints.
-		float slop = space.collisionSlop;
-		float biasCoef = 1.0f - cpfpow(space.collisionBias, dt);
+		double slop = space.collisionSlop;
+		double biasCoef = 1.0f - System.Math.Pow(space.collisionBias, dt);
 		for(int i=0; i<arbiters.num; i++){
 			cpArbiterPreStep((cpArbiter )arbiters.arr[i], dt, slop, biasCoef);
 		}
@@ -391,7 +391,7 @@ cpSpaceStep(cpSpace space, float dt)
 		}
 	
 		// Integrate velocities.
-		float damping = cpfpow(space.damping, dt);
+		double damping = System.Math.Pow(space.damping, dt);
 		cpVect gravity = space.gravity;
 		for(int i=0; i<bodies.num; i++){
 			cpBody body = (cpBody )bodies.arr[i];
@@ -399,7 +399,7 @@ cpSpaceStep(cpSpace space, float dt)
 		}
 		
 		// Apply cached impulses
-		float dt_coef = (prev_dt == 0.0f ? 0.0f : dt/prev_dt);
+		double dt_coef = (prev_dt == 0.0f ? 0.0f : dt/prev_dt);
 		for(int i=0; i<arbiters.num; i++){
 			cpArbiterApplyCachedImpulse((cpArbiter )arbiters.arr[i], dt_coef);
 		}

@@ -84,12 +84,12 @@ GetBB(cpBBTree tree, object obj)
 	
 	cpBBTreeVelocityFunc velocityFunc = tree.velocityFunc;
 	if(velocityFunc){
-		float coef = 0.1f;
-		float x = (bb.r - bb.l)*coef;
-		float y = (bb.t - bb.b)*coef;
+		double coef = 0.1f;
+		double x = (bb.r - bb.l)*coef;
+		double y = (bb.t - bb.b)*coef;
 		
-		cpVect v = cpvmult(velocityFunc(obj), 0.1f);
-		return cpBBNew(bb.l + cpfmin(-x, v.x), bb.b + cpfmin(-y, v.y), bb.r + cpfmax(x, v.x), bb.t + cpfmax(y, v.y));
+		cpVect v = cpVect.Multiply(velocityFunc(obj), 0.1f);
+		return cpBBNew(bb.l + System.Math.Min(-x, v.x), bb.b + System.Math.Min(-y, v.y), bb.r + System.Math.Max(x, v.x), bb.t + System.Math.Max(y, v.y));
 	} else {
 		return bb;
 	}
@@ -314,10 +314,10 @@ NodeReplaceChild(Node parent, Node child, Node value, cpBBTree tree)
 
 //MARK: Subtree Functions
 
-static float
+static double
 cpBBProximity(cpBB a, cpBB b)
 {
-	return cpfabs(a.l + a.r - b.l - b.r) + cpfabs(a.b + a.t - b.b - b.t);
+	return System.Math.Abs(a.l + a.r - b.l - b.r) + System.Math.Abs(a.b + a.t - b.b - b.t);
 }
 
 static Node 
@@ -328,8 +328,8 @@ SubtreeInsert(Node subtree, Node leaf, cpBBTree tree)
 	} else if(NodeIsLeaf(subtree)){
 		return NodeNew(tree, leaf, subtree);
 	} else {
-		float cost_a = cpBBArea(subtree.B.bb) + cpBBMergedArea(subtree.A.bb, leaf.bb);
-		float cost_b = cpBBArea(subtree.A.bb) + cpBBMergedArea(subtree.B.bb, leaf.bb);
+		double cost_a = cpBBArea(subtree.B.bb) + cpBBMergedArea(subtree.A.bb, leaf.bb);
+		double cost_b = cpBBArea(subtree.A.bb) + cpBBMergedArea(subtree.B.bb, leaf.bb);
 		
 		if(cost_a == cost_b){
 			cost_a = cpBBProximity(subtree.A.bb, leaf.bb);
@@ -361,21 +361,21 @@ SubtreeQuery(Node subtree, object obj, cpBB bb, cpSpatialIndexQueryFunc func, ob
 }
 
 
-static float
-SubtreeSegmentQuery(Node subtree, object obj, cpVect a, cpVect b, float t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
+static double
+SubtreeSegmentQuery(Node subtree, object obj, cpVect a, cpVect b, double t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
 {
 	if(NodeIsLeaf(subtree)){
 		return func(obj, subtree.obj, data);
 	} else {
-		float t_a = cpBBSegmentQuery(subtree.A.bb, a, b);
-		float t_b = cpBBSegmentQuery(subtree.B.bb, a, b);
+		double t_a = cpBBSegmentQuery(subtree.A.bb, a, b);
+		double t_b = cpBBSegmentQuery(subtree.B.bb, a, b);
 		
 		if(t_a < t_b){
-			if(t_a < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree.A, obj, a, b, t_exit, func, data));
-			if(t_b < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree.B, obj, a, b, t_exit, func, data));
+			if(t_a < t_exit) t_exit = System.Math.Min(t_exit, SubtreeSegmentQuery(subtree.A, obj, a, b, t_exit, func, data));
+			if(t_b < t_exit) t_exit = System.Math.Min(t_exit, SubtreeSegmentQuery(subtree.B, obj, a, b, t_exit, func, data));
 		} else {
-			if(t_b < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree.B, obj, a, b, t_exit, func, data));
-			if(t_a < t_exit) t_exit = cpfmin(t_exit, SubtreeSegmentQuery(subtree.A, obj, a, b, t_exit, func, data));
+			if(t_b < t_exit) t_exit = System.Math.Min(t_exit, SubtreeSegmentQuery(subtree.B, obj, a, b, t_exit, func, data));
+			if(t_a < t_exit) t_exit = System.Math.Min(t_exit, SubtreeSegmentQuery(subtree.A, obj, a, b, t_exit, func, data));
 		}
 		
 		return t_exit;
@@ -668,7 +668,7 @@ cpBBTreeReindexObject(cpBBTree tree, object obj, cpHashValue hashid)
 //MARK: Query
 
 static void
-cpBBTreeSegmentQuery(cpBBTree tree, object obj, cpVect a, cpVect b, float t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
+cpBBTreeSegmentQuery(cpBBTree tree, object obj, cpVect a, cpVect b, double t_exit, cpSpatialIndexSegmentQueryFunc func, object data)
 {
 	Node root = tree.root;
 	if(root) SubtreeSegmentQuery(root, obj, a, b, t_exit, func, data);
@@ -726,7 +726,7 @@ static cpSpatialIndexClass Klass(){return klass;}
 //MARK: Tree Optimization
 
 static int
-cpfcompare(float a, float b){
+cpfcompare(double a, double b){
 	return (a < b ? -1 : (b < a ? 1 : 0));
 }
 
@@ -753,7 +753,7 @@ partitionNodes(cpBBTree tree, Node[] nodes, int count)
 	bool splitWidth = (bb.r - bb.l > bb.t - bb.b);
 	
 	// Sort the bounds and use the median as the splitting point
-	float bounds = (float )cpcalloc(count*2, sizeof(float));
+	double bounds = (double )cpcalloc(count*2, sizeof(double));
 	if(splitWidth){
 		for(int i=0; i<count; i++){
 			bounds[2*i + 0] = nodes[i].bb.l;
@@ -766,8 +766,8 @@ partitionNodes(cpBBTree tree, Node[] nodes, int count)
 		}
 	}
 	
-	qsort(bounds, count*2, sizeof(float), (int (*)(object , object ))cpfcompare);
-	float split = (bounds[count - 1] + bounds[count])*0.5f; // use the medain as the split
+	qsort(bounds, count*2, sizeof(double), (int (*)(object , object ))cpfcompare);
+	double split = (bounds[count - 1] + bounds[count])*0.5f; // use the medain as the split
 	cpfree(bounds);
 
 	// Generate the child BBs
@@ -856,9 +856,9 @@ NodeRender(Node node, int depth)
 	
 	cpBB bb = node.bb;
 	
-//	GLfloat v = depth/2.0f;	
+//	GLdouble v = depth/2.0f;	
 //	glColor3f(1.0f - v, v, 0.0f);
-	glLineWidth(cpfmax(5.0f - depth, 1.0f));
+	glLineWidth(System.Math.Max(5.0f - depth, 1.0f));
 	glBegin(GL_LINES); {
 		glVertex2f(bb.l, bb.b);
 		glVertex2f(bb.l, bb.t);
