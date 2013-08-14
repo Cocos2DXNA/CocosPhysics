@@ -6,100 +6,185 @@ using Box2D;
 using Box2D.Common;
 using Box2D.Collision.Shapes;
 using Box2D.Dynamics;
+using Box2D.Dynamics.Joints;
+using Box2D.Dynamics.Contacts;
+using Box2D.Collision;
 
-namespace box2dTest
+namespace box2dconsole
 {
+
     class Program
     {
+        static b2Body m_bomb;
+        static b2MouseJoint m_mouseJoint;
+        static b2Vec2 m_bombSpawnPoint = b2Vec2.Zero;
+        static bool m_bombSpawning;
+        static b2Vec2 m_mouseWorld = b2Vec2.Zero;
+        static b2World _world;
+        static b2Body m_body;
+        // Define the ground box shape.
+        static float width = 100f, height = 100f;
+        static float simulat_time = 5f; // time in seconds to run the sim
+
         static void Main(string[] args)
         {
-            var gravity = new b2Vec2(0.0f, -10.0f);
-            b2World _world = new b2World(gravity);
-            _world.SetAllowSleeping(true);
-            _world.SetContinuousPhysics(true);
+            SetupWorld(false);
+            AddPair();
+            // FallingBoxesTest();
+            // ApplyForce();
+            // Run(new Action(ApplyForceKeyboardInput));
+            Run(null);
+        }
 
-            // Call the body factory which allocates memory for the ground body
-            // from a pool and creates the ground box shape (also from a pool).
-            // The body is also added to the world.
-            b2BodyDef def = b2BodyDef.Create();
-            def.allowSleep = true;
-            def.position = b2Vec2.Zero;
-            def.type = b2BodyType.b2_staticBody;
-            b2Body groundBody = _world.CreateBody(def);
-            groundBody.SetActive(true);
-
-            // Define the ground box shape.
-            float width = 50f, height = 50f;
-            // bottom
-            b2EdgeShape groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(-width / 2f, 0), new b2Vec2(width / 2f, 0));
-            b2FixtureDef fd = b2FixtureDef.Create();
-            fd.shape = groundBox;
-            groundBody.CreateFixture(fd);
-
-            // top
-            groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(-width/2f, height), new b2Vec2(width/2f, height));
-            fd.shape = groundBox;
-            groundBody.CreateFixture(fd);
-
-            // left
-            groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(-width / 2f, height), new b2Vec2(-width / 2f, 0));
-            fd.shape = groundBox;
-            groundBody.CreateFixture(fd);
-
-            // right
-            groundBox = new b2EdgeShape();
-            groundBox.Set(new b2Vec2(width/2f, height), new b2Vec2(width/2f, 0));
-            fd.shape = groundBox;
-            groundBody.CreateFixture(fd);
-
-            _world.Dump();
-
-            string s = null;
-            if (args.Length == 1)
+        static void ApplyForceKeyboardInput()
+        {
+            int dr = ran.Next(100);
+            if (dr < 50)
             {
-                s = args[0];
+                // w
+                b2Vec2 f = m_body.GetWorldVector(new b2Vec2(0.0f, -200.0f));
+                b2Vec2 p = m_body.GetWorldPoint(new b2Vec2(0.0f, 2.0f));
+                Console.WriteLine("ApplyForce: w f={0},{1}, p={2},{3}", f.x,f.y, p.x,p.y);
+                m_body.ApplyForce(f, p);
             }
-            else
+            else if (dr > 80 && dr < 90)
             {
-                Console.WriteLine("Enter the number of bodies you want to run?");
-                s = Console.ReadLine();
+                Console.WriteLine("ApplyForce: a");
+                // a
+                m_body.ApplyTorque(50.0f);
             }
-            float y = height;
-            int count = 0, max = int.Parse(s);
-            while (count < max)
+            else if (dr > 90)
             {
-                float xStart = (count / 30 % 2 == 1) ? 8f : 0f;
-                for (int i = 0; i < 30 && count < max; i++, count++)
+                Console.WriteLine("ApplyForce: d");
+                // d
+                m_body.ApplyTorque(-50.0f);
+            }
+        }
+
+        #region Listeners and Callbacks
+
+        struct ContactPoint
+        {
+            public b2Fixture fixtureA;
+            public b2Fixture fixtureB;
+            public b2Vec2 normal;
+            public b2Vec2 position;
+            public b2PointState state;
+        };
+        
+        class Destructo : b2DestructionListener
+        {
+            /// Called when any joint is about to be destroyed due
+            /// to the destruction of one of its attached bodies.
+            public override void SayGoodbye(b2Joint joint)
+            {
+                if (m_mouseJoint == joint)
                 {
-                    def = b2BodyDef.Create();
-                    float x = xStart + (float)i / 30.0f * ((float)width - 30.0f * 2.0f - xStart * 2.0f) + (float)i * 2.0f;
-                    x += -width / 2.0f;
-                    def.position = new b2Vec2(x, y + (float)(count / 30) + (float)(i + 1));
-/*                    def.position = new b2Vec2(
-                          xStart + (float)i / 30f * (width - 30*2 - xStart*2f) + (float)i * 2f
-                        , y + (float)(count / 30) + (float)(i+1));
- */
-                    def.type = b2BodyType.b2_dynamicBody;
-                    b2Body body = _world.CreateBody(def);
-                    // Define another box shape for our dynamic body.
-                    var dynamicBox = new b2PolygonShape();
-                    dynamicBox.SetAsBox(.5f, .5f); //These are mid points for our 1m box
-
-                    // Define the dynamic body fixture.
-                    fd = b2FixtureDef.Create();
-                    fd.shape = dynamicBox;
-                    fd.density = 1f;
-                    fd.friction = 0.3f;
-                    b2Fixture fixture = body.CreateFixture(fd);
+                    m_mouseJoint = null;
                 }
-                y -= 10f;
+                else
+                {
+                    // JointDestroyed(joint);
+                }
+                Console.WriteLine("ByeBye Joint: {0}", joint);
             }
+
+            /// Called when any fixture is about to be destroyed due
+            /// to the destruction of its parent body.
+            public override void SayGoodbye(b2Fixture fixture)
+            {
+                Console.WriteLine("ByeBye Fixture: {0}", fixture);
+            }
+        }
+
+        class QueryCallback : b2QueryCallback
+        {
+            public QueryCallback(b2Vec2 point)
+            {
+                m_point = point;
+                m_fixture = null;
+            }
+
+            public override bool ReportFixture(b2Fixture fixture)
+            {
+                b2Body body = fixture.Body;
+                if (body.BodyType == b2BodyType.b2_dynamicBody)
+                {
+                    bool inside = fixture.TestPoint(m_point);
+                    if (inside)
+                    {
+                        m_fixture = fixture;
+
+                        // We are done, terminate the query.
+                        return false;
+                    }
+                }
+
+                // Continue the query.
+                return true;
+            }
+
+            b2Vec2 m_point;
+            b2Fixture m_fixture;
+        }
+
+        class Contacto : b2ContactListener
+        {
+            const int k_maxContactPoints = 2048;
+            private int m_pointCount = 0;
+            private ContactPoint[] m_points = new ContactPoint[k_maxContactPoints];
+
+            public override void PreSolve(Box2D.Dynamics.Contacts.b2Contact contact, ref Box2D.Collision.b2Manifold oldManifold)
+            {
+                b2Manifold manifold = contact.GetManifold();
+
+                if (manifold.pointCount == 0)
+                {
+                    return;
+                }
+
+                b2Fixture fixtureA = contact.GetFixtureA();
+                b2Fixture fixtureB = contact.GetFixtureB();
+
+                b2PointState[] state1 = new b2PointState[b2Settings.b2_maxManifoldPoints];
+                b2PointState[] state2 = new b2PointState[b2Settings.b2_maxManifoldPoints];
+                b2Collision.b2GetPointStates(state1, state2, ref oldManifold, ref manifold);
+
+                b2WorldManifold worldManifold = new b2WorldManifold();
+                contact.GetWorldManifold(ref worldManifold);
+
+                for (int i = 0; i < manifold.pointCount &&  m_pointCount < k_maxContactPoints; ++i)
+                {
+                    ContactPoint cp = m_points[m_pointCount];
+                    cp.fixtureA = fixtureA;
+                    cp.fixtureB = fixtureB;
+                    cp.position = worldManifold.points[i];
+                    cp.normal = worldManifold.normal;
+                    cp.state = state2[i];
+                    m_points[m_pointCount] = cp;
+                    ++m_pointCount;
+                }
+            }
+
+            public override void PostSolve(Box2D.Dynamics.Contacts.b2Contact contact, ref b2ContactImpulse impulse)
+            {
+            }
+        }
+
+        static Random ran = new Random();
+        static float RandomFloat(float min, float max)
+        {
+            int m = ran.Next(100);
+            float d = (float)m / 100.0f;
+            return (min + (max - min) * d);
+        }
+        #endregion
+
+        static void Run(Action iterCallback)
+        {
             int iter = 0;
             long span = 0L;
-            float step = (float)(TimeSpan.FromTicks(333333).TotalMilliseconds)/1000f;
+            float step = (float)(TimeSpan.FromTicks(333333).TotalMilliseconds) / 1000f;
             Console.WriteLine("Cycle step = {0:F3} which is {1} fps", step, (int)(1f / step));
             int interval = 0;
 #if PROFILING
@@ -107,7 +192,7 @@ namespace box2dTest
             b2Profile m_totalProfile = new b2Profile();
             b2Profile aveProfile = new b2Profile();
 #endif
-            for (float dt = 0f; dt < 3f; )
+            for (float dt = 0f; dt < simulat_time; )
             {
                 long dtStart = DateTime.Now.Ticks;
                 Update(_world, step);
@@ -116,36 +201,34 @@ namespace box2dTest
                 dt += step;
                 iter++;
                 bool bdump = false;
+                if (iterCallback != null)
+                {
+                    iterCallback();
+                }
                 if (iter == 30)
                 {
                     interval++;
-                    iter = 0;
                     bdump = true;
                     //Dump(_world);
-#if DEBUG
                     TimeSpan ts = new TimeSpan(span);
-                    float fs = (float)ts.TotalMilliseconds / (float)(iter + interval*30);
+                    float fs = (float)ts.TotalMilliseconds / (float)iter;
                     Console.WriteLine("{2}: iteration time is {0:F3} ms avg. and is {1:F3} cycles", fs, fs / step, interval);
-#endif
                     iter = 0;
-//                    span = 0L;
-#if DEBUG
+                    span = 0L;
                     int bodyCount = _world.BodyCount;
                     int contactCount = _world.ContactManager.ContactCount;
                     int jointCount = _world.JointCount;
                     Console.WriteLine("{3}:bodies/contacts/joints = {0}/{1}/{2}", bodyCount, contactCount, jointCount, interval);
-#endif
+
                     int proxyCount = _world.GetProxyCount();
                     int treeheight = _world.GetTreeHeight();
                     int balance = _world.GetTreeBalance();
                     float quality = _world.GetTreeQuality();
-#if DEBUG
-                    Console.WriteLine("{4}:proxies/height/balance/quality = {0}/{1}/{2}/{3:F3}", proxyCount, treeheight, balance, quality, interval);
+                    Console.WriteLine("{4}:proxies/height/balance/quality = {0}/{1}/{2}/{3:F3}", proxyCount, height, balance, quality, interval);
                     for (b2Body b = _world.BodyList; b != null; b = b.Next)
                     {
                         Console.WriteLine("Body: p={0:F3},{1:F3} v={2:F3},{3:F3}, w={4:F3}", b.Position.x, b.Position.y, b.LinearVelocity.x, b.LinearVelocity.y, b.AngularVelocity);
                     }
-#endif
                 }
 #if PROFILING
                 b2Profile p = _world.Profile;
@@ -197,20 +280,263 @@ namespace box2dTest
 #if PROFILING
             Dump(_world);
 #endif
-            TimeSpan tsx = new TimeSpan(span);
-            float fsx = (float)tsx.TotalMilliseconds / (float)(iter + interval * 30);
-            Console.WriteLine("FINAL: iteration time is {0:F3} ms avg. and is {1:F3} cycles", fsx, fsx / step);
-            if (args.Length == 0)
+            Console.WriteLine("hit <enter> to exit");
+            Console.ReadLine();
+        }
+
+        static void SetupWorld(bool setupGround)
+        {
+            var gravity = new b2Vec2(0.0f, -10.0f);
+            _world = new b2World(gravity);
+            _world.SetAllowSleeping(true);
+            _world.SetContinuousPhysics(true);
+            _world.SetSubStepping(true);
+            _world.SetWarmStarting(true);
+            _world.SetDestructionListener(new Destructo());
+            _world.SetContactListener(new Contacto());
+            if (!setupGround)
             {
-                Console.WriteLine("hit <enter> to exit");
-                Console.ReadLine();
+                return;
             }
+            // Call the body factory which allocates memory for the ground body
+            // from a pool and creates the ground box shape (also from a pool).
+            // The body is also added to the world.
+            b2BodyDef def = b2BodyDef.Create();
+            def.allowSleep = true;
+            def.position = b2Vec2.Zero;
+            def.type = b2BodyType.b2_staticBody;
+            b2Body groundBody = _world.CreateBody(def);
+            groundBody.SetActive(true);
+
+            // bottom
+            b2EdgeShape groundBox = new b2EdgeShape();
+            groundBox.Set(b2Vec2.Zero, new b2Vec2(width, 0));
+            b2FixtureDef fd = b2FixtureDef.Create();
+            fd.shape = groundBox;
+            groundBody.CreateFixture(fd);
+
+            // top
+            groundBox = new b2EdgeShape();
+            groundBox.Set(new b2Vec2(0, height), new b2Vec2(width, height));
+            fd.shape = groundBox;
+            groundBody.CreateFixture(fd);
+
+            // left
+            groundBox = new b2EdgeShape();
+            groundBox.Set(new b2Vec2(0, height), b2Vec2.Zero);
+            fd.shape = groundBox;
+            groundBody.CreateFixture(fd);
+
+            // right
+            groundBox = new b2EdgeShape();
+            groundBox.Set(new b2Vec2(width, height), new b2Vec2(width, 0));
+            fd.shape = groundBox;
+            groundBody.CreateFixture(fd);
+
+            _world.Dump();
+        }
+
+        static void ApplyForce()
+        {
+            _world.Gravity = b2Vec2.Zero;
+
+            float k_restitution = 0.4f;
+
+            b2Body ground;
+            {
+                b2BodyDef bd = b2BodyDef.Create();
+                bd.position.Set(0.0f, 20.0f);
+                ground = _world.CreateBody(bd);
+
+                b2EdgeShape shape = new b2EdgeShape();
+
+                b2FixtureDef sd = b2FixtureDef.Create();
+                sd.shape = shape;
+                sd.density = 0.0f;
+                sd.restitution = k_restitution;
+
+                // Left vertical
+                shape.Set(new b2Vec2(-20.0f, -20.0f), new b2Vec2(-20.0f, 20.0f));
+                ground.CreateFixture(sd);
+
+                // Right vertical
+                shape.Set(new b2Vec2(20.0f, -20.0f), new b2Vec2(20.0f, 20.0f));
+                ground.CreateFixture(sd);
+
+                // Top horizontal
+                shape.Set(new b2Vec2(-20.0f, 20.0f), new b2Vec2(20.0f, 20.0f));
+                ground.CreateFixture(sd);
+
+                // Bottom horizontal
+                shape.Set(new b2Vec2(-20.0f, -20.0f), new b2Vec2(20.0f, -20.0f));
+                ground.CreateFixture(sd);
+            }
+
+            {
+                b2Transform xf1 = b2Transform.Zero;
+                xf1.q.Set(0.3524f * b2Settings.b2_pi);
+                xf1.p = xf1.q.GetXAxis();
+
+                b2Vec2[] vertices = new b2Vec2[3];
+                vertices[0] = b2Math.b2Mul(xf1, new b2Vec2(-1.0f, 0.0f));
+                vertices[1] = b2Math.b2Mul(xf1, new b2Vec2(1.0f, 0.0f));
+                vertices[2] = b2Math.b2Mul(xf1, new b2Vec2(0.0f, 0.5f));
+
+                b2PolygonShape poly1 = new b2PolygonShape();
+                poly1.Set(vertices, 3);
+
+                b2FixtureDef sd1 = b2FixtureDef.Create();
+                sd1.shape = poly1;
+                sd1.density = 4.0f;
+
+                b2Transform xf2 = b2Transform.Zero;
+                xf2.q.Set(-0.3524f * b2Settings.b2_pi);
+                xf2.p = -xf2.q.GetXAxis();
+
+                vertices[0] = b2Math.b2Mul(xf2, new b2Vec2(-1.0f, 0.0f));
+                vertices[1] = b2Math.b2Mul(xf2, new b2Vec2(1.0f, 0.0f));
+                vertices[2] = b2Math.b2Mul(xf2, new b2Vec2(0.0f, 0.5f));
+
+                b2PolygonShape poly2 = new b2PolygonShape();
+                poly2.Set(vertices, 3);
+
+                b2FixtureDef sd2 = b2FixtureDef.Create();
+                sd2.shape = poly2;
+                sd2.density = 2.0f;
+
+                b2BodyDef bd = b2BodyDef.Create();
+                bd.type = b2BodyType.b2_dynamicBody;
+                bd.angularDamping = 5.0f;
+                bd.linearDamping = 0.1f;
+
+                bd.position = new b2Vec2(0.0f, 2.0f);
+                bd.angle = b2Settings.b2_pi;
+                bd.allowSleep = false;
+                m_body = _world.CreateBody(bd);
+                m_body.CreateFixture(sd1);
+                m_body.CreateFixture(sd2);
+            }
+
+            {
+                b2PolygonShape shape = new b2PolygonShape();
+                shape.SetAsBox(0.5f, 0.5f);
+
+                b2FixtureDef fd = b2FixtureDef.Create();
+                fd.shape = shape;
+                fd.density = 1.0f;
+                fd.friction = 0.3f;
+
+                for (int i = 0; i < 10; ++i)
+                {
+                    b2BodyDef bd = b2BodyDef.Create();
+                    bd.type = b2BodyType.b2_dynamicBody;
+
+                    bd.position = new b2Vec2(0.0f, 5.0f + 1.54f * i);
+                    b2Body body = _world.CreateBody(bd);
+
+                    body.CreateFixture(fd);
+
+                    float gravity = 10.0f;
+                    float I = body.Inertia;
+                    float mass = body.Mass;
+
+                    // For a circle: I = 0.5 * m * r * r ==> r = sqrt(2 * I / m)
+                    float radius = b2Math.b2Sqrt(2.0f * I / mass);
+
+                    b2FrictionJointDef jd = new b2FrictionJointDef();
+                    jd.localAnchorA.SetZero();
+                    jd.localAnchorB.SetZero();
+                    jd.BodyA = ground;
+                    jd.BodyB = body;
+                    jd.CollideConnected = true;
+                    jd.maxForce = mass * gravity;
+                    jd.maxTorque = mass * radius * gravity;
+
+                    _world.CreateJoint(jd);
+                }
+            }
+        }
+
+        static void AddPair()
+        {
+            _world.Gravity = new b2Vec2(0.0f, 0.0f);
+
+            {
+                b2CircleShape shape = new b2CircleShape();
+                shape.Position.SetZero();
+                shape.Radius = 0.1f;
+
+                float minX = -6.0f;
+                float maxX = 0.0f;
+                float minY = 4.0f;
+                float maxY = 6.0f;
+
+                for (int i = 0; i < 400; ++i)
+                {
+                    b2BodyDef bd = b2BodyDef.Create();
+                    bd.type = b2BodyType.b2_dynamicBody;
+                    bd.position = new b2Vec2(RandomFloat(minX, maxX), RandomFloat(minY, maxY));
+                    b2Body body = _world.CreateBody(bd);
+                    body.CreateFixture(shape, 0.01f);
+                }
+            }
+            {
+                b2PolygonShape shape = new b2PolygonShape();
+                shape.SetAsBox(1.5f, 1.5f);
+                b2BodyDef bd = b2BodyDef.Create();
+                bd.type = b2BodyType.b2_dynamicBody;
+                bd.position.Set(-40.0f, 5.0f);
+                bd.bullet = true;
+                b2Body body = _world.CreateBody(bd);
+                body.CreateFixture(shape, 1.0f);
+                body.LinearVelocity = new b2Vec2(150.0f, 0.0f);
+            }
+        }
+
+        static void FallingBoxesTest()
+        {
+            b2BodyDef def;
+            b2FixtureDef fd;
+            Console.WriteLine("Enter the number of bodies you want to run?");
+            string s = Console.ReadLine();
+            Random ran = new Random();
+            float y = height;
+            int count = 0, max = int.Parse(s);
+            while (count < max)
+            {
+                float xStart = (count / 30 % 2 == 1) ? 8f : 0f;
+                for (int i = 0; i < 30 &&  count < max; i++, count++)
+                {
+                    def = b2BodyDef.Create();
+                    float x = xStart + (float)i / 30.0f * ((float)width - 30.0f * 2.0f - xStart * 2.0f) + (float)i * 2.0f;
+                    x += -width / 2.0f;
+                    def.position = new b2Vec2(x, y + (float)(count / 30) + (float)(i + 1));
+                    /*                    def.position = new b2Vec2(
+                                              xStart + (float)i / 30f * (width - 30*2 - xStart*2f) + (float)i * 2f
+                                            , y + (float)(count / 30) + (float)(i+1));
+                     */
+                    def.type = b2BodyType.b2_dynamicBody;
+                    b2Body body = _world.CreateBody(def);
+                    // Define another box shape for our dynamic body.
+                    var dynamicBox = new b2PolygonShape();
+                    dynamicBox.SetAsBox(.5f, .5f); //These are mid points for our 1m box
+
+                    // Define the dynamic body fixture.
+                    fd = b2FixtureDef.Create();
+                    fd.shape = dynamicBox;
+                    fd.density = 1f;
+                    fd.friction = 0.3f;
+                    b2Fixture fixture = body.CreateFixture(fd);
+                }
+                y -= 10f;
+            }
+
 
         }
 
-        public static void Update(b2World _world, float step)
+        public static void Update(b2World _world, float dt)
         {
-            _world.Step(step, 8, 3);
+            _world.Step(dt, 8, 3);
 
         }
 

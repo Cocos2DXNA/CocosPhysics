@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("box2dConsole")]
+[assembly: AssemblyTitle("box2dconsole")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("box2dConsole")]
+[assembly: AssemblyProduct("box2dconsole")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("42c5da41-42ec-48b3-81ef-1929164dc6b3")]
+[assembly: Guid("7dced199-4280-496a-b75e-f4481c27ac95")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -143,7 +143,8 @@ namespace Box2D.Common
         public static b2Vec2 b2Cross(ref b2Vec2 a, float s)
         {
             b2Vec2 b = b2Vec2.Zero;
-            b.Set(s * a.m_y, -s * a.m_x);
+            b.m_x = s * a.m_y;
+            b.m_y = -s * a.m_x;
             return b;
         }
 
@@ -488,7 +489,7 @@ namespace Box2D.Common
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
 #endif
-        public static void b2Swap<T>(T a, T b)
+        public static void b2Swap<T>(ref T a, ref T b)
         {
             T tmp = a;
             a = b;
