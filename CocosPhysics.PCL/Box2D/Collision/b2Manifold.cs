@@ -114,8 +114,8 @@ namespace Box2D.Collision
                 {
                     b2Vec2 clipPoint = b2Math.b2Mul(xfA, manifold.points[i].localPoint);
                     b2Vec2 tmp = b2Vec2.Zero;
-                    tmp.m_x = clipPoint.m_x - planePoint.m_x;
-                    tmp.m_y = clipPoint.m_y - planePoint.m_y;
+                    tmp.x = clipPoint.x - planePoint.x;
+                    tmp.y = clipPoint.y - planePoint.y;
                     // b2Vec2 cB = clipPoint + (radiusB - b2Math.b2Dot(clipPoint - planePoint, normal)) * normal; 
                     b2Vec2 cB = clipPoint + (radiusB - b2Math.b2Dot(ref tmp, ref normal)) * normal;
                     b2Vec2 cA = clipPoint - radiusA * normal;
@@ -135,18 +135,18 @@ namespace Box2D.Collision
 
     public struct b2Manifold
     {
-        public b2ManifoldPoint[] CopyPoints()
-        {
-            b2ManifoldPoint[] copy = new b2ManifoldPoint[points.Length];
-            points.CopyTo(copy, 0);
-            return (copy);
-        }
         public static b2Manifold Create()
         {
             b2Manifold m = new b2Manifold();
             m.points =  new b2ManifoldPoint[b2Settings.b2_maxManifoldPoints];
             return (m);
         }
+
+        public void CopyPointsFrom(ref b2Manifold other)
+        {
+            Array.Copy(other.points, points, b2Settings.b2_maxManifoldPoints);
+        }
+
         public b2ManifoldPoint[] points;//  = new b2ManifoldPoint[b2Settings.b2_maxManifoldPoints];    //< the points of contact
         public b2Vec2 localNormal;                                //< not use for Type::e_points
         public b2Vec2 localPoint;                                //< usage depends on manifold type
