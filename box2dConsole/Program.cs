@@ -373,7 +373,7 @@ namespace box2dconsole
             }
 
             {
-                b2Transform xf1 = b2Transform.Zero;
+                b2Transform xf1 = new b2Transform();
                 xf1.q.Set(0.3524f * b2Settings.b2_pi);
                 xf1.p = xf1.q.GetXAxis();
 
@@ -389,7 +389,7 @@ namespace box2dconsole
                 sd1.shape = poly1;
                 sd1.density = 4.0f;
 
-                b2Transform xf2 = b2Transform.Zero;
+                b2Transform xf2 = new b2Transform();
                 xf2.q.Set(-0.3524f * b2Settings.b2_pi);
                 xf2.p = -xf2.q.GetXAxis();
 

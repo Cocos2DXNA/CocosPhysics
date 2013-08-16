@@ -93,6 +93,7 @@
     <Compile Include="Box2D\Dynamics\Contacts\b2PolygonAndCircleContact.cs" />
     <Compile Include="Box2D\Dynamics\Contacts\b2PolygonContact.cs" />
     <Compile Include="Box2D\Dynamics\Ib2QueryCallback.cs" />
+    <Compile Include="Box2D\Dynamics\Ib2RayCastCallback.cs" />
     <Compile Include="Box2D\Dynamics\Joints\b2DistanceJoint.cs" />
     <Compile Include="Box2D\Dynamics\Joints\b2DistanceJointDef.cs" />
     <Compile Include="Box2D\Dynamics\Joints\b2FrictionJoint.cs" />
