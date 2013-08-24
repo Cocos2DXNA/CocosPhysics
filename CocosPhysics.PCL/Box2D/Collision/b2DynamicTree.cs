@@ -63,7 +63,7 @@ namespace Box2D.Collision
     {
         private int m_root;
 
-        private b2TreeNode[]  m_nodes;
+        internal b2TreeNode[]  m_nodes;
         private int m_nodeCount;
         private int m_nodeCapacity;
 
@@ -73,6 +73,9 @@ namespace Box2D.Collision
 //        private uint m_path;
 
         private int m_insertionCount;
+
+        //TODO: Stack Size?
+        private static int[] _stack = new int[1024];
 
         public b2DynamicTree()
         {
@@ -188,7 +191,7 @@ namespace Box2D.Collision
             FreeNode(proxyId);
         }
 
-        public bool MoveProxy(int proxyId, b2AABB aabb, b2Vec2 displacement)
+        public bool MoveProxy(int proxyId, ref b2AABB aabb, b2Vec2 displacement)
         {
             Debug.Assert(0 <= proxyId && proxyId < m_nodeCapacity);
 
@@ -206,27 +209,28 @@ namespace Box2D.Collision
             b.Fatten();
 
             // Predict AABB displacement.
-            b2Vec2 d = b2Settings.b2_aabbMultiplier * displacement;
-
-            if (d.x < 0.0f)
+            // d = b2Settings.b2_aabbMultiplier * displacement;
+            float dx = b2Settings.b2_aabbMultiplier * displacement.x;
+            float dy = b2Settings.b2_aabbMultiplier * displacement.y;
+            
+            if (dx < 0.0f)
             {
-                b.LowerBoundX += d.x;
+                b.LowerBound.x += dx;
             }
             else
             {
-                b.UpperBoundX += d.x;
+                b.UpperBound.x += dx;
             }
 
-            if (d.y < 0.0f)
+            if (dy < 0.0f)
             {
-                b.LowerBoundY += d.y;
+                b.LowerBound.y += dy;
             }
             else
             {
-                b.UpperBoundY += d.y;
+                b.UpperBound.y += dy;
             }
 
-            b.UpdateAttributes();
             m_nodes[proxyId].aabb = b;
 
             InsertLeaf(proxyId);
@@ -839,25 +843,28 @@ namespace Box2D.Collision
             return m_nodes[proxyId].aabb;
         }
 
-
         public void Query(Ib2QueryCallback w, b2AABB aabb)
         {
-            Stack<int> stack = new Stack<int>();
-            stack.Push(m_root);
+            int stackCount = 0;
+            var stack = _stack;
 
-            while (stack.Count > 0)
+            var nodes = m_nodes;
+
+            stack[stackCount++] = m_root;
+
+            while (stackCount > 0)
             {
-                int nodeId = stack.Pop();
+                int nodeId = stack[--stackCount];
                 if (nodeId == b2TreeNode.b2_nullNode)
                 {
                     continue;
                 }
 
-                b2TreeNode node = m_nodes[nodeId];
+                b2TreeNode node = nodes[nodeId];
 
                 if (b2Collision.b2TestOverlap(ref node.aabb, ref aabb))
                 {
-                    if (node.IsLeaf())
+                    if (node.child1 == b2TreeNode.b2_nullNode)
                     {
                         bool proceed = w.QueryCallback(nodeId);
                         if (proceed == false)
@@ -867,10 +874,10 @@ namespace Box2D.Collision
                     }
                     else
                     {
-                        if(node.child1 != b2TreeNode.b2_nullNode)
-                            stack.Push(node.child1);
+                        //if (node.child1 != b2TreeNode.b2_nullNode)
+                            stack[stackCount++] = node.child1;
                         if (node.child2 != b2TreeNode.b2_nullNode)
-                            stack.Push(node.child2);
+                            stack[stackCount++] = node.child2;
                     }
                 }
             }
@@ -900,12 +907,14 @@ namespace Box2D.Collision
                 segmentAABB.Set(b2Math.b2Min(p1, t), b2Math.b2Max(p1, t));
             }
 
-            Stack<int> stack = new Stack<int>();
-            stack.Push(m_root);
+            int stackCount = 0;
+            var stack = _stack;
 
-            while (stack.Count > 0)
+            stack[stackCount++] = m_root;
+
+            while (stackCount > 0)
             {
-                int nodeId = stack.Pop();
+                int nodeId = stack[--stackCount];
                 if (nodeId == b2TreeNode.b2_nullNode)
                 {
                     continue;
@@ -922,7 +931,7 @@ namespace Box2D.Collision
                 // |dot(v, p1 - c)| > dot(|v|, h)
                 b2Vec2 c = node.aabb.Center;
                 b2Vec2 h = node.aabb.Extents;
-                float separation = b2Math.b2Abs(b2Math.b2Dot(v, p1 - c)) - b2Math.b2Dot(abs_v, h);
+                float separation = b2Math.b2Abs(b2Math.b2Dot(v, p1 - c)) - b2Math.b2Dot(ref abs_v, ref h);
                 if (separation > 0.0f)
                 {
                     continue;
@@ -953,8 +962,8 @@ namespace Box2D.Collision
                 }
                 else
                 {
-                    stack.Push(node.child1);
-                    stack.Push(node.child2);
+                    stack[stackCount++] = node.child1;
+                    stack[stackCount++] = node.child2;
                 }
             }
         }

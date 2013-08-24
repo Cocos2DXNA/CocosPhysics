@@ -63,7 +63,7 @@ namespace Box2D.Collision
 
         public void MoveProxy(int proxyId, b2AABB aabb, b2Vec2 displacement)
         {
-            bool buffer = m_tree.MoveProxy(proxyId, aabb, displacement);
+            bool buffer = m_tree.MoveProxy(proxyId, ref aabb, displacement);
             if (buffer)
             {
                 BufferMove(proxyId);
@@ -149,9 +149,10 @@ namespace Box2D.Collision
 
         public bool TestOverlap(int proxyIdA, int proxyIdB)
         {
-            b2AABB aabbA = m_tree.GetFatAABB(proxyIdA);
-            b2AABB aabbB = m_tree.GetFatAABB(proxyIdB);
-            return b2Collision.b2TestOverlap(ref aabbA, ref aabbB);
+//            b2AABB aabbA = m_tree.GetFatAABB(proxyIdA);
+//            b2AABB aabbB = m_tree.GetFatAABB(proxyIdB);
+//            return b2Collision.b2TestOverlap(ref aabbA, ref aabbB);
+            return b2Collision.b2TestOverlap(ref m_tree.m_nodes[proxyIdA].aabb, ref m_tree.m_nodes[proxyIdB].aabb);
         }
 
         public b2AABB GetFatAABB(int proxyId)
@@ -252,9 +253,24 @@ namespace Box2D.Collision
 
         #region IComparer<b2Pair> Members
 
-        public int Compare(b2Pair x, b2Pair y)
+        public int Compare(b2Pair pair1, b2Pair pair2)
         {
-            return (b2PairLessThan(x, y) ? -1 : 1);
+			//return (b2PairLessThan(x, y) ? -1 : 1);
+			
+            if (pair1.proxyIdA < pair2.proxyIdA)
+            {
+                return -1;
+            }
+
+            if (pair1.proxyIdA == pair2.proxyIdA)
+            {
+                if (pair1.proxyIdB < pair2.proxyIdB)
+                {
+                    return -1;
+                }
+            }
+
+            return 1;
         }
 
         #endregion
