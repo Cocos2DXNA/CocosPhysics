@@ -112,7 +112,7 @@ namespace Box2D.Collision.Shapes
                 b2Vec2 e1 = p2 - p1;
                 b2Vec2 e2 = p3 - p1;
 
-                float D = b2Math.b2Cross(e1, e2);
+                float D = b2Math.b2Cross(ref e1, ref e2);
 
                 float triangleArea = 0.5f * D;
                 area += triangleArea;
@@ -162,7 +162,7 @@ namespace Box2D.Collision.Shapes
             {
                 int i1 = i;
                 int i2 = i + 1 < m_vertexCount ? i + 1 : 0;
-                b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
+                b2Vec2 edge = Vertices[i2] -Vertices[i1];
 
                 for (int j = 0; j < m_vertexCount; ++j)
                 {
@@ -172,7 +172,7 @@ namespace Box2D.Collision.Shapes
                         continue;
                     }
 
-                    b2Vec2 r = m_vertices[j] - m_vertices[i1];
+                    b2Vec2 r = Vertices[j] - Vertices[i1];
 
                     // If this crashes, your polygon is non-convex, has colinear edges,
                     // or the winding order is wrong.
@@ -275,7 +275,7 @@ namespace Box2D.Collision.Shapes
             return false;
         }
 
-        public override b2AABB ComputeAABB(ref b2Transform xf, int childIndex)
+        public override void ComputeAABB(out b2AABB output, ref b2Transform xf, int childIndex)
         {
 #if false
             b2Vec2 lower = b2Math.b2Mul(ref xf, ref Vertices[0]);
@@ -312,11 +312,9 @@ namespace Box2D.Collision.Shapes
                 upper.y = Math.Max(upper.y, v.y);
             }
 
-            b2AABB aabb;
-            aabb.LowerBound = lower;
-            aabb.UpperBound = upper;
-            aabb.Fatten(Radius);
-            return aabb;
+            output.LowerBound = lower;
+            output.UpperBound = upper;
+            output.Fatten(Radius);
 #endif
         }
 

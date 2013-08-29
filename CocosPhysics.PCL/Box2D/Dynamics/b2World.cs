@@ -632,7 +632,6 @@ namespace Box2D.Dynamics
                         other.BodyFlags = other.BodyFlags | b2BodyFlags.e_islandFlag;
                     }
                 }
-                b2ArrayPool<b2Body>.Free(stack);
 
 #if PROFILING
                 b2Profile profile = new b2Profile();
@@ -656,8 +655,11 @@ namespace Box2D.Dynamics
                     }
                 }
             }
+            b2ArrayPool<b2Body>.Free(stack);
 
+#if PROFILING
             b2Timer timer = new b2Timer();
+#endif
             // Synchronize fixtures, check for out of range bodies.
             for (b2Body b = m_bodyList; b != null; b = b.Next)
             {
@@ -688,6 +690,7 @@ namespace Box2D.Dynamics
         // TODO: Make this faster, it's very slow.
 
         private b2Island m_TOIIsland;
+        private b2Body[] m_TOIbodies = new b2Body[2];
 
         public void SolveTOI(b2TimeStep step)
         {
@@ -719,8 +722,10 @@ namespace Box2D.Dynamics
             }
 
             // Find TOI events and solve them.
-            b2Body[] bodies = b2ArrayPool<b2Body>.Create(2, true);
+            b2Body[] bodies = m_TOIbodies;
+#if PROFILING
             b2Timer computeTimer = new b2Timer();
+#endif
             for (; ; )
             {
 #if PROFILING
@@ -811,8 +816,11 @@ namespace Box2D.Dynamics
                         input.sweepB = bB.Sweep;
                         input.tMax = 1.0f;
 
+#if PROFILING
                         computeTimer.Reset();
-                        b2TOIOutput output = b2TimeOfImpact.Compute(input);
+#endif
+                        b2TOIOutput output;
+                        b2TimeOfImpact.Compute(out output, ref input);
 
                         // Console.WriteLine("TOI Output={0}, t={1}", output.state, output.t);
 
@@ -851,7 +859,9 @@ namespace Box2D.Dynamics
                     break;
                 }
                 {
+#if PROFILING
                     b2Timer bt = new b2Timer();
+#endif
                     // Advance the bodies to the TOI.
                     b2Fixture fA = minContact.FixtureA;
                     b2Fixture fB = minContact.FixtureB;
@@ -1030,12 +1040,13 @@ namespace Box2D.Dynamics
 #endif
                 }
             }
-            b2ArrayPool<b2Body>.Free(bodies);
         }
 
         public void Step(float dt, int velocityIterations, int positionIterations)
         {
+#if PROFILING
             b2Timer stepTimer = new b2Timer();
+#endif
 
             // If new fixtures were added, we need to find the new contacts.
             if ((m_flags & b2WorldFlags.e_newFixture) != 0)
@@ -1063,7 +1074,9 @@ namespace Box2D.Dynamics
 
             step.warmStarting = m_warmStarting;
 
+#if PROFILING
             b2Timer timer = new b2Timer();
+#endif
             // Update contacts. This is where some contacts are destroyed.
             {
                 m_contactManager.Collide();
@@ -1075,7 +1088,9 @@ namespace Box2D.Dynamics
             // Integrate velocities, solve velocityraints, and integrate positions.
             if (m_stepComplete && step.dt > 0.0f)
             {
+#if PROFILING
                 timer.Reset();
+#endif
                 Solve(step);
 #if PROFILING
                 m_profile.solve = timer.GetMilliseconds();
@@ -1085,7 +1100,9 @@ namespace Box2D.Dynamics
             // Handle TOI events.
             if (m_continuousPhysics && step.dt > 0.0f)
             {
+#if PROFILING
                 timer.Reset();
+#endif
                 SolveTOI(step);
 #if PROFILING
                 m_profile.solveTOI = timer.GetMilliseconds();
@@ -1137,7 +1154,7 @@ namespace Box2D.Dynamics
             m_contactManager.BroadPhase.RayCast(wrapper, input);
         }
 
-        public void DrawShape(b2Fixture fixture, b2Transform xf, b2Color color)
+        public void DrawShape(b2Fixture fixture, ref b2Transform xf, b2Color color)
         {
             switch (fixture.ShapeType)
             {
@@ -1257,28 +1274,27 @@ namespace Box2D.Dynamics
             {
                 for (b2Body b = m_bodyList; b != null; b = b.Next)
                 {
-                    b2Transform xf = b.Transform;
                     for (b2Fixture f = b.FixtureList; f != null; f = f.Next)
                     {
                         if (b.IsActive() == false)
                         {
-                            DrawShape(f, xf, new b2Color(0.5f, 0.5f, 0.3f));
+                            DrawShape(f, ref b.Transform, new b2Color(0.5f, 0.5f, 0.3f));
                         }
                         else if (b.BodyType == b2BodyType.b2_staticBody)
                         {
-                            DrawShape(f, xf, new b2Color(0.5f, 0.9f, 0.5f));
+                            DrawShape(f, ref b.Transform, new b2Color(0.5f, 0.9f, 0.5f));
                         }
                         else if (b.BodyType == b2BodyType.b2_kinematicBody)
                         {
-                            DrawShape(f, xf, new b2Color(0.5f, 0.5f, 0.9f));
+                            DrawShape(f, ref b.Transform, new b2Color(0.5f, 0.5f, 0.9f));
                         }
                         else if (b.IsAwake() == false)
                         {
-                            DrawShape(f, xf, new b2Color(0.6f, 0.6f, 0.6f));
+                            DrawShape(f, ref b.Transform, new b2Color(0.6f, 0.6f, 0.6f));
                         }
                         else
                         {
-                            DrawShape(f, xf, new b2Color(0.9f, 0.7f, 0.7f));
+                            DrawShape(f, ref b.Transform, new b2Color(0.9f, 0.7f, 0.7f));
                         }
                     }
                 }
@@ -1297,8 +1313,8 @@ namespace Box2D.Dynamics
                 b2Color color = new b2Color(0.3f, 0.9f, 0.9f);
                 for (b2Contact c = m_contactManager.ContactList; c != null; c = c.Next)
                 {
-                    //b2Fixture fixtureA = c.GetFixtureA();
-                    //b2Fixture fixtureB = c.GetFixtureB();
+                    //b2Fixture fixtureA = c.FixtureA;
+                    //b2Fixture fixtureB = c.FixtureB;
 
                     //b2Vec2 cA = fixtureA.GetAABB().Center;
                     //b2Vec2 cB = fixtureB.GetAABB().Center;
@@ -1324,7 +1340,8 @@ namespace Box2D.Dynamics
                         for (int i = 0; i < f.ProxyCount; ++i)
                         {
                             b2FixtureProxy proxy = f.Proxies[i];
-                            b2AABB aabb = bp.GetFatAABB(proxy.proxyId);
+                            b2AABB aabb;
+                            bp.GetFatAABB(proxy.proxyId, out aabb);
                             b2Vec2[] vs = new b2Vec2[4];
                             vs[0].Set(aabb.LowerBound.x, aabb.LowerBound.y);
                             vs[1].Set(aabb.UpperBound.x, aabb.LowerBound.y);
